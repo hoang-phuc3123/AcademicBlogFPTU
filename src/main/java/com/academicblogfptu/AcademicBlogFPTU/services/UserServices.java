@@ -28,11 +28,11 @@ public class UserServices {
 
 
     public UserDto login(LoginRequestDto loginDto) {
-        UserEntity user = userRepository.findByUsername(loginDto.getLogin())
+        UserEntity user = userRepository.findByUsername(loginDto.getUsername())
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
 
         if (passwordEncoder.matches(CharBuffer.wrap(loginDto.getPassword()), user.getPassword())) {
-            UserDto userDto = new UserDto(user.getId(),user.getUsername(),user.getRole(),"");
+            UserDto userDto = new UserDto(user.getId(),user.getUsername(),user.getRole().getRoleName(),"");
             return userDto;
         }
         throw new AppException("Invalid password", HttpStatus.BAD_REQUEST);
