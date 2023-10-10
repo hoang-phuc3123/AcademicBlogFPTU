@@ -25,12 +25,12 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/users")
 public class GoogleLoginController {
     private final UserServices userService;
     private final UserAuthProvider userAuthProvider;
 
-    @PostMapping("/login/google")
+    @PostMapping("/google-login")
     public ResponseEntity<UserDto> loginGoogle(@RequestBody GoogleTokenDto googleTokenDto) {
         String token = googleTokenDto.getData();
         try {
