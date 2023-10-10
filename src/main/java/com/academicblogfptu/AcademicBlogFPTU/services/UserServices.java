@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
 import java.util.Optional;
 
 
@@ -62,7 +64,22 @@ public class UserServices {
             UserDto userDto = new UserDto(user.getId(),user.getUsername(),user.getRole().getRoleName(),"");
             return userDto;
         }
-        throw new AppException("Invalid password", HttpStatus.BAD_REQUEST);
+        throw new AppException("Invalid password", HttpStatus.NOT_FOUND);
+    }
+
+    public UserDto resetPass(LoginRequestDto loginDto) {
+        UserEntity user = userRepository.findByUsername(loginDto.getUsername())
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+
+        String newPasswordHash = passwordEncoder.encode(CharBuffer.wrap(loginDto.getPassword()));
+
+        // Cập nhật mật khẩu của người dùng
+        user.setPassword(newPasswordHash);
+        userRepository.save(user);
+
+        // Trả về thông tin người dùng sau khi cập nhật
+        UserDto userDto = new UserDto(user.getId(), user.getUsername(), user.getRole().getRoleName(), "");
+        return userDto;
     }
 
 }
