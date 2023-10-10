@@ -13,6 +13,8 @@ public class RoleEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "RoleName", nullable = false)
+    @Column(name = "RoleName", nullable = false, columnDefinition = "VARCHAR(255)")
     private String roleName;
+
+
 }
