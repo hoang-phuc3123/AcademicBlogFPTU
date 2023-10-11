@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "Roles")
+@Table(name = "role")
 @Setter
 @Getter
 public class RoleEntity {
@@ -13,8 +13,7 @@ public class RoleEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "RoleName", nullable = false, columnDefinition = "VARCHAR(255)")
+    @Column(name = "role_name")
     private String roleName;
-
 
 }

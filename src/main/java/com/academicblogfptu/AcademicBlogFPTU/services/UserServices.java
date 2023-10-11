@@ -1,13 +1,19 @@
 package com.academicblogfptu.AcademicBlogFPTU.services;
 
 import com.academicblogfptu.AcademicBlogFPTU.dtos.LoginRequestDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDetailsDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDto;
+import com.academicblogfptu.AcademicBlogFPTU.entities.MajorEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.UserDetailsEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.RoleEntity;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
+import com.academicblogfptu.AcademicBlogFPTU.repositories.MajorRepository;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.RoleRepository;
+import com.academicblogfptu.AcademicBlogFPTU.repositories.UserDetailsRepository;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,9 +25,21 @@ import java.nio.CharBuffer;
 @RequiredArgsConstructor
 @Service
 public class UserServices {
+
+    @Autowired
     private final UserRepository userRepository;
+
+    @Autowired
     private final RoleRepository roleRepository;
+
+    @Autowired
     private final PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private final MajorRepository majorRepository;
+
+    @Autowired
+    private final UserDetailsRepository userDetailsRepository;
 
     public UserDto findByUsername(String Username) {
         UserEntity user = userRepository.findByUsername(Username)
@@ -53,6 +71,31 @@ public class UserServices {
             return newUserDto;
         }
     }
+
+    public void RegisterUserDetail(UserDetailsDto userDetailsDto){
+        Optional<UserEntity> optionalUser = userRepository.findByUsername(userDetailsDto.getEmail());
+        UserEntity user = optionalUser.get();
+
+        UserDetailsEntity newUserDetails = new UserDetailsEntity();
+        newUserDetails.setEmail(userDetailsDto.getEmail());
+        newUserDetails.setFullName(userDetailsDto.getGivenName());
+        newUserDetails.setPhone(null);
+
+
+        newUserDetails.setBanned(false);
+        newUserDetails.setWeightOfReport(0);
+        newUserDetails.setProfileURL(userDetailsDto.getProfileUrl());
+        newUserDetails.setCoverURL(null);
+        newUserDetails.setUserStory(null);
+        newUserDetails.setUserid(user);
+        MajorEntity majorEntity = majorRepository.findByMajorName("IT").orElse(null) ;
+        newUserDetails.setMajor(majorEntity);
+
+        userDetailsRepository.save(newUserDetails);
+
+    }
+
+
 
     public UserDto login(LoginRequestDto loginDto) {
         UserEntity user = userRepository.findByUsername(loginDto.getUsername())
