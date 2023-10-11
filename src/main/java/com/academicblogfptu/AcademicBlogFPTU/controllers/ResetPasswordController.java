@@ -2,10 +2,7 @@ package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.LoginRequestDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.ResetPasswordDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.VerifyCodeDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.*;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -33,22 +30,14 @@ public class ResetPasswordController {
     private final UserServices userService;
     private final UserAuthProvider userAuthProvider;
     @PostMapping("/send-code")
-    public ResponseEntity<HashMap<String, String>> ResetPass(@RequestBody String email) {
-        String decodedEmail;
-        try {
-            decodedEmail = UriUtils.decode(email, "UTF-8");
-        } catch (Exception e) {
-            // Xử lý lỗi giải mã nếu cần
-            // Ví dụ: trả về lỗi 400 Bad Request
-            return ResponseEntity.badRequest().build();
-        }
-        decodedEmail = decodedEmail.replace("email=" , "");
-        String isValid = userService.isEmailExist(decodedEmail);
+    public ResponseEntity<HashMap<String, String>> ResetPass(@RequestBody GoogleTokenDto googleTokenDto) {
+        String email = googleTokenDto.getData();
+        String isValid = userService.isEmailExist(email);
         if (isValid.equals("Unknown email")) {
             HashMap<String, String> responseMap = new HashMap<>();
             responseMap.put("message", "Unknown email");
             // Tạo một ResponseEntity với HttpStatus.OK và dữ liệu JSON
-            return ResponseEntity.ok(responseMap);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         try {
             // Tạo URL cho yêu cầu
@@ -63,7 +52,7 @@ public class ResetPasswordController {
             connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 
             // Tạo dữ liệu POST theo định dạng x-www-form-urlencoded
-            String postData = email;
+            String postData = "email=" + email;
 
             // Ghi dữ liệu POST vào body của yêu cầu
             connection.setDoOutput(true);
@@ -86,18 +75,23 @@ public class ResetPasswordController {
                 Map<String, Object> jsonData = jsonParser.parseMap(response.toString());
                 // Lấy giá trị email từ đối tượng Map
                 String code = (String) jsonData.get("verificationCode");
-                HashMap<String, String> responseMap = new HashMap<>();
-                responseMap.put("verificationCode", code);
-                // Tạo một ResponseEntity với HttpStatus.OK và dữ liệu JSON
-                return ResponseEntity.ok(responseMap);
+                if (code.isEmpty()) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+                }
+                else {
+                    HashMap<String, String> responseMap = new HashMap<>();
+                    responseMap.put("message", "true");
+                    // Tạo một ResponseEntity với HttpStatus.OK và dữ liệu JSON
+                    return ResponseEntity.ok(responseMap);
+                }
             } else {
                 // Xử lý lỗi nếu yêu cầu không thành công
-                return ResponseEntity.status(responseCode).build();
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
         } catch (IOException e) {
             // Xử lý ngoại lệ nếu có lỗi trong quá trình gửi yêu cầu
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 
@@ -142,10 +136,13 @@ public class ResetPasswordController {
                 String msg = (String) jsonData.get("status");
                 HashMap<String, String> responseMap = new HashMap<>();
                 responseMap.put("message", msg);
-                String token_ = userAuthProvider.createToken(verifyCodeDto.getEmail());
-                responseMap.put("token" , token_);
-                // Tạo một ResponseEntity với HttpStatus.OK và dữ liệu JSON
-                return ResponseEntity.ok(responseMap);
+                if (msg.equals("true")) {
+                    String token_ = userAuthProvider.createToken(verifyCodeDto.getEmail());
+                    responseMap.put("token" , token_);
+                    // Tạo một ResponseEntity với HttpStatus.OK và dữ liệu JSON
+                    return ResponseEntity.ok(responseMap);
+                }
+                else return ResponseEntity.ok(responseMap);
             } else {
                 // Xử lý lỗi nếu yêu cầu không thành công
                 return ResponseEntity.status(responseCode).build();

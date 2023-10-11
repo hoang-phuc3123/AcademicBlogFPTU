@@ -67,24 +67,24 @@ public class UserServices {
 
     public UserDto login(LoginRequestDto loginDto) {
         UserEntity user = userRepository.findByUsername(loginDto.getUsername())
-                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
 
         if (passwordEncoder.matches(CharBuffer.wrap(loginDto.getPassword()), user.getPassword())) {
             UserDto userDto = new UserDto(user.getId(),user.getUsername(),user.getEmail(),user.getRole().getRoleName(),"");
             return userDto;
         }
-        throw new AppException("Invalid password", HttpStatus.NOT_FOUND);
+        throw new AppException("Invalid password", HttpStatus.UNAUTHORIZED);
     }
 
     public String isEmailExist(String email) {
         UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException("Unknown email", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new AppException("Unknown email", HttpStatus.UNAUTHORIZED));
         return "true";
     }
 
     public UserDto resetPass(ResetPasswordDto loginDto) {
         UserEntity user = userRepository.findByEmail(loginDto.getEmail())
-                .orElseThrow(() -> new AppException("Unknown email", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new AppException("Unknown email", HttpStatus.UNAUTHORIZED));
 
         String newPasswordHash = passwordEncoder.encode(CharBuffer.wrap(loginDto.getPassword()));
 
