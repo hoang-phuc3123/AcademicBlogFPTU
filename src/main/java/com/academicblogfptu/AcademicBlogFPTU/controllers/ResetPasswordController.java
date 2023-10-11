@@ -3,6 +3,7 @@ package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.LoginRequestDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.ResetPasswordDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.VerifyCodeDto;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
@@ -21,7 +22,7 @@ import java.net.URL;
 import java.io.*;
 import org.springframework.boot.json.JsonParser;
 import org.springframework.boot.json.JsonParserFactory;
-
+import org.springframework.web.util.UriUtils;
 import java.util.Map;
 import java.util.*;
 
@@ -33,6 +34,22 @@ public class ResetPasswordController {
     private final UserAuthProvider userAuthProvider;
     @PostMapping("/send-code")
     public ResponseEntity<HashMap<String, String>> ResetPass(@RequestBody String email) {
+        String decodedEmail;
+        try {
+            decodedEmail = UriUtils.decode(email, "UTF-8");
+        } catch (Exception e) {
+            // Xử lý lỗi giải mã nếu cần
+            // Ví dụ: trả về lỗi 400 Bad Request
+            return ResponseEntity.badRequest().build();
+        }
+        decodedEmail = decodedEmail.replace("email=" , "");
+        String isValid = userService.isEmailExist(decodedEmail);
+        if (isValid.equals("Unknown email")) {
+            HashMap<String, String> responseMap = new HashMap<>();
+            responseMap.put("message", "Unknown email");
+            // Tạo một ResponseEntity với HttpStatus.OK và dữ liệu JSON
+            return ResponseEntity.ok(responseMap);
+        }
         try {
             // Tạo URL cho yêu cầu
             URL url = new URL("https://lvnsoft.store/ResetPass/send-code.php");
@@ -125,6 +142,8 @@ public class ResetPasswordController {
                 String msg = (String) jsonData.get("status");
                 HashMap<String, String> responseMap = new HashMap<>();
                 responseMap.put("message", msg);
+                String token_ = userAuthProvider.createToken(verifyCodeDto.getEmail());
+                responseMap.put("token" , token_);
                 // Tạo một ResponseEntity với HttpStatus.OK và dữ liệu JSON
                 return ResponseEntity.ok(responseMap);
             } else {
@@ -139,9 +158,8 @@ public class ResetPasswordController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<UserDto> ResetPass(@RequestBody LoginRequestDto loginRequestDto) {
-        UserDto userDto = userService.resetPass(loginRequestDto);
-        userDto.setToken(userAuthProvider.createToken(userDto.getUsername()));
+    public ResponseEntity<UserDto> ResetPass(@RequestBody ResetPasswordDto resetPasswordDto) {
+        UserDto userDto = userService.resetPass(resetPasswordDto);;
         return ResponseEntity.ok(userDto);
     }
 }

@@ -56,4 +56,17 @@ public class UserAuthProvider {
 
         return new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
     }
+
+    public Authentication validateTokenEmail(String token) {
+        Algorithm algorithm = Algorithm.HMAC256(secretKey);
+
+        JWTVerifier verifier = JWT.require(algorithm)
+                .build();
+
+        DecodedJWT decoded = verifier.verify(token);
+
+        UserDto user = userService.findByEmail(decoded.getSubject());
+
+        return new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
+    }
 }

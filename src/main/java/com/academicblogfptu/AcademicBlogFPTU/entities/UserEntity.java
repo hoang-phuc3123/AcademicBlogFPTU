@@ -18,6 +18,8 @@ public class UserEntity {
     private String username;
     @Column(name = "Password", nullable = false)
     private String password;
+    @Column(name = "Email", nullable = false ,columnDefinition = "VARCHAR(255)")
+    private String email;
 
     @ManyToOne
     @JoinColumn(name = "RoleId", referencedColumnName = "id")
