@@ -21,7 +21,7 @@ public class LoginController {
     @PostMapping("/login")
     public ResponseEntity<UserDto> login(@RequestBody LoginRequestDto loginRequestDto) {
         UserDto userDto = userService.login(loginRequestDto);
-        userDto.setToken(userAuthProvider.createToken(userDto.getUsername()));
+        userDto.setToken(userAuthProvider.createToken(userDto.getUsername(),3600000));
         return ResponseEntity.ok(userDto);
     }
 }

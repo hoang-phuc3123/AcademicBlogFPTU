@@ -63,7 +63,7 @@ public class GoogleLoginController {
                 loginDto.setPassword(generateRandomPassword(10).toCharArray());
                 UserDto userDto = userService.register(loginDto);
                 userService.RegisterUserDetail(userDetailsDto);
-                userDto.setToken(userAuthProvider.createToken(userDto.getUsername()));
+                userDto.setToken(userAuthProvider.createToken(userDto.getUsername() , 3600000));
                 return ResponseEntity.ok(userDto);
             } else {
                 // Xử lý lỗi nếu yêu cầu không thành công

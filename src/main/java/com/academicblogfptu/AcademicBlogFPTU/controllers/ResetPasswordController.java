@@ -130,8 +130,8 @@ public class ResetPasswordController {
                 HashMap < String, String > responseMap = new HashMap < > ();
                 responseMap.put("message", msg);
                 if (msg.equals("true")) {
-                    String token_ = userAuthProvider.createToken(verifyCodeDto.getEmail());
-                    responseMap.put("token", token_);
+                    String token_ = userAuthProvider.createToken(verifyCodeDto.getEmail(), 300000);
+                            responseMap.put("token", token_);
                     // Tạo một ResponseEntity với HttpStatus.OK và dữ liệu JSON
                     return ResponseEntity.ok(responseMap);
                 } else return ResponseEntity.ok(responseMap);
