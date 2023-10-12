@@ -3,6 +3,7 @@ package com.academicblogfptu.AcademicBlogFPTU.controllers;
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.GoogleTokenDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.LoginRequestDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDetailsDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDto;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import org.springframework.boot.json.JsonParser;
 import org.springframework.boot.json.JsonParserFactory;
+
 import java.security.SecureRandom;
 import java.util.Map;
 
@@ -53,10 +55,14 @@ public class GoogleLoginController {
                 Map<String, Object> jsonData = jsonParser.parseMap(response.toString());
                 // Lấy giá trị email từ đối tượng Map
                 String email = (String) jsonData.get("email");
+                String name = (String) jsonData.get("given_name");
+                String picture = (String) jsonData.get("picture");
+                UserDetailsDto userDetailsDto = new UserDetailsDto(email, name, picture);
                 LoginRequestDto loginDto = new LoginRequestDto();
                 loginDto.setUsername(email);
                 loginDto.setPassword(generateRandomPassword(10).toCharArray());
                 UserDto userDto = userService.register(loginDto);
+                userService.RegisterUserDetail(userDetailsDto);
                 userDto.setToken(userAuthProvider.createToken(userDto.getUsername()));
                 return ResponseEntity.ok(userDto);
             } else {

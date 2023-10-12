@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name="Users")
+@Table(name="account")
 @Data
 @NoArgsConstructor
 public class UserEntity {
@@ -14,15 +14,13 @@ public class UserEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "Username", nullable = false)
+    @Column(name = "username", nullable = false)
     private String username;
-    @Column(name = "Password", nullable = false)
+    @Column(name = "password", nullable = false)
     private String password;
-    @Column(name = "Email", nullable = false ,columnDefinition = "VARCHAR(255)")
-    private String email;
 
     @ManyToOne
-    @JoinColumn(name = "RoleId", referencedColumnName = "id")
+    @JoinColumn(name = "role_id", referencedColumnName = "id")
     private RoleEntity role;
 
 

@@ -13,10 +13,9 @@ import lombok.NoArgsConstructor;
 public class UserDto {
     private int id;
     private String username;
-    private String email;
     private String roleName;
     private String token;
 
-    public UserDto(int id, String username, String email, RoleEntity role, String token) {
+    public UserDto(int id, String username, RoleEntity role, String token) {
     }
 }
