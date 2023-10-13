@@ -1,4 +1,3 @@
-
 package com.academicblogfptu.AcademicBlogFPTU.dtos;
 
 import lombok.AllArgsConstructor;
@@ -10,6 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class GoogleTokenDto {
+public class UserDetailsDto {
     private String email;
+    private String givenName;
+    private String profileUrl;
 }

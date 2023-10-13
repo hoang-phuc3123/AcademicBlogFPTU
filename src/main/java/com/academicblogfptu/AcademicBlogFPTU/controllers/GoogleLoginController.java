@@ -3,6 +3,7 @@ package com.academicblogfptu.AcademicBlogFPTU.controllers;
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.GoogleTokenDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.LoginRequestDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDetailsDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDto;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,7 @@ public class GoogleLoginController {
 
     @PostMapping("/google-login")
     public ResponseEntity<UserDto> loginGoogle(@RequestBody GoogleTokenDto googleTokenDto) {
-        String token = googleTokenDto.getData();
+        String token = googleTokenDto.getEmail();
         try {
             // Tạo URL cho yêu cầu
             URL url = new URL("https://www.googleapis.com/oauth2/v3/userinfo");
@@ -54,15 +55,17 @@ public class GoogleLoginController {
                 Map<String, Object> jsonData = jsonParser.parseMap(response.toString());
                 // Lấy giá trị email từ đối tượng Map
                 String email = (String) jsonData.get("email");
-                LoginRequestDto loginDto = new LoginRequestDto();
-                loginDto.setUsername(email);
-                loginDto.setPassword(generateRandomPassword(10).toCharArray());
+                String name = (String) jsonData.get("given_name");
+                String picture = (String) jsonData.get("picture");
+                UserDetailsDto userDetailsDto = new UserDetailsDto(email, name, picture);
+                LoginRequestDto loginDto = new LoginRequestDto(email, generateRandomPassword(10).toCharArray());
                 UserDto userDto = userService.register(loginDto);
-                userDto.setToken(userAuthProvider.createToken(userDto.getUsername()));
+                userService.RegisterUserDetail(userDetailsDto);
+                userDto.setToken(userAuthProvider.createToken(userDto.getUsername() , 3600000));
                 return ResponseEntity.ok(userDto);
             } else {
                 // Xử lý lỗi nếu yêu cầu không thành công
-                return ResponseEntity.status(responseCode).build();
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
         } catch (IOException e) {
             // Xử lý ngoại lệ nếu có lỗi trong quá trình gửi yêu cầu
