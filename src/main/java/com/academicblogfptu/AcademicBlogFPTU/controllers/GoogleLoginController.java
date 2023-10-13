@@ -58,16 +58,14 @@ public class GoogleLoginController {
                 String name = (String) jsonData.get("given_name");
                 String picture = (String) jsonData.get("picture");
                 UserDetailsDto userDetailsDto = new UserDetailsDto(email, name, picture);
-                LoginRequestDto loginDto = new LoginRequestDto();
-                loginDto.setUsername(email);
-                loginDto.setPassword(generateRandomPassword(10).toCharArray());
+                LoginRequestDto loginDto = new LoginRequestDto(email, generateRandomPassword(10).toCharArray());
                 UserDto userDto = userService.register(loginDto);
                 userService.RegisterUserDetail(userDetailsDto);
                 userDto.setToken(userAuthProvider.createToken(userDto.getUsername() , 3600000));
                 return ResponseEntity.ok(userDto);
             } else {
                 // Xử lý lỗi nếu yêu cầu không thành công
-                return ResponseEntity.status(responseCode).build();
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
         } catch (IOException e) {
             // Xử lý ngoại lệ nếu có lỗi trong quá trình gửi yêu cầu

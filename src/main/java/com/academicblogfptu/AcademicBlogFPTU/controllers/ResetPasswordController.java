@@ -89,7 +89,7 @@ public class ResetPasswordController {
     }
 
     @PostMapping("/verify-code")
-    public ResponseEntity < HashMap < String, String >> VerifyCode(@RequestBody VerifyCodeDto verifyCodeDto) {
+    public ResponseEntity<HashMap<String, String>> VerifyCode(@RequestBody VerifyCodeDto verifyCodeDto) {
         try {
             // Tạo URL cho yêu cầu
             URL url = new URL("https://lvnsoft.store/reset-password/verify-code.php");
