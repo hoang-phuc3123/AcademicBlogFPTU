@@ -33,7 +33,7 @@ public class GoogleLoginController {
 
     @PostMapping("/google-login")
     public ResponseEntity<UserDto> loginGoogle(@RequestBody GoogleTokenDto googleTokenDto) {
-        String token = googleTokenDto.getData();
+        String token = googleTokenDto.getEmail();
         try {
             // Tạo URL cho yêu cầu
             URL url = new URL("https://www.googleapis.com/oauth2/v3/userinfo");

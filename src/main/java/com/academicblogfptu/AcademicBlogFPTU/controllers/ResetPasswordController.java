@@ -29,8 +29,8 @@ public class ResetPasswordController {
     private final UserAuthProvider userAuthProvider;
 
     @PostMapping("/send-code")
-    public ResponseEntity < HashMap < String, String >> ResetPass(@RequestBody GoogleTokenDto googleTokenDto) {
-        String email = googleTokenDto.getData();
+    public ResponseEntity<HashMap<String,String>> ResetPass(@RequestBody GoogleTokenDto googleTokenDto) {
+        String email = googleTokenDto.getEmail();
         String isValid = userService.isEmailExist(email);
         if (isValid.equals("Unknown email")) {
             HashMap < String, String > responseMap = new HashMap < > ();
@@ -131,7 +131,7 @@ public class ResetPasswordController {
                 responseMap.put("message", msg);
                 if (msg.equals("true")) {
                     String token_ = userAuthProvider.createToken(verifyCodeDto.getEmail(), 300000);
-                            responseMap.put("token", token_);
+                    responseMap.put("token", token_);
                     // Tạo một ResponseEntity với HttpStatus.OK và dữ liệu JSON
                     return ResponseEntity.ok(responseMap);
                 } else return ResponseEntity.ok(responseMap);
