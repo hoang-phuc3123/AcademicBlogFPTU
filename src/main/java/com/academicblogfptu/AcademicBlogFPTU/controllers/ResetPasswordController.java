@@ -134,7 +134,7 @@ public class ResetPasswordController {
                     responseMap.put("token", token_);
                     // Tạo một ResponseEntity với HttpStatus.OK và dữ liệu JSON
                     return ResponseEntity.ok(responseMap);
-                } else return ResponseEntity.ok(responseMap);
+                } else return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             } else {
                 // Xử lý lỗi nếu yêu cầu không thành công
                 return ResponseEntity.status(responseCode).build();
