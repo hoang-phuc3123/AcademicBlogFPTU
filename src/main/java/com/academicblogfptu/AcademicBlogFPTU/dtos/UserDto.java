@@ -10,17 +10,19 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@JsonPropertyOrder({"id", "username", "isBanned", "roleName", "token"})
+@JsonPropertyOrder({"id", "username", "isBanned", "isMuted" ,"roleName", "token"})
 public class UserDto {
 
     private int id;
     private String username;
     @JsonProperty("isBanned")
     private boolean isBanned;
+    @JsonProperty("isMuted")
+    private boolean isMuted;
     private String roleName;
     private String token;
 
-    public UserDto(int id, String username, UserDetailsEntity isBanned, RoleEntity roleName, String token) {
+    public UserDto(int id, String username, UserDetailsEntity isBanned, UserDetailsEntity isMuted, RoleEntity roleName, String token) {
 
     }
 
