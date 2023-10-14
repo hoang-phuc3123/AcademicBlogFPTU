@@ -1,5 +1,6 @@
 package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
+
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.TagDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDto;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -56,11 +58,13 @@ public class TagManageController {
         else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+
     }
 
 
 
     @PostMapping("/edit-tag")
+
     public ResponseEntity<TagEntity> updateTag(@RequestHeader("Authorization") String headerValue, @RequestBody TagDto updatedTag) {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             TagEntity _updatedTag = new TagEntity();
@@ -84,3 +88,4 @@ public class TagManageController {
     }
 
 }
+
