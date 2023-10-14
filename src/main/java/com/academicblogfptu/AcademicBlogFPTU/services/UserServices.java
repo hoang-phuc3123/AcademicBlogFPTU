@@ -18,12 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-
-import java.io.Console;
 import java.util.Optional;
-
-
 import java.nio.CharBuffer;
 
 @RequiredArgsConstructor
@@ -50,7 +45,7 @@ public class UserServices {
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
         UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
-        return new UserDto(user.getId(),user.getUsername(),userDetails.isBanned(),user.getRole().getRoleName(), "");
+        return new UserDto(user.getId(),user.getUsername(),userDetails.isBanned(),userDetails.isMuted(),user.getRole().getRoleName(), "");
     }
 
     public UserDetailsDto findByEmail(String email) {
@@ -65,7 +60,7 @@ public class UserServices {
         UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
         if (passwordEncoder.matches(CharBuffer.wrap(loginDto.getPassword()), user.getPassword())) {
-            return new UserDto(user.getId(),user.getUsername(), userDetails.isBanned(),user.getRole().getRoleName(),"");
+            return new UserDto(user.getId(),user.getUsername(), userDetails.isBanned(), userDetails.isMuted(),user.getRole().getRoleName(),"");
         }
         throw new AppException("Invalid password", HttpStatus.UNAUTHORIZED);
     }
@@ -83,7 +78,7 @@ public class UserServices {
             UserEntity user = optionalUser.get();
             UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                     .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
-            return new UserDto(user.getId(), user.getUsername(), userDetails.isBanned(), user.getRole().getRoleName(), "");
+            return new UserDto(user.getId(), user.getUsername(), userDetails.isBanned(), userDetails.isMuted(), user.getRole().getRoleName(), "");
         } else {
             // Nếu không tìm thấy, tạo một tài khoản mới và trả về thông tin của tài khoản mới
             UserEntity newUser = new UserEntity();
@@ -93,7 +88,7 @@ public class UserServices {
             newUser.setRole(roleEntity);
             userRepository.save(newUser);
             // Tạo UserDto từ tài khoản mới và trả về
-            return new UserDto(newUser.getId(), newUser.getUsername(), false, newUser.getRole().getRoleName(), "");
+            return new UserDto(newUser.getId(), newUser.getUsername(), false,false, newUser.getRole().getRoleName(), "");
         }
     }
 
@@ -111,7 +106,7 @@ public class UserServices {
         newUserDetails.setCoverURL(null);
         newUserDetails.setUserStory(null);
         newUserDetails.setUserid(user);
-        MajorEntity majorEntity = majorRepository.findByMajorName("IT").orElse(null) ;
+        MajorEntity majorEntity = majorRepository.findByMajorName("CÔNG NGHỆ THÔNG TIN").orElse(null) ;
         newUserDetails.setMajor(majorEntity);
         userDetailsRepository.save(newUserDetails);
     }
@@ -127,7 +122,7 @@ public class UserServices {
             user_.setPassword(newPasswordHash);
             userRepository.save(user_);
             // Trả về thông tin người dùng sau khi cập nhật
-            return new UserDto(user_.getId(),user_.getUsername(),user.isBanned(),user_.getRole().getRoleName() , "");
+            return new UserDto(user_.getId(),user_.getUsername(),user.isBanned(), user.isMuted(),user_.getRole().getRoleName() , "");
         }
         else {
             return new UserDto();
