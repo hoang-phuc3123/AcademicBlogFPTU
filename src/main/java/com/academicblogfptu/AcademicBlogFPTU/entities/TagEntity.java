@@ -1,21 +1,16 @@
 package com.academicblogfptu.AcademicBlogFPTU.entities;
-
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
-
-@Entity
-@Table(name = "major")
 @Data
-@NoArgsConstructor
-public class MajorEntity {
-
+@Entity
+@Table(name = "tag")
+public class TagEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
 
-    @Column(name = "major_name")
-    private String majorName;
-
+    @Column(name = "tag_name", nullable = false, length = 10)
+    private String tagName;
 }

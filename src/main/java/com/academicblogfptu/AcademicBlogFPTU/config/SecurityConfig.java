@@ -30,7 +30,7 @@ public class SecurityConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeHttpRequests((requests)->requests
-                        .requestMatchers(HttpMethod.POST,"/users/login" , "/users/google-login").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/users/login" , "/users/google-login" , "/users/send-code" , "/users/verify-code").permitAll()
                         .anyRequest().authenticated());
         return http.build();
     }

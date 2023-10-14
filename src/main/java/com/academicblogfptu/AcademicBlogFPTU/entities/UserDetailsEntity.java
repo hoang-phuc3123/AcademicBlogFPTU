@@ -39,9 +39,7 @@ public class UserDetailsEntity {
     @JoinColumn(name = "account_id", referencedColumnName = "id")
     private UserEntity userid;
 
-
     @ManyToOne
-    @JoinColumn(name = "major_id", referencedColumnName = "id" )
+    @JoinColumn(name = "major_id", referencedColumnName = "id")
     private MajorEntity major;
-
 }

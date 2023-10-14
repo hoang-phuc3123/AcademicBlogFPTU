@@ -10,5 +10,4 @@ public class AcademicBlogFptuApplication {
 		SpringApplication.run(AcademicBlogFptuApplication.class, args);
 	}
 
-
 }
