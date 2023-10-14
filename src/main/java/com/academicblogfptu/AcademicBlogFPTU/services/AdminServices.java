@@ -1,10 +1,7 @@
 package com.academicblogfptu.AcademicBlogFPTU.services;
 
 import com.academicblogfptu.AcademicBlogFPTU.dtos.*;
-import com.academicblogfptu.AcademicBlogFPTU.entities.MajorEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.UserDetailsEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.RoleEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.*;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.MajorRepository;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.RoleRepository;
@@ -18,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.sql.Date;
+import java.util.List;
 import java.util.Optional;
 import java.nio.CharBuffer;
 
@@ -39,6 +37,10 @@ public class AdminServices {
 
     @Autowired
     private final UserDetailsRepository userDetailsRepository;
+
+    public List<UserEntity> getAllUsers(){
+        return userRepository.findAll();
+    }
 
     public UserDto findById(int id) {
         UserEntity user = userRepository.findById(id)
