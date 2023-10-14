@@ -23,6 +23,9 @@ public class UserDetailsEntity {
     @Column(name = "is_banned")
     private boolean isBanned;
 
+    @Column(name = "is_muted")
+    private boolean isMuted;
+
     @Column(name = "weight_of_report")
     private int weightOfReport;
 

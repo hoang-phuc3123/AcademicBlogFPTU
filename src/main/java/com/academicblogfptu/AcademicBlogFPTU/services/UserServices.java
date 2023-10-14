@@ -4,15 +4,9 @@ import com.academicblogfptu.AcademicBlogFPTU.dtos.LoginRequestDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.ResetPasswordDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDetailsDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDto;
-import com.academicblogfptu.AcademicBlogFPTU.entities.MajorEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.UserDetailsEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.RoleEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.*;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
-import com.academicblogfptu.AcademicBlogFPTU.repositories.MajorRepository;
-import com.academicblogfptu.AcademicBlogFPTU.repositories.RoleRepository;
-import com.academicblogfptu.AcademicBlogFPTU.repositories.UserDetailsRepository;
-import com.academicblogfptu.AcademicBlogFPTU.repositories.UserRepository;
+import com.academicblogfptu.AcademicBlogFPTU.repositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.io.Console;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -45,6 +40,9 @@ public class UserServices {
     @Autowired
     private final UserDetailsRepository userDetailsRepository;
 
+    @Autowired
+    private final PostRepository postRepository;
+
     public UserDto findByUsername(String Username) {
         UserEntity user = userRepository.findByUsername(Username)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
@@ -56,7 +54,7 @@ public class UserServices {
     public UserDetailsDto findByEmail(String email) {
         UserDetailsEntity user = userDetailsRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException("Unknown email", HttpStatus.UNAUTHORIZED));
-        return new UserDetailsDto(user.getEmail(), user.getFullName(), user.getCoverURL());
+        return new UserDetailsDto(user.getEmail(), user.getFullName(), user.getProfileURL());
     }
 
     public UserDto login(LoginRequestDto loginDto) {
@@ -106,12 +104,13 @@ public class UserServices {
         newUserDetails.setFullName(userDetailsDto.getGivenName());
         newUserDetails.setPhone(null);
         newUserDetails.setBanned(false);
+        newUserDetails.setMuted(false);
         newUserDetails.setWeightOfReport(0);
         newUserDetails.setProfileURL(userDetailsDto.getProfileUrl());
         newUserDetails.setCoverURL(null);
         newUserDetails.setUserStory(null);
         newUserDetails.setUserid(user);
-        MajorEntity majorEntity = majorRepository.findByMajorName("IT").orElse(null) ;
+        MajorEntity majorEntity = majorRepository.findByMajorName("CÔNG NGHỆ THÔNG TIN").orElse(null) ;
         newUserDetails.setMajor(majorEntity);
         userDetailsRepository.save(newUserDetails);
     }
@@ -133,6 +132,14 @@ public class UserServices {
             return new UserDto();
         }
     }
+
+
+    public List<PostEntity> getAll(){
+        List<PostEntity> list = postRepository.findAll();
+        return list;
+    }
+
+
 
 
 }
