@@ -1,10 +1,7 @@
 package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.GoogleTokenDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.RegisterDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDetailsDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.*;
 import com.academicblogfptu.AcademicBlogFPTU.services.AdminServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +32,32 @@ public class UserManageController {
             UserDto userDto = adminServices.register(registerDto);
             adminServices.RegisterUserDetail(registerDto);
             return ResponseEntity.ok(userDto);
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+    @PostMapping("/ban-user")
+    public ResponseEntity<HashMap<String, String>> BanUser(@RequestHeader("Authorization") String headerValue, @RequestBody IdentificationDto identificationDto){
+        if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
+            adminServices.banUser(adminServices.findById(identificationDto.getId()));
+            HashMap < String, String > responseMap = new HashMap < > ();
+            responseMap.put("message", "Ban success.");
+            return ResponseEntity.ok(responseMap);
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+    @PostMapping("/unban-user")
+    public ResponseEntity<HashMap<String, String>> UnbanUser(@RequestHeader("Authorization") String headerValue, @RequestBody IdentificationDto identificationDto){
+        if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
+            adminServices.unbanUser(adminServices.findById(identificationDto.getId()));
+            HashMap <String, String> responseMap = new HashMap<>();
+            responseMap.put("message", "Unban success.");
+            return ResponseEntity.ok(responseMap);
         }
         else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

@@ -37,6 +37,14 @@ public class AdminServices {
     @Autowired
     private final UserDetailsRepository userDetailsRepository;
 
+    public UserDto findById(int id) {
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+        UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+        return new UserDto(user.getId(),user.getUsername(),userDetails.isBanned(),userDetails.isMuted(),user.getRole().getRoleName(), "");
+    }
+
     public UserDto register(RegisterDto registerDto) {
         Optional<UserEntity> optionalUser = userRepository.findByUsername(registerDto.getUsername());
         if (optionalUser.isPresent()) {
@@ -75,6 +83,24 @@ public class AdminServices {
         MajorEntity majorEntity = majorRepository.findByMajorName("CÔNG NGHỆ THÔNG TIN").orElse(null) ;
         newUserDetails.setMajor(majorEntity);
         userDetailsRepository.save(newUserDetails);
+    }
+
+    public void banUser(UserDto userDto){
+        Optional<UserEntity> optionalUser = userRepository.findByUsername(userDto.getUsername());
+        UserEntity user = optionalUser.get();
+        UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+        userDetails.setBanned(true);
+        userDetailsRepository.save(userDetails);
+    }
+
+    public void unbanUser(UserDto userDto){
+        Optional<UserEntity> optionalUser = userRepository.findByUsername(userDto.getUsername());
+        UserEntity user = optionalUser.get();
+        UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+        userDetails.setBanned(false);
+        userDetailsRepository.save(userDetails);
     }
 
 }
