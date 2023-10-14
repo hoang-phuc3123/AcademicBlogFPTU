@@ -26,4 +26,8 @@ public class UserDto {
 
     }
 
+    public UserDto(int id) {
+
+    }
+
 }
