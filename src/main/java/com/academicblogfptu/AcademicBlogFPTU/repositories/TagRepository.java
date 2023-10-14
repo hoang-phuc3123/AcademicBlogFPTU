@@ -10,3 +10,4 @@ public interface TagRepository extends JpaRepository<TagEntity,Integer> {
     Optional<TagEntity> findById(int id);
 
 }
+

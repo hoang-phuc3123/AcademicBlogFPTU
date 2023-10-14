@@ -13,7 +13,7 @@ public class PostDto {
     private boolean isEdited;
     private boolean allowComment;
     private int length;
-
+  
     private int userId;
-
 }
+
