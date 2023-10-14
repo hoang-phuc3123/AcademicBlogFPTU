@@ -18,12 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-
-import java.io.Console;
 import java.util.Optional;
-
-
 import java.nio.CharBuffer;
 
 @RequiredArgsConstructor
@@ -48,7 +43,7 @@ public class UserServices {
     public UserDto findByUsername(String Username) {
         UserEntity user = userRepository.findByUsername(Username)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
-        UserDetailsEntity userDetails = userDetailsRepository.findById(user.getId())
+        UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
         return new UserDto(user.getId(),user.getUsername(),userDetails.isBanned(),user.getRole().getRoleName(), "");
     }
