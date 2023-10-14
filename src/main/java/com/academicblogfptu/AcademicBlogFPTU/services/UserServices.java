@@ -48,7 +48,7 @@ public class UserServices {
     public UserDto findByUsername(String Username) {
         UserEntity user = userRepository.findByUsername(Username)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
-        UserDetailsEntity userDetails = userDetailsRepository.findById(user.getId())
+        UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
         return new UserDto(user.getId(),user.getUsername(),userDetails.isBanned(),user.getRole().getRoleName(), "");
     }
