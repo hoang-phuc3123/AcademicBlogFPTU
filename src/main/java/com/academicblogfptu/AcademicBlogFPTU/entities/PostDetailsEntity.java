@@ -26,12 +26,11 @@ public class PostDetailsEntity {
     private String reasonOfDeclination;
 
     @ManyToOne
-    @JoinColumn(name = "account_id")
+    @JoinColumn(name = "account_id", referencedColumnName = "id")
     private UserEntity user;
 
     @ManyToOne
-    @JoinColumn(name = "post_id")
+    @JoinColumn(name = "post_id", referencedColumnName = "id")
     private PostEntity post;
 
-    // Other fields and relationships go here
 }

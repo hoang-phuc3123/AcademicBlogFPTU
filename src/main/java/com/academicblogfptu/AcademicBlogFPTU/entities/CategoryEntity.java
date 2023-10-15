@@ -17,15 +17,17 @@ public class CategoryEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Column(name = "category_name")
     private String categoryName;
 
+    @Column(name = "category_type")
     private String categoryType;
 
-    private int parentID;
+    @Column(name = "parent_id")
+    private Integer parentID;
 
     @ManyToOne
     @JoinColumn(name = "major_id")
     private MajorEntity major;
-
 }
 
