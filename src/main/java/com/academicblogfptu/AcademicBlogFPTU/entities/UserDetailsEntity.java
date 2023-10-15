@@ -1,8 +1,12 @@
 package com.academicblogfptu.AcademicBlogFPTU.entities;
 
 import jakarta.persistence.*;
+import jdk.jfr.Timespan;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.sql.Date;
+import java.sql.Timestamp;
 
 @Entity
 @Table(name = "user_details")
@@ -25,6 +29,9 @@ public class UserDetailsEntity {
 
     @Column(name = "is_muted")
     private boolean isMuted;
+
+    @Column(name = "mute_time")
+    private Timestamp mutetime;
 
     @Column(name = "weight_of_report")
     private int weightOfReport;
