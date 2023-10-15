@@ -1,9 +1,6 @@
 package com.academicblogfptu.AcademicBlogFPTU.services;
 
-import com.academicblogfptu.AcademicBlogFPTU.dtos.LoginRequestDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.ResetPasswordDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDetailsDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.*;
 import com.academicblogfptu.AcademicBlogFPTU.entities.*;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.*;
@@ -13,12 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-
-import java.io.Console;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-
 import java.nio.CharBuffer;
 
 @RequiredArgsConstructor
@@ -40,21 +34,19 @@ public class UserServices {
     @Autowired
     private final UserDetailsRepository userDetailsRepository;
 
-    @Autowired
-    private final PostRepository postRepository;
 
     public UserDto findByUsername(String Username) {
         UserEntity user = userRepository.findByUsername(Username)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
-        UserDetailsEntity userDetails = userDetailsRepository.findById(user.getId())
+        UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
-        return new UserDto(user.getId(),user.getUsername(),userDetails.isBanned(),user.getRole().getRoleName(), "");
+        return new UserDto(user.getId(),user.getUsername(),userDetails.isBanned(),userDetails.isMuted(),user.getRole().getRoleName(), "");
     }
 
     public UserDetailsDto findByEmail(String email) {
         UserDetailsEntity user = userDetailsRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException("Unknown email", HttpStatus.UNAUTHORIZED));
-        return new UserDetailsDto(user.getEmail(), user.getFullName(), user.getProfileURL());
+        return new UserDetailsDto(user.getEmail(), user.getFullName(), user.getCoverURL());
     }
 
     public UserDto login(LoginRequestDto loginDto) {
@@ -63,7 +55,7 @@ public class UserServices {
         UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
         if (passwordEncoder.matches(CharBuffer.wrap(loginDto.getPassword()), user.getPassword())) {
-            return new UserDto(user.getId(),user.getUsername(), userDetails.isBanned(),user.getRole().getRoleName(),"");
+            return new UserDto(user.getId(),user.getUsername(), userDetails.isBanned(), userDetails.isMuted(),user.getRole().getRoleName(),"");
         }
         throw new AppException("Invalid password", HttpStatus.UNAUTHORIZED);
     }
@@ -81,7 +73,7 @@ public class UserServices {
             UserEntity user = optionalUser.get();
             UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                     .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
-            return new UserDto(user.getId(), user.getUsername(), userDetails.isBanned(), user.getRole().getRoleName(), "");
+            return new UserDto(user.getId(), user.getUsername(), userDetails.isBanned(), userDetails.isMuted(), user.getRole().getRoleName(), "");
         } else {
             // Nếu không tìm thấy, tạo một tài khoản mới và trả về thông tin của tài khoản mới
             UserEntity newUser = new UserEntity();
@@ -91,7 +83,7 @@ public class UserServices {
             newUser.setRole(roleEntity);
             userRepository.save(newUser);
             // Tạo UserDto từ tài khoản mới và trả về
-            return new UserDto(newUser.getId(), newUser.getUsername(), false, newUser.getRole().getRoleName(), "");
+            return new UserDto(newUser.getId(), newUser.getUsername(), false,false, newUser.getRole().getRoleName(), "");
         }
     }
 
@@ -126,20 +118,11 @@ public class UserServices {
             user_.setPassword(newPasswordHash);
             userRepository.save(user_);
             // Trả về thông tin người dùng sau khi cập nhật
-            return new UserDto(user_.getId(),user_.getUsername(),user.isBanned(),user_.getRole().getRoleName() , "");
+            return new UserDto(user_.getId(),user_.getUsername(),user.isBanned(), user.isMuted(),user_.getRole().getRoleName() , "");
         }
         else {
             return new UserDto();
         }
     }
-
-
-    public List<PostEntity> getAll(){
-        List<PostEntity> list = postRepository.findAll();
-        return list;
-    }
-
-
-
 
 }

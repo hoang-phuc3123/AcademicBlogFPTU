@@ -15,16 +15,7 @@ import java.util.HashMap;
 @RequiredArgsConstructor
 @RequestMapping("/admin")
 public class UserManageController {
-    @Autowired
     private final UserServices userService;
-    @Autowired
     private final UserAuthProvider userAuthProvider;
-
-    @GetMapping("/view")
-    public String view(){
-
-        return "Hello world";
-    }
-
 
 }
