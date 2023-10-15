@@ -18,23 +18,14 @@ public class PostEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
     private String title;
-
     private String content;
-
     private Date dateOfPost;
-
-    private int numOfUpvote;
-
-    private int numOfDownvote;
-
+    private Integer numOfUpvote;
+    private Integer numOfDownvote;
     private boolean isRewarded;
-
     private boolean isEdited;
-
     private boolean allowComment;
-
     private int length;
 
     @ManyToOne
