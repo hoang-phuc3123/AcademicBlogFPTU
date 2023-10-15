@@ -10,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@JsonPropertyOrder({"id", "username", "isBanned","isMuted", "roleName", "token"})
+@JsonPropertyOrder({"id", "username", "isBanned", "isMuted" ,"roleName", "token"})
 public class UserDto {
 
     private int id;
@@ -22,7 +22,11 @@ public class UserDto {
     private String roleName;
     private String token;
 
-    public UserDto(int id, String username, UserDetailsEntity isBanned, UserDetailsEntity isMuted ,RoleEntity roleName, String token) {
+    public UserDto(int id, String username, UserDetailsEntity isBanned, UserDetailsEntity isMuted, RoleEntity roleName, String token) {
+
+    }
+
+    public UserDto(int id) {
 
     }
 

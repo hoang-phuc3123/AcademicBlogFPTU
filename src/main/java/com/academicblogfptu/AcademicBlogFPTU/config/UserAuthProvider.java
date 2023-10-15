@@ -33,13 +33,13 @@ public class UserAuthProvider {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
     }
 
-    public String createToken(String login, int timeout) {
+    public String createToken(String username, int timeout) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + timeout); // 1 hour = 3600000
 
         Algorithm algorithm = Algorithm.HMAC256(secretKey);
         return JWT.create()
-                .withSubject(login)
+                .withSubject(username)
                 .withIssuedAt(now)
                 .withExpiresAt(validity)
                 .sign(algorithm);
@@ -56,6 +56,16 @@ public class UserAuthProvider {
         UserDto user = userService.findByUsername(decoded.getSubject());
 
         return new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
+    }
+
+    public String getUser(String token) {
+        Algorithm algorithm = Algorithm.HMAC256(secretKey);
+
+        JWTVerifier verifier = JWT.require(algorithm)
+                .build();
+
+        DecodedJWT decoded = verifier.verify(token);
+        return decoded.getSubject();
     }
 
     public Authentication validateTokenEmail(String token) {
