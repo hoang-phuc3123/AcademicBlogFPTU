@@ -1,10 +1,7 @@
 package com.academicblogfptu.AcademicBlogFPTU.services;
 
 import com.academicblogfptu.AcademicBlogFPTU.dtos.*;
-import com.academicblogfptu.AcademicBlogFPTU.entities.MajorEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.UserDetailsEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.RoleEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.*;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.MajorRepository;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.RoleRepository;
@@ -15,6 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.sql.Timestamp;
+import java.sql.Date;
+import java.util.List;
 import java.util.Optional;
 import java.nio.CharBuffer;
 
@@ -37,12 +38,16 @@ public class AdminServices {
     @Autowired
     private final UserDetailsRepository userDetailsRepository;
 
+    public List<UserEntity> getAllUsers(){
+        return userRepository.findAll();
+    }
+
     public UserDto findById(int id) {
         UserEntity user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
         UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
-        return new UserDto(user.getId(),user.getUsername(),userDetails.isBanned(),userDetails.isMuted(),user.getRole().getRoleName(), "");
+        return new UserDto(user.getId(),user.getUsername(),userDetails.isBanned(),userDetails.isMuted(),userDetails.getMutetime(),user.getRole().getRoleName(), "");
     }
 
     public UserDto register(RegisterDto registerDto) {
@@ -52,7 +57,7 @@ public class AdminServices {
             UserEntity user = optionalUser.get();
             UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                     .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
-            return new UserDto(user.getId(), user.getUsername(), userDetails.isBanned(), userDetails.isMuted(), user.getRole().getRoleName(), "");
+            return new UserDto(user.getId(), user.getUsername(), userDetails.isBanned(), userDetails.isMuted(),userDetails.getMutetime(), user.getRole().getRoleName(), "");
         } else {
             // Nếu không tìm thấy, tạo một tài khoản mới và trả về thông tin của tài khoản mới
             UserEntity newUser = new UserEntity();
@@ -62,7 +67,7 @@ public class AdminServices {
             newUser.setRole(roleEntity);
             userRepository.save(newUser);
             // Tạo UserDto từ tài khoản mới và trả về
-            return new UserDto(newUser.getId(), newUser.getUsername(), false,false, newUser.getRole().getRoleName(), "");
+            return new UserDto(newUser.getId(), newUser.getUsername(), false,false,null, newUser.getRole().getRoleName(), "");
         }
     }
 
@@ -75,6 +80,7 @@ public class AdminServices {
         newUserDetails.setFullName(userDetailsDto.getFullname());
         newUserDetails.setPhone(userDetailsDto.getPhone());
         newUserDetails.setBanned(false);
+        newUserDetails.setMuted(false);
         newUserDetails.setWeightOfReport(0);
         newUserDetails.setProfileURL(null);
         newUserDetails.setCoverURL(null);
@@ -83,6 +89,14 @@ public class AdminServices {
         MajorEntity majorEntity = majorRepository.findByMajorName("CÔNG NGHỆ THÔNG TIN").orElse(null) ;
         newUserDetails.setMajor(majorEntity);
         userDetailsRepository.save(newUserDetails);
+    }
+
+    public void setRoleUser(UserDto setRoleDto){
+        Optional<UserEntity> optionalUser = userRepository.findById(setRoleDto.getId());
+        UserEntity user = optionalUser.get();
+        RoleEntity roleEntity = roleRepository.findByRoleName(setRoleDto.getRoleName()).orElse(null);
+        user.setRole(roleEntity);
+        userRepository.save(user);
     }
 
     public void banUser(UserDto userDto){
@@ -100,6 +114,29 @@ public class AdminServices {
         UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
         userDetails.setBanned(false);
+        userDetailsRepository.save(userDetails);
+    }
+
+    public void muteUser(UserDto userDto, Timestamp muteDuration) {
+        Optional<UserEntity> optionalUser = userRepository.findByUsername(userDto.getUsername());
+        UserEntity user = optionalUser.get();
+        UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+        userDetails.setMuted(true);
+        Timestamp timespan = new Timestamp(muteDuration.getTime());
+        userDetails.setMutetime(timespan);
+        userDetailsRepository.save(userDetails);
+    }
+
+
+
+    public void unmuteUser(UserDto userDto) {
+        Optional<UserEntity> optionalUser = userRepository.findByUsername(userDto.getUsername());
+        UserEntity user = optionalUser.get();
+        UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+        userDetails.setMuted(false);
+        userDetails.setMutetime(null);
         userDetailsRepository.save(userDetails);
     }
 

@@ -45,7 +45,7 @@ public class UserServices {
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
         UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
-        return new UserDto(user.getId(),user.getUsername(),userDetails.isBanned(),userDetails.isMuted(),user.getRole().getRoleName(), "");
+        return new UserDto(user.getId(),user.getUsername(),userDetails.isBanned(),userDetails.isMuted(),userDetails.getMutetime(),user.getRole().getRoleName(), "");
     }
 
     public UserDetailsDto findByEmail(String email) {
@@ -60,7 +60,7 @@ public class UserServices {
         UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
         if (passwordEncoder.matches(CharBuffer.wrap(loginDto.getPassword()), user.getPassword())) {
-            return new UserDto(user.getId(),user.getUsername(), userDetails.isBanned(), userDetails.isMuted(),user.getRole().getRoleName(),"");
+            return new UserDto(user.getId(),user.getUsername(), userDetails.isBanned(), userDetails.isMuted(),userDetails.getMutetime(),user.getRole().getRoleName(),"");
         }
         throw new AppException("Invalid password", HttpStatus.UNAUTHORIZED);
     }
@@ -78,7 +78,7 @@ public class UserServices {
             UserEntity user = optionalUser.get();
             UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                     .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
-            return new UserDto(user.getId(), user.getUsername(), userDetails.isBanned(), userDetails.isMuted(), user.getRole().getRoleName(), "");
+            return new UserDto(user.getId(), user.getUsername(), userDetails.isBanned(), userDetails.isMuted(), userDetails.getMutetime(), user.getRole().getRoleName(), "");
         } else {
             // Nếu không tìm thấy, tạo một tài khoản mới và trả về thông tin của tài khoản mới
             UserEntity newUser = new UserEntity();
@@ -88,7 +88,7 @@ public class UserServices {
             newUser.setRole(roleEntity);
             userRepository.save(newUser);
             // Tạo UserDto từ tài khoản mới và trả về
-            return new UserDto(newUser.getId(), newUser.getUsername(), false,false, newUser.getRole().getRoleName(), "");
+            return new UserDto(newUser.getId(), newUser.getUsername(), false,false, null ,newUser.getRole().getRoleName(), "");
         }
     }
 
@@ -122,7 +122,7 @@ public class UserServices {
             user_.setPassword(newPasswordHash);
             userRepository.save(user_);
             // Trả về thông tin người dùng sau khi cập nhật
-            return new UserDto(user_.getId(),user_.getUsername(),user.isBanned(), user.isMuted(),user_.getRole().getRoleName() , "");
+            return new UserDto(user_.getId(),user_.getUsername(),user.isBanned(), user.isMuted(), user.getMutetime(),user_.getRole().getRoleName() , "");
         }
         else {
             return new UserDto();
