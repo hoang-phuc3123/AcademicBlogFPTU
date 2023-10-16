@@ -10,4 +10,6 @@ public interface CategoryRepository extends JpaRepository<CategoryEntity, Intege
     Optional<CategoryEntity> findById(Integer id);
 
     List<CategoryEntity> findByParentID(Integer id);
+
+    Optional<CategoryEntity> findByCategoryName(String categoryName);
 }

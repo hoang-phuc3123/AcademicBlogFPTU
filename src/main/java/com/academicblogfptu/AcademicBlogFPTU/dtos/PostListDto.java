@@ -1,5 +1,6 @@
 package com.academicblogfptu.AcademicBlogFPTU.dtos;
 
+
 import com.academicblogfptu.AcademicBlogFPTU.entities.CategoryEntity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -14,12 +15,10 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PostDto {
+public class PostListDto {
     private int postId;
 
     private String title;
-
-    private String content;
 
     private String dateOfPost;
 
@@ -27,19 +26,9 @@ public class PostDto {
 
     private Integer numOfDownVote;
 
-    @JsonProperty("is_rewarded")
-    private boolean isRewarded;
-
-    @JsonProperty("is_edited")
-    private boolean isEdited;
-
-    private boolean allowComment;
-
     private String accountName;
 
     private List<CategoryEntity> category;
 
     private String tag;
-
 }
-
