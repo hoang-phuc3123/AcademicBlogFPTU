@@ -1,6 +1,8 @@
 package com.academicblogfptu.AcademicBlogFPTU.services;
 
 import com.academicblogfptu.AcademicBlogFPTU.dtos.PostDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.PostListDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.RequestPostDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.*;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.*;
@@ -10,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-
+import java.sql.Date;
 import java.util.*;
 
 
@@ -34,9 +36,9 @@ public class PostServices {
     private final CategoryRepository categoryRepository;
 
 
-    public List<PostDto> viewAllPost() {
+    public List<PostListDto> viewAllPost() {
         List<PostEntity> list = postRepository.findAll();
-        List<PostDto> postList = new ArrayList<>();
+        List<PostListDto> postList = new ArrayList<>();
         for (PostEntity post : list) {
 
             if (isApprove(post.getId())) {
@@ -48,12 +50,32 @@ public class PostServices {
                 int numOfUpvote = (post.getNumOfUpvote() != null) ? post.getNumOfUpvote() : 0;
                 int numOfDownvote = (post.getNumOfDownvote() != null) ? post.getNumOfDownvote() : 0;
 
-                PostDto postDto = new PostDto(post.getId(), post.getTitle(), post.getContent(),
-                        post.getDateOfPost().toString(), numOfUpvote, numOfDownvote, post.isRewarded(), post.isEdited(), post.isAllowComment(), user.getUsername(), getRelatedCategories(post.getCategory().getId()), tag.getTagName());
-                postList.add(postDto);
+                PostListDto postListDto = new PostListDto(post.getId(), post.getTitle(),
+                        post.getDateOfPost().toString(), numOfUpvote, numOfDownvote, user.getUsername(), getRelatedCategories(post.getCategory().getId()), tag.getTagName());
+                postList.add(postListDto);
             }
         }
         return postList;
+    }
+
+    public PostDto viewPostById(int postId) {
+        PostEntity post = postRepository.findById(postId)
+                .orElseThrow(() -> new AppException("Post with ID " + postId + " not found", HttpStatus.NOT_FOUND));
+
+        if (!isApprove(post.getId())) {
+            throw new AppException("Post with ID " + postId + " is not approved", HttpStatus.UNAUTHORIZED);
+        }
+
+        UserEntity user = userRepository.findById(post.getUser().getId())
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+        TagEntity tag = tagRepository.findById(post.getTag().getId())
+                .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.UNAUTHORIZED));
+
+        int numOfUpvote = (post.getNumOfUpvote() != null) ? post.getNumOfUpvote() : 0;
+        int numOfDownvote = (post.getNumOfDownvote() != null) ? post.getNumOfDownvote() : 0;
+
+        return new PostDto(post.getId(), post.getTitle(), post.getContent(),
+                post.getDateOfPost().toString(), numOfUpvote, numOfDownvote, post.isRewarded(), post.isEdited(), post.isAllowComment(), user.getUsername(), getRelatedCategories(post.getCategory().getId()), tag.getTagName());
     }
 
     public boolean isApprove(int id) {
@@ -115,5 +137,59 @@ public class PostServices {
         }
     }
 
+    public void deletePostById(int id){
+        PostDetailsEntity postDetails = postDetailsRepository.findByPostId(id)
+                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.UNAUTHORIZED));
+        postDetails.setType("Delete");
+        postDetails.setDateOfAction(Date.valueOf(java.time.LocalDate.now()));
+        postDetailsRepository.save(postDetails);
+    }
 
+    public PostDto requestPost(RequestPostDto requestPostDto){
+        PostEntity newPostEntity = new PostEntity();
+
+        newPostEntity.setTitle(requestPostDto.getTitle());
+        newPostEntity.setContent(requestPostDto.getContent());
+        newPostEntity.setDateOfPost(Date.valueOf(java.time.LocalDate.now()));
+        newPostEntity.setNumOfUpvote(0);
+        newPostEntity.setNumOfDownvote(0);
+        newPostEntity.setRewarded(false);
+        newPostEntity.setEdited(false);
+        newPostEntity.setAllowComment(requestPostDto.isAllowComment());
+        newPostEntity.setLength(countWords(requestPostDto.getContent()));
+        UserEntity user = userRepository.findById(requestPostDto.getAccountId())
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+        newPostEntity.setUser(user);
+        CategoryEntity category = categoryRepository.findById(requestPostDto.getCategoryId())
+                .orElseThrow(() -> new AppException("Unknown category", HttpStatus.UNAUTHORIZED));
+        newPostEntity.setCategory(category);
+        TagEntity tag = tagRepository.findById(requestPostDto.getTagId())
+                .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.UNAUTHORIZED));
+        newPostEntity.setTag(tag);
+
+        postRepository.save(newPostEntity);
+
+        return new PostDto(newPostEntity.getId(), newPostEntity.getTitle(), newPostEntity.getContent(), newPostEntity.getDateOfPost().toString()
+        , newPostEntity.getNumOfUpvote(), newPostEntity.getNumOfDownvote(), newPostEntity.isRewarded(), newPostEntity.isEdited()
+        , newPostEntity.isAllowComment(), newPostEntity.getUser().getUsername() ,getRelatedCategories(newPostEntity.getCategory().getId()), newPostEntity.getTag().getTagName());
+    }
+    public int countWords(String text) {
+        if (text == null || text.isEmpty()) {
+            return 0;
+        }
+        String[] words = text.split("\\s+");
+        return words.length;
+    }
+
+    public void postDetail(int postId){
+        Optional<PostEntity> post = postRepository.findById(postId);
+        PostEntity postEntity = post.get();
+
+        PostDetailsEntity newPostDetails = new PostDetailsEntity();
+        newPostDetails.setDateOfAction(postEntity.getDateOfPost());
+        newPostDetails.setType("Request");
+        newPostDetails.setPost(postEntity);
+
+        postDetailsRepository.save(newPostDetails);
+    }
 }
