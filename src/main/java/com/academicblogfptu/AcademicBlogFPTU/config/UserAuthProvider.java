@@ -2,7 +2,6 @@ package com.academicblogfptu.AcademicBlogFPTU.config;
 
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDetailsDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDto;
-import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
@@ -65,6 +64,23 @@ public class UserAuthProvider {
                 .build();
 
         DecodedJWT decoded = verifier.verify(token);
+
+        return decoded.getSubject();
+    }
+
+    public String getUserRefresh(String token) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secretKey);
+
+            // Sử dụng verifier để xác minh token
+            JWTVerifier verifier = JWT.require(algorithm).build();
+            DecodedJWT decoded = verifier.verify(token);
+
+            return decoded.getSubject();
+        } catch (Exception e) {
+            // Nếu token đã hết hạn, vẫn giải mã để lấy username
+        }
+        DecodedJWT decoded = JWT.decode(token);
         return decoded.getSubject();
     }
 
