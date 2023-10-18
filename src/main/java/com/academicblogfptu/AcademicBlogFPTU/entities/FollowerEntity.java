@@ -13,13 +13,14 @@ public class FollowerEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @ManyToOne
-    @JoinColumn(name = "followed_by")
-    private UserEntity followedBy;
+    @Column(name = "followed_by")
+    private Integer followedBy;
 
     @ManyToOne
     @JoinColumn(name = "account_id")
     private UserEntity user;
+
+
 
 
 }

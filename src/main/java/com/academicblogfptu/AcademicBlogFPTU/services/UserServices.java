@@ -105,7 +105,7 @@ public class UserServices {
         newUserDetails.setProfileURL(userDetailsDto.getProfileUrl());
         newUserDetails.setCoverURL(null);
         newUserDetails.setUserStory(null);
-        newUserDetails.setUserid(user);
+        newUserDetails.setUser(user);
         MajorEntity majorEntity = majorRepository.findByMajorName("CÔNG NGHỆ THÔNG TIN").orElse(null) ;
         newUserDetails.setMajor(majorEntity);
         userDetailsRepository.save(newUserDetails);
@@ -116,7 +116,7 @@ public class UserServices {
                 .orElseThrow(() -> new AppException("Unknown email", HttpStatus.UNAUTHORIZED));
         String newPasswordHash = passwordEncoder.encode(CharBuffer.wrap(resetPasswordDto.getPassword()));
         // Cập nhật mật khẩu của người dùng
-        Optional<UserEntity> newUser = userRepository.findById(user.getUserid().getId()); // Tìm UserEntity có ID = 1
+        Optional<UserEntity> newUser = userRepository.findById(user.getUser().getId()); // Tìm UserEntity có ID = 1
         if (newUser.isPresent()) {
             UserEntity user_ = newUser.get();
             user_.setPassword(newPasswordHash);
