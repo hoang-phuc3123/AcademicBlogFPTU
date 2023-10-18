@@ -47,7 +47,7 @@ public class UserDetailsEntity {
 
     @OneToOne
     @JoinColumn(name = "account_id", referencedColumnName = "id")
-    private UserEntity userid;
+    private UserEntity user;
 
     @ManyToOne
     @JoinColumn(name = "major_id", referencedColumnName = "id")
