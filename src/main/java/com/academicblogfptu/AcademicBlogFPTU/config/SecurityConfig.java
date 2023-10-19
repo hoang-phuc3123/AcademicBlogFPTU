@@ -1,5 +1,6 @@
 package com.academicblogfptu.AcademicBlogFPTU.config;
 
+import com.academicblogfptu.AcademicBlogFPTU.services.TokenServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,19 +19,19 @@ public class SecurityConfig {
 
     private final UserAuthenticationEntryPoint userAuthenticationEntryPoint;
     private final UserAuthProvider userAuthProvider;
+    private final TokenServices tokenService;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http)throws Exception{
-
 
         http
                 .exceptionHandling().authenticationEntryPoint(userAuthenticationEntryPoint)
                 .and()
-                .addFilterBefore(new JwtAuthFilter(userAuthProvider), BasicAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthFilter(userAuthProvider, tokenService), BasicAuthenticationFilter.class)
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeHttpRequests((requests)->requests
-                        .requestMatchers(HttpMethod.POST,"/users/login" , "/users/google-login" , "/users/send-code" , "/users/verify-code").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/users/login" , "/users/google-login" , "/users/send-code" , "/users/verify-code" , "/auth/refresh-token").permitAll()
                         .anyRequest().authenticated());
         return http.build();
     }

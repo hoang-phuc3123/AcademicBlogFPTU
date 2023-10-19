@@ -4,23 +4,16 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "follower")
+@Table(name = "token_list")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class FollowerEntity {
+public class TokenEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "followed_by")
-    private Integer followedBy;
-
-    @ManyToOne
-    @JoinColumn(name = "account_id")
-    private UserEntity user;
-
-
-
-
+    @Lob // Sử dụng @Lob cho kiểu dữ liệu VARCHAR(MAX)
+    @Column(name = "token", nullable = false)
+    private String token;
 }
