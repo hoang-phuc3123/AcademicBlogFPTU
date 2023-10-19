@@ -7,14 +7,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PostDto {
+public class QuestionAnswerDto {
+
     private int postId;
 
     private String title;
@@ -23,27 +23,16 @@ public class PostDto {
 
     private String dateOfPost;
 
+    private String accountName;
+
     private Integer numOfUpVote;
 
     private Integer numOfDownVote;
-
-    @JsonProperty("is_rewarded")
-    private boolean isRewarded;
-
-    @JsonProperty("is_edited")
-    private boolean isEdited;
-
-    private boolean allowComment;
-
-    private String accountName;
 
     private List<CategoryEntity> category;
 
     private String tag;
 
-    private List<String> imageURL;
-
-    private List<String> videoURL;
-
+    @JsonProperty("is_rewarded")
+    private boolean isRewarded;
 }
-
