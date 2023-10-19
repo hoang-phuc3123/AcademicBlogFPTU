@@ -1,13 +1,9 @@
 package com.academicblogfptu.AcademicBlogFPTU.dtos;
 
-
-import com.academicblogfptu.AcademicBlogFPTU.entities.CategoryEntity;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 
 import java.util.List;
 
@@ -15,25 +11,13 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PostListDto {
+public class EditPostDto {
     private int postId;
-
     private String title;
-
     private String content;
-
-    private String dateOfPost;
-
-    private String accountName;
-
-    private List<CategoryEntity> category;
-
-    private String tag;
-
+    private boolean allowComment;
+    private int categoryId;
+    private int tagId;
     private List<String> imageURL;
-
     private List<String> videoURL;
-
-    @JsonProperty("is_rewarded")
-    private boolean isRewarded;
 }

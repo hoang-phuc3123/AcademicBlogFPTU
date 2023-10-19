@@ -1,8 +1,6 @@
 package com.academicblogfptu.AcademicBlogFPTU.services;
 
-import com.academicblogfptu.AcademicBlogFPTU.dtos.PostDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.PostListDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.RequestPostDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.*;
 import com.academicblogfptu.AcademicBlogFPTU.entities.*;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.*;
@@ -35,6 +33,11 @@ public class PostServices {
     @Autowired
     private final CategoryRepository categoryRepository;
 
+    @Autowired
+    private final ImageRepository imageRepository;
+
+    @Autowired
+    private final VideoRepository videoRepository;
 
     public List<PostListDto> viewAllPost() {
         List<PostEntity> list = postRepository.findAll();
@@ -46,13 +49,11 @@ public class PostServices {
                         .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
                 TagEntity tag = tagRepository.findById(post.getTag().getId())
                         .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.UNAUTHORIZED));
-
-                int numOfUpvote = (post.getNumOfUpvote() != null) ? post.getNumOfUpvote() : 0;
-                int numOfDownvote = (post.getNumOfDownvote() != null) ? post.getNumOfDownvote() : 0;
-
-                PostListDto postListDto = new PostListDto(post.getId(), post.getTitle(),
-                        post.getDateOfPost().toString(), numOfUpvote, numOfDownvote, user.getUsername(), getRelatedCategories(post.getCategory().getId()), tag.getTagName());
-                postList.add(postListDto);
+                if (!tag.getTagName().equalsIgnoreCase("Q&A")){
+                    PostListDto postListDto = new PostListDto(post.getId(), post.getTitle(), post.getContent(),
+                            post.getDateOfPost().toString(), user.getUsername(), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), getImageURL(post.getId()) , getVideoURL(post.getId()) ,post.isRewarded());
+                    postList.add(postListDto);
+                }
             }
         }
         return postList;
@@ -75,7 +76,8 @@ public class PostServices {
         int numOfDownvote = (post.getNumOfDownvote() != null) ? post.getNumOfDownvote() : 0;
 
         return new PostDto(post.getId(), post.getTitle(), post.getContent(),
-                post.getDateOfPost().toString(), numOfUpvote, numOfDownvote, post.isRewarded(), post.isEdited(), post.isAllowComment(), user.getUsername(), getRelatedCategories(post.getCategory().getId()), tag.getTagName());
+                post.getDateOfPost().toString(), numOfUpvote, numOfDownvote, post.isRewarded(), post.isEdited(), post.isAllowComment(), user.getUsername(),
+                getRelatedCategories(post.getCategory().getId()), tag.getTagName(), getImageURL(post.getId()), getVideoURL(post.getId()));
     }
 
     public boolean isApprove(int id) {
@@ -87,6 +89,7 @@ public class PostServices {
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     public List<CategoryEntity> getRelatedCategories(Integer categoryId) {
         List relatedCategories = new ArrayList<>();
 
@@ -103,8 +106,9 @@ public class PostServices {
         relatedCategories.add(initialCategory.getCategoryName());
         if (initialCategory.getParentID() != null) {
             findParentCategory(initialCategory, relatedCategories);
-
-            findChildCategories(initialCategory, relatedCategories);
+            if (!initialCategory.getCategoryType().equals("Semester") ){
+                findChildCategories(initialCategory, relatedCategories);
+            }
         }
 
         relatedCategories.sort(Comparator.comparing(String::length).reversed());
@@ -169,9 +173,16 @@ public class PostServices {
 
         postRepository.save(newPostEntity);
 
+        if (!requestPostDto.getImageURL().isEmpty()){
+            imageSave(newPostEntity.getId(), requestPostDto.getImageURL());
+        }
+        if (!requestPostDto.getVideoURL().isEmpty()){
+            videoSave(newPostEntity.getId(), requestPostDto.getVideoURL());
+        }
+
         return new PostDto(newPostEntity.getId(), newPostEntity.getTitle(), newPostEntity.getContent(), newPostEntity.getDateOfPost().toString()
         , newPostEntity.getNumOfUpvote(), newPostEntity.getNumOfDownvote(), newPostEntity.isRewarded(), newPostEntity.isEdited()
-        , newPostEntity.isAllowComment(), newPostEntity.getUser().getUsername() ,getRelatedCategories(newPostEntity.getCategory().getId()), newPostEntity.getTag().getTagName());
+        , newPostEntity.isAllowComment(), newPostEntity.getUser().getUsername() ,getRelatedCategories(newPostEntity.getCategory().getId()), newPostEntity.getTag().getTagName(), getImageURL(newPostEntity.getId()), getVideoURL(newPostEntity.getId()));
     }
     public int countWords(String text) {
         if (text == null || text.isEmpty()) {
@@ -192,4 +203,159 @@ public class PostServices {
 
         postDetailsRepository.save(newPostDetails);
     }
+
+    public List<String> getImageURL(int postId) {
+        List<String> imgURLs = new ArrayList<>();
+
+        // Get image URLs
+        List<ImageEntity> images = imageRepository.findByPostId(postId);
+        for (ImageEntity image : images) {
+            imgURLs.add(image.getImageURL());
+        }
+        return imgURLs;
+    }
+
+    public List<String> getVideoURL(int postId) {
+        List<String> videoURLs = new ArrayList<>();
+
+        // Get image URLs
+        List<VideoEntity> videos = videoRepository.findByPostId(postId);
+        for (VideoEntity video : videos) {
+            videoURLs.add(video.getVideoURL());
+        }
+        return videoURLs;
+    }
+
+    public void imageSave(int postId, List<String> imageURL){
+        Optional<PostEntity> post = postRepository.findById(postId);
+        PostEntity postEntity = post.get();
+        for (String imgURL : imageURL) {
+            ImageEntity image = new ImageEntity();
+            image.setImageURL(imgURL);
+            image.setPost(postEntity);
+            imageRepository.save(image);
+        }
+    }
+
+    public void videoSave(int postId, List<String> videoURL){
+        Optional<PostEntity> post = postRepository.findById(postId);
+        PostEntity postEntity = post.get();
+        for (String videoUrl : videoURL) {
+            VideoEntity video = new VideoEntity();
+            video.setVideoURL(videoUrl);
+            video.setPost(postEntity);
+            videoRepository.save(video);
+        }
+    }
+
+    public PostDto editPost(EditPostDto editPostDto){
+        PostEntity post = postRepository.findById(editPostDto.getPostId())
+                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.UNAUTHORIZED));
+
+        post.setTitle(editPostDto.getTitle());
+        post.setContent(editPostDto.getContent());
+        post.setEdited(true);
+        post.setLength(countWords(editPostDto.getContent()));
+        post.setAllowComment(editPostDto.isAllowComment());
+        CategoryEntity category = categoryRepository.findById(editPostDto.getCategoryId())
+                .orElseThrow(() -> new AppException("Unknown category", HttpStatus.UNAUTHORIZED));
+        post.setCategory(category);
+        TagEntity tag = tagRepository.findById(editPostDto.getTagId())
+                .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.UNAUTHORIZED));
+        post.setTag(tag);
+
+            List<ImageEntity> images = imageRepository.findByPostId(post.getId());
+            if (!images.isEmpty()){
+                for (ImageEntity image : images) {
+                    imageRepository.delete(image);
+                }
+            }
+
+            List<VideoEntity> videos = videoRepository.findByPostId(post.getId());
+            if (!videos.isEmpty()){
+                for (VideoEntity video : videos) {
+                    videoRepository.delete(video);
+                }
+            }
+
+        postRepository.save(post);
+
+        if (!editPostDto.getImageURL().isEmpty()){
+            imageSave(post.getId(), editPostDto.getImageURL());
+        }
+
+        if (!editPostDto.getVideoURL().isEmpty()){
+            videoSave(post.getId(), editPostDto.getVideoURL());
+        }
+
+        return new PostDto(post.getId(), post.getTitle(), post.getContent(), post.getDateOfPost().toString()
+                , post.getNumOfUpvote(), post.getNumOfDownvote(), post.isRewarded(), post.isEdited()
+                , post.isAllowComment(), post.getUser().getUsername() ,getRelatedCategories(post.getCategory().getId()), post.getTag().getTagName(), getImageURL(post.getId()), getVideoURL(post.getId()));
+    }
+
+    public List<PostListDto> viewRewardedPost() {
+        List<PostEntity> list = postRepository.findAll();
+        List<PostListDto> rewardedPostList = new ArrayList<>();
+        for (PostEntity post : list) {
+
+            if (isApprove(post.getId()) && post.isRewarded()) {
+                UserEntity user = userRepository.findById(post.getUser().getId())
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                TagEntity tag = tagRepository.findById(post.getTag().getId())
+                        .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.UNAUTHORIZED));
+                if (!tag.getTagName().equalsIgnoreCase("Q&A")){
+                    PostListDto postListDto = new PostListDto(post.getId(), post.getTitle(), post.getContent(),
+                            post.getDateOfPost().toString(), user.getUsername(), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), getImageURL(post.getId()), getVideoURL(post.getId()) ,post.isRewarded());
+                    rewardedPostList.add(postListDto);
+                }
+            }
+        }
+        return rewardedPostList;
+    }
+
+    public List<QuestionAnswerDto> viewQuestionAndAnswerPost() {
+        List<PostEntity> list = postRepository.findAll();
+        List<QuestionAnswerDto> QAPostList = new ArrayList<>();
+        for (PostEntity post : list) {
+
+            if (isApprove(post.getId())) {
+                UserEntity user = userRepository.findById(post.getUser().getId())
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                TagEntity tag = tagRepository.findById(post.getTag().getId())
+                        .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.UNAUTHORIZED));
+                if (tag.getTagName().equalsIgnoreCase("Q&A")){
+
+                    int numOfUpvote = (post.getNumOfUpvote() != null) ? post.getNumOfUpvote() : 0;
+                    int numOfDownvote = (post.getNumOfDownvote() != null) ? post.getNumOfDownvote() : 0;
+
+                    QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), post.getTitle(), post.getContent(),
+                            post.getDateOfPost().toString(), user.getUsername(),numOfUpvote,numOfDownvote ,getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.isRewarded());
+                    QAPostList.add(questionAnswerDto);
+                }
+            }
+        }
+        return QAPostList;
+    }
+
+    public List<PostListDto> viewByLatestPost(){
+        List<PostEntity> postList = postRepository.findAll();
+        List<PostListDto> latestPost = new ArrayList<>();
+
+        for (PostEntity post: postList) {
+            if(isApprove(post.getId())) {
+                UserEntity user = userRepository.findById(post.getUser().getId())
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                TagEntity tag = tagRepository.findById(post.getTag().getId())
+                        .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.UNAUTHORIZED));
+                if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
+                    PostListDto postListDto = new PostListDto(post.getId(), post.getTitle(), post.getContent(),
+                            post.getDateOfPost().toString(), user.getUsername(), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), getImageURL(post.getId()), getVideoURL(post.getId()) ,post.isRewarded());
+                    latestPost.add(postListDto);
+                    latestPost.sort(Comparator.comparing(PostListDto::getDateOfPost).reversed());
+                }
+            }
+        }
+        return latestPost;
+    }
+
 }

@@ -17,6 +17,7 @@ public class ImageEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Column(name = "img_URL")
     private String imageURL;
 
     @ManyToOne
