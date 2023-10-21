@@ -3,21 +3,22 @@ package com.academicblogfptu.AcademicBlogFPTU.services;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.*;
 import com.academicblogfptu.AcademicBlogFPTU.entities.*;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
-import com.academicblogfptu.AcademicBlogFPTU.repositories.MajorRepository;
-import com.academicblogfptu.AcademicBlogFPTU.repositories.RoleRepository;
-import com.academicblogfptu.AcademicBlogFPTU.repositories.UserDetailsRepository;
-import com.academicblogfptu.AcademicBlogFPTU.repositories.UserRepository;
+import com.academicblogfptu.AcademicBlogFPTU.repositories.*;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.sql.Date;
+//import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.nio.CharBuffer;
+import java.time.LocalDate;
+import java.sql.Date;
+
 
 @RequiredArgsConstructor
 @Service
@@ -37,6 +38,9 @@ public class AdminServices {
 
     @Autowired
     private final UserDetailsRepository userDetailsRepository;
+
+    @Autowired
+    private final RoleUpdateRepository roleUpdateHistoryRepository;
 
     public List<UserEntity> getAllUsers(){
         return userRepository.findAll();
@@ -91,12 +95,24 @@ public class AdminServices {
         userDetailsRepository.save(newUserDetails);
     }
 
-    public void setRoleUser(UserDto setRoleDto){
+    public void setRoleUser(UserDto setRoleDto, int id){
         Optional<UserEntity> optionalUser = userRepository.findById(setRoleDto.getId());
         UserEntity user = optionalUser.get();
+        String roleBefore = optionalUser.get().getRole().getRoleName();
         RoleEntity roleEntity = roleRepository.findByRoleName(setRoleDto.getRoleName()).orElse(null);
         user.setRole(roleEntity);
+        RoleUpdateHistoryEntity roleUpdateHistory = new RoleUpdateHistoryEntity();
+        roleUpdateHistory.setRoleBefore(roleBefore);
+        roleUpdateHistory.setRoleAfter(user.getRole().getRoleName());
+        LocalDate currentDate = LocalDate.now();
+        roleUpdateHistory.setChangeDate(Date.valueOf(currentDate)); // Sử dụng ngày hiện tại
+        UserEntity userEntity = userRepository.findById(id).orElse(null) ;
+        roleUpdateHistory.setSetBy(userEntity); // Điền thông tin của người thực hiện cập nhật
+        roleUpdateHistory.setUser(user);
+        // Lưu thông tin cập nhật vào bảng role_update_history
+        roleUpdateHistoryRepository.save(roleUpdateHistory);
         userRepository.save(user);
+
     }
 
     public void banUser(UserDto userDto){

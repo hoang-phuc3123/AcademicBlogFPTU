@@ -60,7 +60,8 @@ public class UserManageController {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             UserDto userDto = adminService.findById(setRoleDto.getId());
             userDto.setRoleName(setRoleDto.getRole());
-            adminService.setRoleUser(userDto);
+            UserDto userSet = userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
+            adminService.setRoleUser(userDto,userSet.getId());
             HashMap < String, String > responseMap = new HashMap<>();
             responseMap.put("message", "Set role success.");
             return ResponseEntity.ok(responseMap);
