@@ -12,7 +12,6 @@ public interface FollowerRepository extends JpaRepository<FollowerEntity,Integer
 
     List<FollowerEntity> findByUserId(Integer id);
 
-
-
+    Optional<FollowerEntity> findByUserIdAndFollowedBy(Integer userId, Integer followedBy);
 
 }

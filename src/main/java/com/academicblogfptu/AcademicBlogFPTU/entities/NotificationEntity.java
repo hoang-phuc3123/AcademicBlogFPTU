@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import jakarta.persistence.*;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 @Entity
 @Table(name = "notification")
@@ -25,12 +26,13 @@ public class NotificationEntity {
 
     private boolean isRead;
 
-    private Date notifyAt;
+    private Timestamp notifyAt;
 
     private String type;
 
     private int triggerUser;
 
+    @Column(name = "related_URL")
     private String relatedURL;
 
     @ManyToOne
