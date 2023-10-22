@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -23,23 +25,43 @@ public class TokenServices {
         return optionalToken.isPresent();
     }
 
-    public void StoreToken(String token) {
+    public void StoreToken(String token, String refreshToken) {
         TokenEntity tokenEntity = new TokenEntity();
         tokenEntity.setToken(token);
+        tokenEntity.setRefreshToken(refreshToken);
+        long currentTimeMillis = System.currentTimeMillis();
+        long expirationTimeMillis = currentTimeMillis + (24 * 60 * 60 * 1000); // 24 giờ * 60 phút * 60 giây * 1000 millis
+        Timestamp expirationTimestamp = new Timestamp(expirationTimeMillis);
+        // Chuyển java.util.Date thành java.sql.Timestamp để lưu vào cơ sở dữ liệu
+        tokenEntity.setExpiredTime(expirationTimestamp);
         tokenRepository.save(tokenEntity);
     }
 
-    public void RefreshToken(String token, String newToken) {
+    public String GetTokenFromRefreshToken(String refreshToken) {
+        TokenEntity oldToken = tokenRepository.findByRefreshToken(refreshToken)
+                .orElseThrow(() -> new AppException ("Unknown refresh token", HttpStatus.UNAUTHORIZED));
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        Timestamp expirationTime = oldToken.getExpiredTime();
+
+        if (expirationTime != null && expirationTime.before(now)) {
+            throw new AppException("The refresh token expired", HttpStatus.FORBIDDEN);
+        }
+        return oldToken.getToken();
+    }
+
+
+
+    public void RefreshToken(String token, String newToken ,String newRefreshToken) {
         TokenEntity oldToken = tokenRepository.findByToken(token)
                 .orElseThrow(() -> new AppException ("Unknown token", HttpStatus.UNAUTHORIZED));
         oldToken.setToken(newToken);
+        oldToken.setRefreshToken(newRefreshToken);
         tokenRepository.save(oldToken);
     }
 
     public void RemoveToken(String token) {
         TokenEntity tokenEntity = tokenRepository.findByToken(token)
                 .orElseThrow(() -> new AppException("Token not found", HttpStatus.NOT_FOUND));
-
         tokenRepository.delete(tokenEntity);
     }
 
