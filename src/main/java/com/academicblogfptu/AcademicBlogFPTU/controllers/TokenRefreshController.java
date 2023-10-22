@@ -32,12 +32,12 @@ public class TokenRefreshController {
 
         String refreshToken = tokenDto.getToken();
         String oldToken = tokenService.GetTokenFromRefreshToken(refreshToken);
+        String newrefreshToken = UUID.randomUUID().toString();
         String user = userAuthProvider.getUserRefresh(oldToken);
         String newToken = userAuthProvider.createToken(user, 900000);
-        tokenService.RefreshToken(oldToken, newToken , refreshToken);
+        tokenService.RefreshToken(oldToken, newToken , newrefreshToken);
         HashMap <String, String> responseMap = new HashMap<>();
         responseMap.put("token", newToken);
-        String newrefreshToken = UUID.randomUUID().toString();
         responseMap.put("refreshToken", newrefreshToken);
         return ResponseEntity.ok(responseMap);
 
