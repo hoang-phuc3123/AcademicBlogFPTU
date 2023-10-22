@@ -17,19 +17,21 @@ public class QuestionAnswerDto {
 
     private int postId;
 
+    private String accountName;
+
     private String title;
 
     private String content;
 
     private String dateOfPost;
 
-    private String accountName;
-
     private Integer numOfUpVote;
 
     private Integer numOfDownVote;
 
     private List<CategoryEntity> category;
+
+    private List<String> imageURL;
 
     private String tag;
 

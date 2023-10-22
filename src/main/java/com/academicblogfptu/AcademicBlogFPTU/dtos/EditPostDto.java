@@ -14,10 +14,13 @@ import java.util.List;
 public class EditPostDto {
     private int postId;
     private String title;
+    private String description;
     private String content;
     private boolean allowComment;
     private int categoryId;
     private int tagId;
+    private String coverURL;
     private List<String> imageURL;
     private List<String> videoURL;
+    private String slug;
 }
