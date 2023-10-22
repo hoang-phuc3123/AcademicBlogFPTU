@@ -56,6 +56,10 @@ public class TokenServices {
                 .orElseThrow(() -> new AppException ("Unknown token", HttpStatus.UNAUTHORIZED));
         oldToken.setToken(newToken);
         oldToken.setRefreshToken(newRefreshToken);
+        long currentTimeMillis = System.currentTimeMillis();
+        long expirationTimeMillis = currentTimeMillis + (24 * 60 * 60 * 1000);
+        Timestamp expirationTimestamp = new Timestamp(expirationTimeMillis);
+        oldToken.setExpiredTime(expirationTimestamp);
         tokenRepository.save(oldToken);
     }
 

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
 import java.util.HashMap;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -36,6 +37,8 @@ public class TokenRefreshController {
         tokenService.RefreshToken(oldToken, newToken , refreshToken);
         HashMap <String, String> responseMap = new HashMap<>();
         responseMap.put("token", newToken);
+        String newrefreshToken = UUID.randomUUID().toString();
+        responseMap.put("refreshToken", newrefreshToken);
         return ResponseEntity.ok(responseMap);
 
     }
