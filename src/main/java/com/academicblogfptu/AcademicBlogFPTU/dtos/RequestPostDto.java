@@ -15,11 +15,14 @@ import java.util.List;
 @Builder
 public class RequestPostDto {
     private String title;
+    private String description;
     private String content;
     private boolean allowComment;
     private int accountId;
     private int categoryId;
     private int tagId;
+    private String coverURL;
     private List<String> imageURL;
     private List<String> videoURL;
+    private String slug;
 }

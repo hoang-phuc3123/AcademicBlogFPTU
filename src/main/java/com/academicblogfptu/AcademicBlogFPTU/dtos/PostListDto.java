@@ -18,21 +18,19 @@ import java.util.List;
 public class PostListDto {
     private int postId;
 
+    private String accountName;
+
     private String title;
 
-    private String content;
+    private String description;
 
     private String dateOfPost;
-
-    private String accountName;
 
     private List<CategoryEntity> category;
 
     private String tag;
 
-    private List<String> imageURL;
-
-    private List<String> videoURL;
+    private String coverURL;
 
     @JsonProperty("is_rewarded")
     private boolean isRewarded;

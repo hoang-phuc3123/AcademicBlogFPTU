@@ -2,6 +2,7 @@ package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 import com.academicblogfptu.AcademicBlogFPTU.dtos.*;
 import com.academicblogfptu.AcademicBlogFPTU.entities.PostEntity;
+import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.services.PostServices;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
@@ -25,9 +26,9 @@ public class PostController {
         return ResponseEntity.ok(list);
     }
 
-    @PostMapping("users/view-post")
-    public ResponseEntity<PostDto> viewAPost(@RequestBody PostDto postId){
-        PostDto post = postServices.viewPostById(postId.getPostId());
+    @GetMapping("users/view-post")
+    public ResponseEntity<PostDto> viewAPost(@RequestParam int postId){
+        PostDto post = postServices.viewPostById(postId);
         return ResponseEntity.ok(post);
     }
 
