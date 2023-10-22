@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,9 +24,11 @@ public class LoginController {
     @PostMapping("/login")
     public ResponseEntity<UserDto> login(@RequestBody LoginRequestDto loginRequestDto) {
         UserDto userDto = userService.login(loginRequestDto);
-        String token = userAuthProvider.createToken(userDto.getUsername(),3600000);
+        String refreshToken = UUID.randomUUID().toString();
+        String token = userAuthProvider.createToken(userDto.getUsername(),900000);
         userDto.setToken(token);
-        tokenService.StoreToken(token);
+        userDto.setRefreshToken(refreshToken);
+        tokenService.StoreToken(token, refreshToken);
         return ResponseEntity.ok(userDto);
     }
 }

@@ -14,7 +14,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@JsonPropertyOrder({"id", "username", "isBanned", "isMuted", "mutetime" ,"roleName", "token"})
+@JsonPropertyOrder({"id", "username", "isBanned", "isMuted", "mutetime" ,"roleName", "token" , "refreshToken"})
 public class UserDto {
 
     private int id;
@@ -26,8 +26,9 @@ public class UserDto {
     private Timestamp mutetime;
     private String roleName;
     private String token;
+    private String refreshToken;
 
-    public UserDto(int id, String username, UserDetailsEntity isBanned, UserDetailsEntity isMuted, UserDetailsEntity mutetime ,RoleEntity roleName, String token) {
+    public UserDto(int id, String username, UserDetailsEntity isBanned, UserDetailsEntity isMuted, UserDetailsEntity mutetime ,RoleEntity roleName, String token, String refreshToken) {
 
     }
 

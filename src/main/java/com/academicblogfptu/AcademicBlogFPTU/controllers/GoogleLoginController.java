@@ -5,6 +5,7 @@ import com.academicblogfptu.AcademicBlogFPTU.dtos.GoogleTokenDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.LoginRequestDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDetailsDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDto;
+import com.academicblogfptu.AcademicBlogFPTU.services.TokenServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,7 @@ import org.springframework.boot.json.JsonParserFactory;
 
 import java.security.SecureRandom;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,6 +32,7 @@ import java.util.Map;
 public class GoogleLoginController {
     private final UserServices userService;
     private final UserAuthProvider userAuthProvider;
+    private final TokenServices tokenService;
 
     @PostMapping("/google-login")
     public ResponseEntity<UserDto> loginGoogle(@RequestBody GoogleTokenDto googleTokenDto) {
@@ -61,7 +64,11 @@ public class GoogleLoginController {
                 LoginRequestDto loginDto = new LoginRequestDto(email, generateRandomPassword(10).toCharArray());
                 UserDto userDto = userService.register(loginDto);
                 userService.RegisterUserDetail(userDetailsDto);
-                userDto.setToken(userAuthProvider.createToken(userDto.getUsername() , 3600000));
+                String accessToken = userAuthProvider.createToken(userDto.getUsername() , 900000);
+                userDto.setToken(accessToken);
+                String refreshToken = UUID.randomUUID().toString();
+                userDto.setRefreshToken(refreshToken);
+                tokenService.StoreToken(accessToken, refreshToken);
                 return ResponseEntity.ok(userDto);
             } else {
                 // Xử lý lỗi nếu yêu cầu không thành công

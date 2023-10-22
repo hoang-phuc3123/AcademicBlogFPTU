@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Timestamp;
 import java.util.HashMap;
 
 @RestController
@@ -24,13 +25,15 @@ public class TokenRefreshController {
     @Autowired
     private final UserAuthProvider userAuthProvider;
 
+
     @PostMapping("/refresh-token")
     public ResponseEntity<HashMap<String, String>> RefreshToken(@RequestBody TokenDto tokenDto) {
 
-        String oldToken = tokenDto.getToken();
+        String refreshToken = tokenDto.getToken();
+        String oldToken = tokenService.GetTokenFromRefreshToken(refreshToken);
         String user = userAuthProvider.getUserRefresh(oldToken);
-        String newToken = userAuthProvider.createToken(user, 3600000);
-        tokenService.RefreshToken(oldToken, newToken);
+        String newToken = userAuthProvider.createToken(user, 900000);
+        tokenService.RefreshToken(oldToken, newToken , refreshToken);
         HashMap <String, String> responseMap = new HashMap<>();
         responseMap.put("token", newToken);
         return ResponseEntity.ok(responseMap);

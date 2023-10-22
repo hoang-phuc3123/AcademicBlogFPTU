@@ -1,7 +1,6 @@
 package com.academicblogfptu.AcademicBlogFPTU.repositories;
 
 import com.academicblogfptu.AcademicBlogFPTU.entities.MajorEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.RoleEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
