@@ -22,7 +22,6 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/admin")
 public class TagManageController {
 
     @Autowired
@@ -40,16 +39,12 @@ public class TagManageController {
 
     @GetMapping("/tags")
     public ResponseEntity<List<TagEntity>> getAllTags(@RequestHeader("Authorization") String headerValue) {
-        if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             List<TagEntity> tags = tagService.getAllTags();
             return ResponseEntity.ok(tags);
-        }
-        else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+
     }
 
-    @PostMapping("/new-tag")
+    @PostMapping("/admin/new-tag")
     public ResponseEntity<TagEntity> createTag(@RequestHeader("Authorization") String headerValue, @RequestBody TagDto tag) {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             TagEntity newTag = tagService.createTag(tag);
@@ -63,7 +58,7 @@ public class TagManageController {
 
 
 
-    @PostMapping("/edit-tag")
+    @PostMapping("/admin/edit-tag")
 
     public ResponseEntity<TagEntity> updateTag(@RequestHeader("Authorization") String headerValue, @RequestBody TagDto updatedTag) {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
@@ -76,7 +71,7 @@ public class TagManageController {
         }
     }
 
-    @PostMapping("/delete-tag")
+    @PostMapping("/admin/delete-tag")
     public ResponseEntity<Boolean> deleteTag(@RequestHeader("Authorization") String headerValue, @RequestBody TagDto deletedTag) {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             tagService.deleteTag(deletedTag.getTagId());

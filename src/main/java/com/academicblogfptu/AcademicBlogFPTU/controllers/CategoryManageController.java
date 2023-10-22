@@ -21,7 +21,6 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/admin")
 public class CategoryManageController {
     @Autowired
     private final CategoryServices categoryServices;
@@ -35,17 +34,14 @@ public class CategoryManageController {
     }
 
     @GetMapping("/categories")
-    public ResponseEntity<List<CategoryDto>> getAllTags(@RequestHeader("Authorization") String headerValue) {
-        if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
+    public ResponseEntity<List<CategoryDto>> getAllTags() {
+
             List<CategoryDto> categories = categoryServices.buildCategoryTree();
             return ResponseEntity.ok(categories);
         }
-        else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-    }
 
-    @PostMapping("/edit-category")
+
+    @PostMapping("/admin/edit-category")
     public ResponseEntity<CategoryEntity> updateTag(@RequestHeader("Authorization") String headerValue, @RequestBody CategoryDto updatedCategory) {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             CategoryEntity _updatedCategory = new CategoryEntity();
@@ -57,7 +53,7 @@ public class CategoryManageController {
         }
     }
 
-    @PostMapping("/new-category")
+    @PostMapping("/admin/new-category")
     public ResponseEntity<String> createCategory(@RequestHeader("Authorization") String headerValue, @RequestBody CategoryRequestDto categoryRequestDto){
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             try {
@@ -88,7 +84,7 @@ public class CategoryManageController {
     }
 
 
-    @PostMapping("/delete-category")
+    @PostMapping("/admin/delete-category")
     public ResponseEntity<String> deleteCategory(@RequestHeader("Authorization") String headerValue, @RequestBody CategoryDto categoryDto) {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             try {
