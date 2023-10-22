@@ -18,8 +18,7 @@ import java.net.URL;
 import java.io.*;
 import org.springframework.boot.json.JsonParser;
 import org.springframework.boot.json.JsonParserFactory;
-import org.springframework.web.util.UriUtils;
-import java.util.Map;
+
 import java.util.*;
 @RestController
 @RequiredArgsConstructor
@@ -72,7 +71,7 @@ public class ResetPasswordController {
                 if (code.isEmpty()) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
                 } else {
-                    HashMap < String, String > responseMap = new HashMap < > ();
+                    HashMap <String, String> responseMap = new HashMap < > ();
                     responseMap.put("message", "true");
                     // Tạo một ResponseEntity với HttpStatus.OK và dữ liệu JSON
                     return ResponseEntity.ok(responseMap);
