@@ -36,8 +36,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     try {
                         SecurityContextHolder.getContext().setAuthentication(userAuthProvider.validateTokenEmail(elements[1]));
                     } catch (RuntimeException ex) {
-                        // Token hết hạn - Trả về mã trạng thái 401 Unauthorized
-                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        // Token hết hạn - Trả về mã trạng thái 403 Forbidden
+                        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                         response.getWriter().write("The token has expired.");
                         response.getWriter().flush();
                         response.getWriter().close();
