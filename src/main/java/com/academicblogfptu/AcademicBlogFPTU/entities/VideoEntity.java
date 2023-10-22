@@ -17,6 +17,7 @@ public class VideoEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Column(name = "video_URL")
     private String videoURL;
 
     @ManyToOne

@@ -17,7 +17,11 @@ import java.util.List;
 public class PostDto {
     private int postId;
 
+    private String accountName;
+
     private String title;
+
+    private String description;
 
     private String content;
 
@@ -35,11 +39,17 @@ public class PostDto {
 
     private boolean allowComment;
 
-    private String accountName;
-
     private List<CategoryEntity> category;
 
     private String tag;
+
+    private String coverURL;
+
+    private List<String> imageURL;
+
+    private List<String> videoURL;
+
+    private String slug;
 
 }
 

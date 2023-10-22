@@ -19,6 +19,8 @@ public class PostEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String title;
+    @Column(name = "description")
+    private String description;
     private String content;
     private Date dateOfPost;
     private Integer numOfUpvote;
@@ -27,6 +29,12 @@ public class PostEntity {
     private boolean isEdited;
     private boolean allowComment;
     private int length;
+
+    @Column(name = "slug")
+    private String slug;
+
+    @Column(name = "cover_URL")
+    private String coverURL;
 
     @ManyToOne
     @JoinColumn(name = "account_id")

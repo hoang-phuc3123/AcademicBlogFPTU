@@ -24,7 +24,7 @@ import java.util.List;
 @RequestMapping("/admin")
 public class CategoryManageController {
     @Autowired
-    CategoryServices categoryServices;
+    private final CategoryServices categoryServices;
     @Autowired
     private final UserServices userService;
     @Autowired

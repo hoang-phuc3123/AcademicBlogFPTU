@@ -89,7 +89,7 @@ public class AdminServices {
         newUserDetails.setProfileURL(null);
         newUserDetails.setCoverURL(null);
         newUserDetails.setUserStory(null);
-        newUserDetails.setUserid(user);
+        newUserDetails.setUser(user);
         MajorEntity majorEntity = majorRepository.findByMajorName("CÔNG NGHỆ THÔNG TIN").orElse(null) ;
         newUserDetails.setMajor(majorEntity);
         userDetailsRepository.save(newUserDetails);
