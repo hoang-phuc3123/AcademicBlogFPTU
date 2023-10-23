@@ -5,8 +5,10 @@ import com.academicblogfptu.AcademicBlogFPTU.dtos.DeclineDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.PostDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.PostListDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDto;
+import com.academicblogfptu.AcademicBlogFPTU.entities.PostEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.TagEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
+import com.academicblogfptu.AcademicBlogFPTU.repositories.PostRepository;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.UserRepository;
 import com.academicblogfptu.AcademicBlogFPTU.services.PostServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
@@ -34,6 +36,9 @@ public class PostManageController {
 
     @Autowired
     private final UserRepository userRepository;
+
+    @Autowired
+    private final PostRepository postRepository;
 
     public boolean isLecturer(UserDto userDto) {
         return userDto.getRoleName().equals("lecturer");
@@ -85,6 +90,34 @@ public class PostManageController {
             Optional<UserEntity> user = userRepository.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
             UserEntity userEntity = user.get();
             postServices.declinePost(declineDto.getPostId(), declineDto.getReasonOfDecline(), userEntity);
+            return ResponseEntity.ok(true);
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+    @PostMapping("/reward/add")
+    public ResponseEntity<Boolean> giveReward(@RequestHeader("Authorization") String headerValue, @RequestBody PostDto postId) {
+        if (isLecturer(userServices.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
+            Optional<PostEntity> postEntity = postRepository.findById(postId.getPostId());
+            PostEntity post = postEntity.get();
+            postServices.giveReward(post.getId());
+
+            return ResponseEntity.ok(true);
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+    @PostMapping("/reward/remove")
+    public ResponseEntity<Boolean> removeReward(@RequestHeader("Authorization") String headerValue, @RequestBody PostDto postId) {
+        if (isLecturer(userServices.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
+            Optional<PostEntity> postEntity = postRepository.findById(postId.getPostId());
+            PostEntity post = postEntity.get();
+            postServices.removeReward(post.getId());
+
             return ResponseEntity.ok(true);
         }
         else {

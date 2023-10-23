@@ -31,9 +31,9 @@ public class QuestionAnswerDto {
 
     private List<CategoryEntity> category;
 
-    private List<String> imageURL;
-
     private String tag;
+
+    private String coverURL;
 
     @JsonProperty("is_rewarded")
     private boolean isRewarded;
