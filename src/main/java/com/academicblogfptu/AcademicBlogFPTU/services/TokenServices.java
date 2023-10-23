@@ -39,7 +39,7 @@ public class TokenServices {
 
     public String GetTokenFromRefreshToken(String refreshToken) {
         TokenEntity oldToken = tokenRepository.findByRefreshToken(refreshToken)
-                .orElseThrow(() -> new AppException ("Unknown refresh token", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException ("Unknown refresh token", HttpStatus.FORBIDDEN));
         Timestamp now = new Timestamp(System.currentTimeMillis());
         Timestamp expirationTime = oldToken.getExpiredTime();
 
@@ -53,15 +53,19 @@ public class TokenServices {
 
     public void RefreshToken(String token, String newToken ,String newRefreshToken) {
         TokenEntity oldToken = tokenRepository.findByToken(token)
-                .orElseThrow(() -> new AppException ("Unknown token", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException ("Unknown token", HttpStatus.FORBIDDEN));
         oldToken.setToken(newToken);
         oldToken.setRefreshToken(newRefreshToken);
+        long currentTimeMillis = System.currentTimeMillis();
+        long expirationTimeMillis = currentTimeMillis + (24 * 60 * 60 * 1000);
+        Timestamp expirationTimestamp = new Timestamp(expirationTimeMillis);
+        oldToken.setExpiredTime(expirationTimestamp);
         tokenRepository.save(oldToken);
     }
 
     public void RemoveToken(String token) {
         TokenEntity tokenEntity = tokenRepository.findByToken(token)
-                .orElseThrow(() -> new AppException("Token not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new AppException("Token not found", HttpStatus.FORBIDDEN));
         tokenRepository.delete(tokenEntity);
     }
 

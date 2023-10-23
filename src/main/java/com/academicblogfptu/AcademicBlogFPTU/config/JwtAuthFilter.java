@@ -24,7 +24,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String[] elements = header.split(" ");
             if(elements.length == 2 && "Bearer".equals(elements[0])){
                 if (!tokenService.isTokenExist(elements[1])) {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                     response.getWriter().write("The token is not exist.");
                     response.getWriter().flush();
                     response.getWriter().close();
