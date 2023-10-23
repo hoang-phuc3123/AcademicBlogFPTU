@@ -2,6 +2,7 @@ package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.*;
+import com.academicblogfptu.AcademicBlogFPTU.services.TokenServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,7 @@ import java.util.*;
 public class ResetPasswordController {
     private final UserServices userService;
     private final UserAuthProvider userAuthProvider;
+    private final TokenServices tokenService;
 
     @PostMapping("/send-code")
     public ResponseEntity<HashMap<String,String>> ResetPass(@RequestBody GoogleTokenDto googleTokenDto) {
@@ -131,6 +133,8 @@ public class ResetPasswordController {
                 if (msg.equals("true")) {
                     String token_ = userAuthProvider.createToken(verifyCodeDto.getEmail(), 300000);
                     responseMap.put("token", token_);
+                    String refreshToken = UUID.randomUUID().toString();
+                    tokenService.StoreToken(token_, refreshToken);
                     // Tạo một ResponseEntity với HttpStatus.OK và dữ liệu JSON
                     return ResponseEntity.ok(responseMap);
                 } else return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
