@@ -1,7 +1,7 @@
 package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.TokenDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.RefreshTokenDto;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.TokenRepository;
 import com.academicblogfptu.AcademicBlogFPTU.services.TokenServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
@@ -28,9 +28,9 @@ public class TokenRefreshController {
 
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<HashMap<String, String>> RefreshToken(@RequestBody TokenDto tokenDto) {
+    public ResponseEntity<HashMap<String, String>> RefreshToken(@RequestBody RefreshTokenDto tokenDto) {
 
-        String refreshToken = tokenDto.getToken();
+        String refreshToken = tokenDto.getRefreshToken();
         String oldToken = tokenService.GetTokenFromRefreshToken(refreshToken);
         String newrefreshToken = UUID.randomUUID().toString();
         String user = userAuthProvider.getUserRefresh(oldToken);
@@ -44,9 +44,10 @@ public class TokenRefreshController {
     }
 
     @PostMapping("/remove-token")
-    public ResponseEntity<HashMap<String, String>> RemoveToken(@RequestBody TokenDto tokenDto) {
+    public ResponseEntity<HashMap<String, String>> RemoveToken(@RequestBody RefreshTokenDto tokenDto) {
 
-        String token = tokenDto.getToken();
+        String refreshToken = tokenDto.getRefreshToken();
+        String token = tokenService.GetTokenFromRefreshToken(refreshToken);
         tokenService.RemoveToken(token);
         HashMap <String, String> responseMap = new HashMap<>();
         responseMap.put("message", "Remove token success.");
