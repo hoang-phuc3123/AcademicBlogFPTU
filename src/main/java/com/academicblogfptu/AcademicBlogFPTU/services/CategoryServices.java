@@ -49,7 +49,6 @@ public class CategoryServices {
 
     }
 
-    @Transactional
     public void deleteCategoryWithChildren(int categoryId) {
         CategoryEntity category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new AppException("Category not found", HttpStatus.UNAUTHORIZED));

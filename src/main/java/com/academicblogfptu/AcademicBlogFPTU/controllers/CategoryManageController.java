@@ -91,6 +91,9 @@ public class CategoryManageController {
                 categoryServices.deleteCategoryWithChildren(categoryDto.getId());
                 return new ResponseEntity<>("Category and its children deleted successfully", HttpStatus.OK);
             } catch (Exception e) {
+                if(e.getMessage().equals("could not execute statement; SQL [n/a]; constraint [null]")){
+                    return new ResponseEntity<>("This category has at least 1 usage",HttpStatus.CONFLICT);
+                }
                 return new ResponseEntity<>("Failed to delete category: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }else {
