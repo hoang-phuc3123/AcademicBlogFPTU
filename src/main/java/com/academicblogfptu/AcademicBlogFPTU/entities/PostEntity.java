@@ -7,6 +7,11 @@ import lombok.AllArgsConstructor;
 import jakarta.persistence.*;
 
 import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "post")
@@ -22,7 +27,7 @@ public class PostEntity {
     @Column(name = "description")
     private String description;
     private String content;
-    private Date dateOfPost;
+    private LocalDateTime dateOfPost;
     private Integer numOfUpvote;
     private Integer numOfDownvote;
     private boolean isRewarded;

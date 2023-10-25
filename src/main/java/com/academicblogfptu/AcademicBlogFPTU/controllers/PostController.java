@@ -48,6 +48,7 @@ public class PostController {
     @PostMapping("posts/edit")
     public ResponseEntity<PostDto> editPost(@RequestBody EditPostDto editPostDto){
         PostDto post = postServices.editPost(editPostDto);
+        postServices.postDetail(post.getPostId());
         return ResponseEntity.ok(post);
     }
 

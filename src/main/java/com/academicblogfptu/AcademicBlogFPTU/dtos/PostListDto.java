@@ -9,6 +9,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -19,6 +21,8 @@ public class PostListDto {
     private int postId;
 
     private String accountName;
+
+    private String avatarURL;
 
     private String title;
 
