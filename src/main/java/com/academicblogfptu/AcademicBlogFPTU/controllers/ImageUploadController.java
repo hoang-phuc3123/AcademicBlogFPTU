@@ -46,8 +46,6 @@ public class ImageUploadController {
             for (Map<String, Object> jsonData : jsonDataList) {
                 link = (String) jsonData.get("link");
                 links.add(link);
-                System.out.println(link);
-                // Xử lý dữ liệu ở đây nếu cần
             }
             link = links.toString();
             Map<String, String> response = new HashMap<>();
