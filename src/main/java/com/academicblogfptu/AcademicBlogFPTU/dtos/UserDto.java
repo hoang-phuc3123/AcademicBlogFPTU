@@ -14,11 +14,12 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@JsonPropertyOrder({"id", "username", "isBanned", "isMuted", "mutetime" ,"roleName", "token" , "refreshToken"})
+@JsonPropertyOrder({"id", "username", "fullname", "isBanned", "isMuted", "mutetime" ,"roleName", "token" , "refreshToken"})
 public class UserDto {
 
     private int id;
     private String username;
+    private String fullname;
     @JsonProperty("isBanned")
     private boolean isBanned;
     @JsonProperty("isMuted")
@@ -28,7 +29,7 @@ public class UserDto {
     private String token;
     private String refreshToken;
 
-    public UserDto(int id, String username, UserDetailsEntity isBanned, UserDetailsEntity isMuted, UserDetailsEntity mutetime ,RoleEntity roleName, String token, String refreshToken) {
+    public UserDto(int id, String username, String fullname ,UserDetailsEntity isBanned, UserDetailsEntity isMuted, UserDetailsEntity mutetime ,RoleEntity roleName, String token, String refreshToken) {
 
     }
 

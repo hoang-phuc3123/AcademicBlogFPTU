@@ -51,7 +51,7 @@ public class AdminServices {
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
         UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
-        return new UserDto(user.getId(),user.getUsername(),userDetails.isBanned(),userDetails.isMuted(),userDetails.getMutetime(),user.getRole().getRoleName(), "" , "");
+        return new UserDto(user.getId(),user.getUsername(),userDetails.getFullName(),userDetails.isBanned(),userDetails.isMuted(),userDetails.getMutetime(),user.getRole().getRoleName(), "" , "");
     }
 
     public UserDto register(RegisterDto registerDto) {
@@ -61,7 +61,7 @@ public class AdminServices {
             UserEntity user = optionalUser.get();
             UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                     .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
-            return new UserDto(user.getId(), user.getUsername(), userDetails.isBanned(), userDetails.isMuted(),userDetails.getMutetime(), user.getRole().getRoleName(), "" , "");
+            return new UserDto(user.getId(), user.getUsername(), userDetails.getFullName(), userDetails.isBanned(), userDetails.isMuted(),userDetails.getMutetime(), user.getRole().getRoleName(), "" , "");
         } else {
             // Nếu không tìm thấy, tạo một tài khoản mới và trả về thông tin của tài khoản mới
             UserEntity newUser = new UserEntity();
@@ -71,7 +71,7 @@ public class AdminServices {
             newUser.setRole(roleEntity);
             userRepository.save(newUser);
             // Tạo UserDto từ tài khoản mới và trả về
-            return new UserDto(newUser.getId(), newUser.getUsername(),false, false, null, newUser.getRole().getRoleName(), "", "");
+            return new UserDto(newUser.getId(), newUser.getUsername(), "" ,false, false, null, newUser.getRole().getRoleName(), "", "");
         }
     }
 
