@@ -1,9 +1,11 @@
 package com.academicblogfptu.AcademicBlogFPTU.services;
 
 import com.academicblogfptu.AcademicBlogFPTU.dtos.NotificationDto;
+import com.academicblogfptu.AcademicBlogFPTU.entities.CommentEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.NotificationEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.UserDetailsEntity;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
+import com.academicblogfptu.AcademicBlogFPTU.repositories.CommentRepository;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.NotificationRepository;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.UserDetailsRepository;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.UserRepository;
@@ -29,6 +31,9 @@ public class NotificationServices {
     @Autowired
     private UserDetailsRepository userDetailsRepository;
 
+    @Autowired
+    private CommentRepository commentRepository;
+
     public NotificationEntity sendNotification(NotificationDto notificationDto){
         NotificationEntity notification = new NotificationEntity();
 
@@ -44,10 +49,10 @@ public class NotificationServices {
             notification.setRelatedURL("users/view-post?id=" + notificationDto.getRelatedId());
         } else if (notificationDto.getType().equals("comment")) {
             // add after finish comment api
-            //CommentEntity comment = new CommentEntity();
-            //comment = commentRepository.findById(notificationDto.getRelatedId()).orElseThrow(() -> new AppException("Unknown comment", HttpStatus.UNAUTHORIZED);
-            //notification.setRelatedURL("users/view-post?id=" + comment.getPostId());
-            //...
+            CommentEntity comment = new CommentEntity();
+            comment = commentRepository.findById(notificationDto.getRelatedId()).orElseThrow(() -> new AppException("Unknown comment", HttpStatus.UNAUTHORIZED));
+            notification.setRelatedURL("users/view-post?id=" + comment.getPost().getId());
+
         }
         notificationRepository.save(notification);
 
@@ -79,8 +84,9 @@ public class NotificationServices {
     private NotificationDto mapToDto(NotificationEntity notificationEntity){
 
         NotificationDto notification = new NotificationDto();
+        notification.setNotificationId(notificationEntity.getId());
         notification.setContent(notificationEntity.getContent());
-        notification.setRead(notification.isRead());
+        notification.setRead(notificationEntity.isRead()); ;
         notification.setRelatedId(notificationEntity.getRelatedId());
         notification.setType(notificationEntity.getType());
         notification.setNotifyTime(notificationEntity.getNotifyAt());
