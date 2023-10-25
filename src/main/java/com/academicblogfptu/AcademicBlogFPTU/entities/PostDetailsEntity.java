@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import jakarta.persistence.*;
 
 import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "post_details")
@@ -19,7 +21,7 @@ public class PostDetailsEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    private Date dateOfAction;
+    private LocalDateTime dateOfAction;
 
     private String type;
 

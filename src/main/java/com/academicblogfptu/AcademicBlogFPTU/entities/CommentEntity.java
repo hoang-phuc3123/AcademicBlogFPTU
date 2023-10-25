@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import jakarta.persistence.*;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "comment")
@@ -21,7 +22,7 @@ public class CommentEntity {
 
     private String content;
 
-    private Date dateOfComment;
+    private LocalDateTime dateOfComment;
 
     private int numOfUpvote;
 
