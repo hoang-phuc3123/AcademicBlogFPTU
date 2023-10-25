@@ -42,12 +42,9 @@ public class ImageUploadController {
             ObjectMapper objectMapper = new ObjectMapper();
             List<Map<String, Object>> jsonDataList = objectMapper.readValue(responseEntity.getBody(), new TypeReference<List<Map<String, Object>>>() {});
             String link = "";
-            List<String> links = new ArrayList<>();
             for (Map<String, Object> jsonData : jsonDataList) {
                 link = (String) jsonData.get("link");
-                links.add(link);
             }
-            link = links.toString();
             Map<String, String> response = new HashMap<>();
             response.put("status", "success");
             response.put("link", link);
