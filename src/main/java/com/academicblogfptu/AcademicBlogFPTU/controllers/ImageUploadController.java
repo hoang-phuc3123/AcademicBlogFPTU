@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.Map;
 
 @RestController
@@ -42,12 +42,14 @@ public class ImageUploadController {
             ObjectMapper objectMapper = new ObjectMapper();
             List<Map<String, Object>> jsonDataList = objectMapper.readValue(responseEntity.getBody(), new TypeReference<List<Map<String, Object>>>() {});
             String link = "";
-
+            List<String> links = new ArrayList<>();
             for (Map<String, Object> jsonData : jsonDataList) {
                 link = (String) jsonData.get("link");
-                // Xử lý dữ liệu ở đây
+                links.add(link);
+                System.out.println(link);
+                // Xử lý dữ liệu ở đây nếu cần
             }
-
+            link = links.toString();
             Map<String, String> response = new HashMap<>();
             response.put("status", "success");
             response.put("link", link);
