@@ -2,13 +2,14 @@ package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.*;
-import com.academicblogfptu.AcademicBlogFPTU.entities.TagEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.RoleEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.UserDetailsEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
+import com.academicblogfptu.AcademicBlogFPTU.repositories.UserDetailsRepository;
 import com.academicblogfptu.AcademicBlogFPTU.services.AdminServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +17,7 @@ import java.sql.Timestamp;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,6 +27,7 @@ public class UserManageController {
     private final UserServices userService;
     private final AdminServices adminService;
     private final UserAuthProvider userAuthProvider;
+    private final UserDetailsRepository userDetailsRepository;
 
 
     public boolean isAdmin(UserDto userDto) {
@@ -33,12 +35,24 @@ public class UserManageController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<List<UserEntity>> getAllTags(@RequestHeader("Authorization") String headerValue) {
+    public ResponseEntity<List<ListUserDto>> getAllUsers(@RequestHeader("Authorization") String headerValue) {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
-            List<UserEntity> tags = adminService.getAllUsers();
-            return ResponseEntity.ok(tags);
-        }
-        else {
+            List<Object[]> userInfos = userDetailsRepository.getAllUsersInfo();
+            List<ListUserDto> users = new ArrayList<>();
+
+            for (Object[] userInfo : userInfos) {
+                ListUserDto userDetailsInfo = new ListUserDto();
+                userDetailsInfo.setId((Integer) userInfo[0]);
+                userDetailsInfo.setUsername(userInfo[1].toString());
+                userDetailsInfo.setPassword(userInfo[2].toString());
+                userDetailsInfo.setFullName(userInfo[3].toString());
+                userDetailsInfo.setEmail(userInfo[4] != null ? userInfo[4].toString() : null); // Check for null
+                userDetailsInfo.setPhone(userInfo[5] != null ? userInfo[5].toString() : null); // Check for null;
+                userDetailsInfo.setRole((RoleEntity) userInfo[6]);
+                users.add(userDetailsInfo);
+            }
+            return ResponseEntity.ok(users);
+        } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
