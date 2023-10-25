@@ -14,6 +14,7 @@ import java.sql.Timestamp;
 @Builder
 public class NotificationDto {
 
+    private int notificationId;
     private String content;
     private int relatedId;
     private boolean isRead;
@@ -23,5 +24,4 @@ public class NotificationDto {
     private String fullNameOfTriggerUser;
     private String relatedUrl;
     private int userId;
-
 }
