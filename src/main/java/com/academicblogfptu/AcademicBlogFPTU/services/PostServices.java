@@ -384,6 +384,34 @@ public class PostServices {
         return latestPost;
     }
 
+    //View trending post
+    public List<PostListTrendingDto> viewTrending(){
+        List<PostEntity> postList = postRepository.findAll();
+        List<PostListTrendingDto> trendingPost = new ArrayList<>();
+        LocalDateTime now = localDateTime;
+        LocalDateTime sevenDaysAgo = localDateTime.minusDays(7);
+        for (PostEntity post: postList) {
+            if(isApprove(post.getId())) {
+                if (post.getDateOfPost().format(formatter).compareTo(sevenDaysAgo.format(formatter)) > 0 && post.getDateOfPost().format(formatter).compareTo(now.format(formatter)) < 0) {
+                    Integer numOfVote = post.getNumOfUpvote() - post.getNumOfDownvote();
+                    UserEntity user = userRepository.findById(post.getUser().getId())
+                            .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                    UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
+                            .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                    TagEntity tag = tagRepository.findById(post.getTag().getId())
+                            .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.UNAUTHORIZED));
+                    if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
+                        PostListTrendingDto postListTrendingDto = new PostListTrendingDto(post.getId(), userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription(),
+                                post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(),post.isRewarded(), numOfVote);
+                        trendingPost.add(postListTrendingDto);
+                        trendingPost.sort(Comparator.comparing(PostListTrendingDto::getNumOfVote).reversed());
+                    }
+                }
+            }
+        }
+        return trendingPost;
+    }
+
     // View edit post history
     public List<PostDto> viewPostEditHistory(int postId) {
         PostEntity post = postRepository.findById(postId)

@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import jakarta.persistence.*;
 
 import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "pending_report")
@@ -21,7 +23,7 @@ public class PendingReportEntity {
 
     private String content;
 
-    private Date dateOfReport;
+    private LocalDateTime dateOfReport;
 
     private String reportType;
 

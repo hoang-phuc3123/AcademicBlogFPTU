@@ -20,7 +20,5 @@ public class EditPostDto {
     private int categoryId;
     private int tagId;
     private String coverURL;
-    private List<String> imageURL;
-    private List<String> videoURL;
     private String slug;
 }

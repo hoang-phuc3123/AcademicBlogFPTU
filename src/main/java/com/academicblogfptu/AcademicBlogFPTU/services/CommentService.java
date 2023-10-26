@@ -3,18 +3,19 @@ package com.academicblogfptu.AcademicBlogFPTU.services;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CreateCommentDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.ReplyCommentDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.ReportCommentDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.*;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
-import com.academicblogfptu.AcademicBlogFPTU.repositories.CommentRepository;
-import com.academicblogfptu.AcademicBlogFPTU.repositories.PostRepository;
-import com.academicblogfptu.AcademicBlogFPTU.repositories.UserDetailsRepository;
+import com.academicblogfptu.AcademicBlogFPTU.repositories.*;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.util.http.parser.HttpParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -30,7 +31,24 @@ public class CommentService {
     @Autowired
     private final UserDetailsRepository userDetailsRepository;
 
+    @Autowired
+    private final ReportReasonRepository reportReasonRepository;
+
+    @Autowired
+    private final UserRepository userRepository;
+
+    @Autowired
+    private final PendingReportRepository pendingReportRepository;
+
+    @Autowired
+    private final PendingReportReasonRepository pendingReportReasonRepository;
+
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    ZoneId vietnamZone = ZoneId.of("Asia/Ho_Chi_Minh");
+
+    // Get the current date and time in the specified time zone
+    LocalDateTime localDateTime = LocalDateTime.now(vietnamZone);
 
     public CommentDto createComment(CreateCommentDto createCommentDto, UserEntity user){
         CommentEntity comment = new CommentEntity();
@@ -41,7 +59,7 @@ public class CommentService {
         UserDetailsEntity userDetails = userDetailsRepository.findByUserId(user.getId());
 
         comment.setContent(createCommentDto.getContent());
-        comment.setDateOfComment(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
+        comment.setDateOfComment(localDateTime);
         comment.setNumOfUpvote(0);
         comment.setNumOfDownvote(0);
         comment.setEdited(false);
@@ -96,7 +114,7 @@ public class CommentService {
         UserDetailsEntity userDetails = userDetailsRepository.findByUserId(user.getId());
 
         comment.setContent(replyCommentDto.getContent());
-        comment.setDateOfComment(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
+        comment.setDateOfComment(localDateTime);
         comment.setNumOfUpvote(0);
         comment.setNumOfDownvote(0);
         comment.setEdited(false);
@@ -109,4 +127,38 @@ public class CommentService {
                 comment.getDateOfComment().format(formatter), comment.getPost().getId());
     }
 
+    public List<ReportReasonEntity> viewReportReason(){
+        return reportReasonRepository.findAll();
+    }
+
+    public PendingReportEntity reportComment(ReportCommentDto reportCommentDto){
+        PendingReportEntity reportComment = new PendingReportEntity();
+
+        CommentEntity comment = commentRepository.findById(reportCommentDto.getCommentId())
+                .orElseThrow(()-> new AppException("Unknown comment", HttpStatus.UNAUTHORIZED));
+
+        UserEntity user = userRepository.findById(comment.getUser().getId())
+                .orElseThrow(()-> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+
+        reportComment.setContent(comment.getContent());
+        reportComment.setDateOfReport(localDateTime);
+        reportComment.setReportType("Comment");
+        reportComment.setComment(comment);
+        reportComment.setUser(user);
+
+        pendingReportRepository.save(reportComment);
+        return  reportComment;
+    }
+
+    public void pendingReportReason(PendingReportEntity report, int reasonOfReportId) {
+        ReportReasonEntity reason = reportReasonRepository.findById(reasonOfReportId)
+                .orElseThrow(()-> new AppException("Unknown reason", HttpStatus.UNAUTHORIZED));
+
+        PendingReportReasonEntity pendingReportReason = new PendingReportReasonEntity();
+
+        pendingReportReason.setReport(report);
+        pendingReportReason.setReason(reason);
+
+        pendingReportReasonRepository.save(pendingReportReason);
+    }
 }
