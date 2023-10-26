@@ -72,10 +72,17 @@ public class TagManageController {
     }
 
     @PostMapping("/admin/delete-tag")
-    public ResponseEntity<Boolean> deleteTag(@RequestHeader("Authorization") String headerValue, @RequestBody TagDto deletedTag) {
+    public ResponseEntity<String> deleteTag(@RequestHeader("Authorization") String headerValue, @RequestBody TagDto deletedTag) {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
-            tagService.deleteTag(deletedTag.getTagId());
-            return ResponseEntity.ok(true);
+            try{
+                tagService.deleteTag(deletedTag.getTagId());
+            }catch (Exception e){
+                if(e.getMessage().equals("could not execute statement; SQL [n/a]; constraint [null]")){
+                    return new ResponseEntity<>("This tag has at least 1 usage",HttpStatus.CONFLICT);
+                }
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            return ResponseEntity.ok("Success");
         }
         else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

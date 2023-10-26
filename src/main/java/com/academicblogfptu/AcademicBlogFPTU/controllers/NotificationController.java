@@ -50,8 +50,18 @@ public class NotificationController {
             return ResponseEntity.ok(readNotification.getRelatedURL());
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
     }
+
+   @PostMapping("/send")
+   public ResponseEntity<String> sendNotification(@RequestHeader("Authorization") String headerValue, @RequestBody NotificationDto notificationDto){
+       notificationDto.setTriggerUser(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))).getId());
+       try{
+           notificationServices.sendNotification(notificationDto);
+       }catch(Exception e){
+           return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+       }
+        return ResponseEntity.ok("Send notification success!");
+   }
 
 
 }
