@@ -14,9 +14,11 @@ import java.util.Date;
 public class CommentDto {
     private int commentId;
 
-    private String content;
-
     private String accountName;
+
+    private String avatarURL;
+
+    private String content;
 
     private Boolean isEdited;
 
@@ -28,5 +30,4 @@ public class CommentDto {
 
     private int postId;
 
-    private String avatarURL;
 }

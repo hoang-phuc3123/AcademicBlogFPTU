@@ -7,6 +7,7 @@ import com.academicblogfptu.AcademicBlogFPTU.services.PostServices;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.config.RepositoryConfigurationSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -68,5 +69,11 @@ public class PostController {
     public ResponseEntity<List<QuestionAnswerDto>> viewQuestionAndAnswerPost(){
         List<QuestionAnswerDto> list = postServices.viewQuestionAndAnswerPost();
         return ResponseEntity.ok(list);
+    }
+
+    @PostMapping("posts/post-history")
+    public ResponseEntity<List<PostDto>> viewPostEditHistory(@RequestBody PostDto postId){
+        List<PostDto> postEditHistoryList = postServices.viewPostEditHistory(postId.getPostId());
+        return ResponseEntity.ok(postEditHistoryList);
     }
 }

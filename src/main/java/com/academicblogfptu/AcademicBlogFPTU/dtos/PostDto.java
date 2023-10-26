@@ -48,10 +48,6 @@ public class PostDto {
 
     private String coverURL;
 
-    private List<String> imageURL;
-
-    private List<String> videoURL;
-
     private String slug;
 
 }
