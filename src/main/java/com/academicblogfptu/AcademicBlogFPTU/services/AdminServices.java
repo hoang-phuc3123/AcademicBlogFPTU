@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 //import java.util.Date;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.nio.CharBuffer;
@@ -42,6 +44,17 @@ public class AdminServices {
 
     @Autowired
     private final RoleUpdateRepository roleUpdateHistoryRepository;
+
+    @Autowired
+    private final PendingReportRepository pendingReportRepository;
+
+    @Autowired
+    private final PendingReportReasonRepository pendingReportReasonRepository;
+
+    @Autowired
+    private final ReportReasonRepository reportReasonRepository;
+
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public List<UserEntity> getAllUsers(){
         return userRepository.findAll();
@@ -161,4 +174,44 @@ public class AdminServices {
         userDetailsRepository.save(userDetails);
     }
 
+    public List<ReportedCommentDto> viewPendingReport(){
+
+        List<PendingReportEntity> reports = pendingReportRepository.findAll();
+
+        List<ReportedCommentDto> reportComments = new ArrayList<>();
+
+        for (PendingReportEntity pendingReport: reports) {
+            if (pendingReport.getReportType().equalsIgnoreCase("Comment")){
+                UserEntity user = userRepository.findById(pendingReport.getUser().getId())
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+
+                PendingReportReasonEntity pendingReportReason = pendingReportReasonRepository.findByReportId(pendingReport.getId())
+                        .orElseThrow(() -> new AppException("Unknown report", HttpStatus.UNAUTHORIZED));
+
+                ReportReasonEntity reason = reportReasonRepository.findById(pendingReportReason.getReason().getId())
+                        .orElseThrow(() -> new AppException("Unknown reason", HttpStatus.UNAUTHORIZED));
+
+                ReportedCommentDto reportedCommentDto = new ReportedCommentDto(pendingReport.getId(), pendingReport.getDateOfReport().format(formatter), pendingReport.getReportType(),
+                        pendingReport.getComment().getId(), pendingReport.getContent() , userDetails.getFullName(), reason.getReasonName());
+                reportComments.add(reportedCommentDto);
+            }
+        }
+        return reportComments;
+    }
+
+    public void deleteReportComment(int commentId){
+        PendingReportEntity pendingReport = pendingReportRepository.findByCommentId(commentId)
+                .orElseThrow(() -> new AppException("Unknown pending report", HttpStatus.UNAUTHORIZED));
+
+        PendingReportReasonEntity pendingReportReason = pendingReportReasonRepository.findByReportId(pendingReport.getId())
+                .orElseThrow(() -> new AppException("Unknown pending report reason", HttpStatus.UNAUTHORIZED));
+
+        if (pendingReportReason != null) {
+            pendingReportReasonRepository.delete(pendingReportReason);
+        }
+
+        pendingReportRepository.delete(pendingReport);
+    }
 }
