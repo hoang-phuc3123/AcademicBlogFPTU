@@ -44,14 +44,15 @@ public class PostServices {
     @Autowired
     private final UserDetailsRepository userDetailsRepository;
 
+    @Autowired
+    private final CommentRepository commentRepository;
+
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     ZoneId vietnamZone = ZoneId.of("Asia/Ho_Chi_Minh");
 
     // Get the current date and time in the specified time zone
     LocalDateTime localDateTime = LocalDateTime.now(vietnamZone);
-
-
 
 
     public List<PostListDto> viewAllPost() {
@@ -103,7 +104,46 @@ public class PostServices {
 
         return new PostDto(post.getId(), userDetails.getFullName(), userDetails.getProfileURL() , post.getTitle(), post.getDescription() , post.getContent(),
                 post.getDateOfPost().format(formatter), numOfUpvote, numOfDownvote, post.isRewarded(), post.isEdited(), post.isAllowComment(),
-                getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(), post.getSlug());
+                getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(), post.getSlug(), getCommentsForPost(postId));
+    }
+    public List<CommentDto> getCommentsForPost(int postId) {
+        List<CommentDto> comments = new ArrayList<>();
+
+        List<CommentEntity> rootComments = commentRepository.findByPostIdAndParentCommentIsNull(postId);
+
+        for (CommentEntity rootComment : rootComments) {
+            Integer parentCommentId = (rootComment.getParentComment() !=  null) ? rootComment.getParentComment().getId() : 0;
+            UserDetailsEntity userDetails = userDetailsRepository.findByUserId(rootComment.getUser().getId());
+            CommentDto commentDto = new CommentDto(rootComment.getId(), userDetails.getFullName(), userDetails.getProfileURL(), rootComment.getContent(),
+                    rootComment.isEdited(), rootComment.getNumOfUpvote(), rootComment.getNumOfDownvote(),
+                    rootComment.getDateOfComment().format(formatter), rootComment.getPost().getId(), parentCommentId, null);
+
+            List<CommentDto> replyComments = new ArrayList<>();
+            getReplyComments(rootComment, replyComments);
+            commentDto.setReplyComments(replyComments);
+
+            comments.add(commentDto);
+        }
+
+        return comments;
+    }
+
+    private void getReplyComments(CommentEntity parentComment, List<CommentDto> replyComments) {
+        List<CommentEntity> directReplyComments = commentRepository.findByParentComment(parentComment);
+
+        for (CommentEntity replyComment : directReplyComments) {
+            Integer parentCommentId = (replyComment.getParentComment() !=  null) ? replyComment.getParentComment().getId() : 0;
+            UserDetailsEntity userDetails = userDetailsRepository.findByUserId(replyComment.getUser().getId());
+            CommentDto commentDto = new CommentDto(replyComment.getId(), userDetails.getFullName(), userDetails.getProfileURL(), replyComment.getContent(),
+                    replyComment.isEdited(), replyComment.getNumOfUpvote(), replyComment.getNumOfDownvote(),
+                    replyComment.getDateOfComment().format(formatter), replyComment.getPost().getId(), parentCommentId, null);
+
+            List<CommentDto> nestedReplyComments = new ArrayList<>();
+            getReplyComments(replyComment, nestedReplyComments);
+            commentDto.setReplyComments(nestedReplyComments);
+
+            replyComments.add(commentDto);
+        }
     }
 
 
@@ -210,7 +250,7 @@ public class PostServices {
         return new PostDto(newPostEntity.getId(), userDetails.getFullName() , userDetails.getProfileURL(),newPostEntity.getTitle(), newPostEntity.getDescription(), newPostEntity.getContent(), newPostEntity.getDateOfPost().format(formatter)
         , newPostEntity.getNumOfUpvote(), newPostEntity.getNumOfDownvote(), newPostEntity.isRewarded(), newPostEntity.isEdited()
         , newPostEntity.isAllowComment() ,getRelatedCategories(newPostEntity.getCategory().getId()), newPostEntity.getTag().getTagName(),
-                newPostEntity.getCoverURL(), newPostEntity.getSlug());
+                newPostEntity.getCoverURL(), newPostEntity.getSlug(), null);
     }
     public int countWords(String text) {
         if (text == null || text.isEmpty()) {
@@ -253,7 +293,6 @@ public class PostServices {
         }
         return videoURLs;
     }
-
     public PostDto editPost(EditPostDto editPostDto){
         PostEntity post = postRepository.findById(editPostDto.getPostId())
                 .orElseThrow(() -> new AppException("Unknown post", HttpStatus.UNAUTHORIZED));
@@ -310,7 +349,7 @@ public class PostServices {
 
         return new PostDto(newPost.getId(), userDetails.getFullName() , userDetails.getProfileURL(),newPost.getTitle(), newPost.getDescription(),newPost.getContent(), newPost.getDateOfPost().format(formatter)
                 , newPost.getNumOfUpvote(), newPost.getNumOfDownvote(), newPost.isRewarded(), newPost.isEdited()
-                , newPost.isAllowComment() ,getRelatedCategories(newPost.getCategory().getId()), newPost.getTag().getTagName(), newPost.getCoverURL(), newPost.getSlug());
+                , newPost.isAllowComment() ,getRelatedCategories(newPost.getCategory().getId()), newPost.getTag().getTagName(), newPost.getCoverURL(), newPost.getSlug(), null);
     }
 
     public List<PostListDto> viewRewardedPost() {
@@ -393,7 +432,6 @@ public class PostServices {
         for (PostEntity post: postList) {
             if(isApprove(post.getId())) {
                 if (post.getDateOfPost().format(formatter).compareTo(sevenDaysAgo.format(formatter)) > 0 && post.getDateOfPost().format(formatter).compareTo(now.format(formatter)) < 0) {
-                    Integer numOfVote = post.getNumOfUpvote() - post.getNumOfDownvote();
                     UserEntity user = userRepository.findById(post.getUser().getId())
                             .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
                     UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
@@ -402,9 +440,12 @@ public class PostServices {
                             .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.UNAUTHORIZED));
                     if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
                         PostListTrendingDto postListTrendingDto = new PostListTrendingDto(post.getId(), userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription(),
-                                post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(),post.isRewarded(), numOfVote);
+                                post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(),post.isRewarded(), post.getNumOfUpvote(), post.getNumOfDownvote());
                         trendingPost.add(postListTrendingDto);
-                        trendingPost.sort(Comparator.comparing(PostListTrendingDto::getNumOfVote).reversed());
+                        Collections.sort(trendingPost, Comparator.comparingInt(
+                                trendingPosts -> trendingPosts.getNumOfUpVote() - trendingPosts.getNumOfDownVote()));
+                        Collections.reverse(trendingPost);
+
                     }
                 }
             }
@@ -450,7 +491,7 @@ public class PostServices {
         postEditHistoryList.add(new PostDto(postEntity.getId(), userDetails.getFullName(), userDetails.getProfileURL(), postEntity.getTitle(), postEntity.getDescription(),
                 postEntity.getContent(), postEntity.getDateOfPost().format(formatter), postEntity.getNumOfUpvote(), postEntity.getNumOfDownvote(),
                 postEntity.isRewarded(), postEntity.isEdited(), postEntity.isAllowComment(), getRelatedCategories(postEntity.getCategory().getId()),
-                tag.getTagName(), postEntity.getCoverURL(), postEntity.getSlug()
+                tag.getTagName(), postEntity.getCoverURL(), postEntity.getSlug(), null
         ));
     }
 

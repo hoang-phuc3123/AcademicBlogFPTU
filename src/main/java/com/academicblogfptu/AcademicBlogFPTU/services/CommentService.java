@@ -17,7 +17,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +44,9 @@ public class CommentService {
 
     @Autowired
     private final PendingReportReasonRepository pendingReportReasonRepository;
+
+    @Autowired
+    private final VoteRepository voteRepository;
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -69,7 +74,7 @@ public class CommentService {
         commentRepository.save(comment);
         return new CommentDto(comment.getId(), userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
                 comment.isEdited(), comment.getNumOfUpvote(), comment.getNumOfDownvote(),
-                comment.getDateOfComment().format(formatter), comment.getPost().getId());
+                comment.getDateOfComment().format(formatter), comment.getPost().getId(), null, null);
     }
 
     public CommentDto editComment(CommentDto commentDto, UserEntity user){
@@ -82,15 +87,31 @@ public class CommentService {
         comment.setEdited(true);
         commentRepository.save(comment);
 
+        Integer parentCommentId = (comment.getParentComment() !=  null) ? comment.getParentComment().getId() : 0;
+
         return new CommentDto(comment.getId(), userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
                 comment.isEdited(), comment.getNumOfUpvote(), comment.getNumOfDownvote(),
-                comment.getDateOfComment().format(formatter), comment.getPost().getId());
+                comment.getDateOfComment().format(formatter), comment.getPost().getId(), parentCommentId, null);
     }
 
     public void deleteComment(int commentId) {
 
         CommentEntity comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new AppException("Unknown comment", HttpStatus.UNAUTHORIZED));
+
+        Optional<PendingReportEntity> pendingReportEntity = pendingReportRepository.findByCommentId(commentId);
+
+        if (pendingReportEntity.isPresent()){
+            throw new AppException("Reported comment !!!", HttpStatus.UNAUTHORIZED);
+        }
+
+        List<VoteEntity> votes = voteRepository.findByCommentId(commentId);
+        if (votes != null){
+            for ( VoteEntity vote : votes) {
+                voteRepository.delete(vote);
+            }
+        }
+
         deleteReplyComments(comment);
         commentRepository.delete(comment);
     }
@@ -124,7 +145,7 @@ public class CommentService {
         commentRepository.save(comment);
         return new CommentDto(comment.getId(), userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
                 comment.isEdited(), comment.getNumOfUpvote(), comment.getNumOfDownvote(),
-                comment.getDateOfComment().format(formatter), comment.getPost().getId());
+                comment.getDateOfComment().format(formatter), comment.getPost().getId(), parentComment.getId(), null);
     }
 
     public List<ReportReasonEntity> viewReportReason(){

@@ -35,5 +35,7 @@ public class PostListTrendingDto {
     @JsonProperty("is_rewarded")
     private boolean isRewarded;
 
-    private Integer numOfVote;
+    private Integer numOfUpVote;
+
+    private Integer numOfDownVote;
 }
