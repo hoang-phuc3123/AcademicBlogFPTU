@@ -12,4 +12,6 @@ import java.util.Optional;
 public interface CommentRepository extends JpaRepository<CommentEntity, Integer> {
 
     List<CommentEntity> findByParentComment(CommentEntity parentComment);
+
+    List<CommentEntity> findByPostIdAndParentCommentIsNull(Integer postId);
 }
