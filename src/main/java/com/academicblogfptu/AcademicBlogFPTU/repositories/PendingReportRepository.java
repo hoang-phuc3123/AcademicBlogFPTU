@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface PendingReportRepository extends JpaRepository<PendingReportEntity, Integer> {
 
-    Optional<PendingReportEntity> findByCommentId(Integer reportedCommentId);
+    Optional<PendingReportEntity> findByContentIdAndReportType(Integer contentId,String reportType);
 }
