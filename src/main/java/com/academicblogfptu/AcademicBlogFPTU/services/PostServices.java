@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.sql.Date;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -62,15 +61,15 @@ public class PostServices {
 
             if (isApprove(post.getId())) {
                 UserEntity user = userRepository.findById(post.getUser().getId())
-                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
-                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 TagEntity tag = tagRepository.findById(post.getTag().getId())
-                        .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
 
                 if (!tag.getTagName().equalsIgnoreCase("Q&A")){
                     PostListDto postListDto = new PostListDto(post.getId(),userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getDescription(),
-                            post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL() ,post.isRewarded());
+                            post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL() ,post.isRewarded(), post.getSlug());
                     postList.add(postListDto);
                 }
             }
@@ -80,7 +79,7 @@ public class PostServices {
 
     public boolean isApprove(int id) {
         PostDetailsEntity post = postDetailsRepository.findByPostId(id)
-                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
         if (post.getType().equalsIgnoreCase("Approve")) {
             return true;
         }
@@ -92,12 +91,12 @@ public class PostServices {
                 .orElseThrow(() -> new AppException("Post with ID " + postId + " not found", HttpStatus.NOT_FOUND));
 
         UserEntity user = userRepository.findById(post.getUser().getId())
-                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
         UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
-                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
 
         TagEntity tag = tagRepository.findById(post.getTag().getId())
-                .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
 
         int numOfUpvote = (post.getNumOfUpvote() != null) ? post.getNumOfUpvote() : 0;
         int numOfDownvote = (post.getNumOfDownvote() != null) ? post.getNumOfDownvote() : 0;
@@ -201,14 +200,14 @@ public class PostServices {
 
     public void deletePostById(int id){
         PostDetailsEntity postDetails = postDetailsRepository.findByPostId(id)
-                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
         postDetails.setType("Delete");
         postDetails.setDateOfAction(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
         postDetails.setUser(null);
         postDetailsRepository.save(postDetails);
     }
 
-    public PostDto requestPost(RequestPostDto requestPostDto){
+    public PostDto requestPost(RequestPostDto requestPostDto, UserEntity userEntity){
         PostEntity newPostEntity = new PostEntity();
 
         newPostEntity.setTitle(requestPostDto.getTitle());
@@ -218,23 +217,23 @@ public class PostServices {
             newPostEntity.setDescription(null);
         }
         newPostEntity.setContent(requestPostDto.getContent());
-        newPostEntity.setDateOfPost(localDateTime);
+        newPostEntity.setDateOfPost(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
         newPostEntity.setNumOfUpvote(0);
         newPostEntity.setNumOfDownvote(0);
         newPostEntity.setRewarded(false);
         newPostEntity.setEdited(false);
         newPostEntity.setAllowComment(requestPostDto.isAllowComment());
-        newPostEntity.setLength(countWords(requestPostDto.getContent()));
-        UserEntity user = userRepository.findById(requestPostDto.getAccountId())
-                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+        newPostEntity.setLength(requestPostDto.getLength());
+        UserEntity user = userRepository.findById(userEntity.getId())
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
         UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
-                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
         newPostEntity.setUser(user);
         CategoryEntity category = categoryRepository.findById(requestPostDto.getCategoryId())
-                .orElseThrow(() -> new AppException("Unknown category", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown category", HttpStatus.NOT_FOUND));
         newPostEntity.setCategory(category);
         TagEntity tag = tagRepository.findById(requestPostDto.getTagId())
-                .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
         newPostEntity.setTag(tag);
         if (!requestPostDto.getCoverURL().isEmpty()){
             newPostEntity.setCoverURL(requestPostDto.getCoverURL());
@@ -252,20 +251,13 @@ public class PostServices {
         , newPostEntity.isAllowComment() ,getRelatedCategories(newPostEntity.getCategory().getId()), newPostEntity.getTag().getTagName(),
                 newPostEntity.getCoverURL(), newPostEntity.getSlug(), null);
     }
-    public int countWords(String text) {
-        if (text == null || text.isEmpty()) {
-            return 0;
-        }
-        String[] words = text.split("\\s+");
-        return words.length;
-    }
 
     public void postDetail(int postId){
         Optional<PostEntity> post = postRepository.findById(postId);
         PostEntity postEntity = post.get();
 
         PostDetailsEntity newPostDetails = new PostDetailsEntity();
-        newPostDetails.setDateOfAction(localDateTime);
+        newPostDetails.setDateOfAction(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
         newPostDetails.setType("Request");
         newPostDetails.setPost(postEntity);
 
@@ -295,7 +287,7 @@ public class PostServices {
     }
     public PostDto editPost(EditPostDto editPostDto){
         PostEntity post = postRepository.findById(editPostDto.getPostId())
-                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
         post.setEdited(false);
         postRepository.save(post);
 
@@ -309,24 +301,24 @@ public class PostServices {
             newPost.setDescription(null);
         }
         newPost.setContent(editPostDto.getContent());
-        newPost.setDateOfPost(localDateTime);
+        newPost.setDateOfPost(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
         newPost.setNumOfUpvote(0);
         newPost.setNumOfDownvote(0);
         newPost.setRewarded(false);
         newPost.setEdited(true);
-        newPost.setLength(countWords(editPostDto.getContent()));
+        newPost.setLength(editPostDto.getLength());
         newPost.setAllowComment(editPostDto.isAllowComment());
         UserEntity user = userRepository.findById(post.getUser().getId())
-                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
         UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
-                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
         newPost.setUser(user);
         newPost.setParentPost(post);
         CategoryEntity category = categoryRepository.findById(editPostDto.getCategoryId())
-                .orElseThrow(() -> new AppException("Unknown category", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown category", HttpStatus.NOT_FOUND));
         newPost.setCategory(category);
         TagEntity tag = tagRepository.findById(editPostDto.getTagId())
-                .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
         newPost.setTag(tag);
 
         if (!editPostDto.getCoverURL().isEmpty()){
@@ -340,11 +332,11 @@ public class PostServices {
         postRepository.save(newPost);
 
         PostDetailsEntity postDetails = postDetailsRepository.findByPostId(post.getId())
-                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
 
         postDetails.setType("Edit");
         postDetails.setUser(null);
-        postDetails.setDateOfAction(localDateTime);
+        postDetails.setDateOfAction(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
         postDetailsRepository.save(postDetails);
 
         return new PostDto(newPost.getId(), userDetails.getFullName() , userDetails.getProfileURL(),newPost.getTitle(), newPost.getDescription(),newPost.getContent(), newPost.getDateOfPost().format(formatter)
@@ -359,14 +351,14 @@ public class PostServices {
 
             if (isApprove(post.getId()) && post.isRewarded()) {
                 UserEntity user = userRepository.findById(post.getUser().getId())
-                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
-                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 TagEntity tag = tagRepository.findById(post.getTag().getId())
-                        .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
                 if (!tag.getTagName().equalsIgnoreCase("Q&A")){
                     PostListDto postListDto = new PostListDto(post.getId(),userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription() ,
-                            post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL() ,post.isRewarded());
+                            post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL() ,post.isRewarded(), post.getSlug());
                     rewardedPostList.add(postListDto);
                 }
             }
@@ -381,11 +373,11 @@ public class PostServices {
 
             if (isApprove(post.getId())) {
                 UserEntity user = userRepository.findById(post.getUser().getId())
-                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
-                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 TagEntity tag = tagRepository.findById(post.getTag().getId())
-                        .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
                 if (tag.getTagName().equalsIgnoreCase("Q&A")){
 
                     int numOfUpvote = (post.getNumOfUpvote() != null) ? post.getNumOfUpvote() : 0;
@@ -407,14 +399,14 @@ public class PostServices {
         for (PostEntity post: postList) {
             if(isApprove(post.getId())) {
                 UserEntity user = userRepository.findById(post.getUser().getId())
-                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
-                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 TagEntity tag = tagRepository.findById(post.getTag().getId())
-                        .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
                 if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
                     PostListDto postListDto = new PostListDto(post.getId(), userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription(),
-                            post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(),post.isRewarded());
+                            post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(),post.isRewarded(), post.getSlug());
                     latestPost.add(postListDto);
                     latestPost.sort(Comparator.comparing(PostListDto::getDateOfPost).reversed());
                 }
@@ -427,20 +419,20 @@ public class PostServices {
     public List<PostListTrendingDto> viewTrending(){
         List<PostEntity> postList = postRepository.findAll();
         List<PostListTrendingDto> trendingPost = new ArrayList<>();
-        LocalDateTime now = localDateTime;
-        LocalDateTime sevenDaysAgo = localDateTime.minusDays(7);
+        LocalDateTime now = LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now());
+        LocalDateTime sevenDaysAgo = LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()).minusDays(7);
         for (PostEntity post: postList) {
             if(isApprove(post.getId())) {
                 if (post.getDateOfPost().format(formatter).compareTo(sevenDaysAgo.format(formatter)) > 0 && post.getDateOfPost().format(formatter).compareTo(now.format(formatter)) < 0) {
                     UserEntity user = userRepository.findById(post.getUser().getId())
-                            .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                            .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                     UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
-                            .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                            .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                     TagEntity tag = tagRepository.findById(post.getTag().getId())
-                            .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.UNAUTHORIZED));
+                            .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
                     if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
                         PostListTrendingDto postListTrendingDto = new PostListTrendingDto(post.getId(), userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription(),
-                                post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(),post.isRewarded(), post.getNumOfUpvote(), post.getNumOfDownvote());
+                                post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(),post.isRewarded(), post.getNumOfUpvote(), post.getNumOfDownvote(), post.getSlug());
                         trendingPost.add(postListTrendingDto);
                         Collections.sort(trendingPost, Comparator.comparingInt(
                                 trendingPosts -> trendingPosts.getNumOfUpVote() - trendingPosts.getNumOfDownVote()));
@@ -456,7 +448,7 @@ public class PostServices {
     // View edit post history
     public List<PostDto> viewPostEditHistory(int postId) {
         PostEntity post = postRepository.findById(postId)
-                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
         List<PostDto> postEditHistoryList = new ArrayList<>();
 
         if (post.getParentPost() == null) {
@@ -483,11 +475,11 @@ public class PostServices {
 
     private void addPostToList(PostEntity postEntity, List<PostDto> postEditHistoryList) {
         UserEntity user = userRepository.findById(postEntity.getUser().getId())
-                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
         UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
-                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
         TagEntity tag = tagRepository.findById(postEntity.getTag().getId())
-                .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
         postEditHistoryList.add(new PostDto(postEntity.getId(), userDetails.getFullName(), userDetails.getProfileURL(), postEntity.getTitle(), postEntity.getDescription(),
                 postEntity.getContent(), postEntity.getDateOfPost().format(formatter), postEntity.getNumOfUpvote(), postEntity.getNumOfDownvote(),
                 postEntity.isRewarded(), postEntity.isEdited(), postEntity.isAllowComment(), getRelatedCategories(postEntity.getCategory().getId()),
@@ -497,7 +489,7 @@ public class PostServices {
 
     public void commentToggle(int postId){
         PostEntity post = postRepository.findById(postId)
-                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
         if (post.isAllowComment()){
             post.setAllowComment(false);
         } else {
@@ -510,7 +502,7 @@ public class PostServices {
     // View pending post
     public boolean isPending(int id) {
         PostDetailsEntity post = postDetailsRepository.findByPostId(id)
-                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
         if (post.getType().equalsIgnoreCase("Request")) {
             return true;
         }
@@ -522,21 +514,21 @@ public class PostServices {
         List<PostListDto> pendingPostList = new ArrayList<>();
 
         UserDetailsEntity userDetailsEntity = userDetailsRepository.findByUserAccount(userEntity)
-                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
 
         for (PostEntity post: postList) {
             if(isPending(post.getId())) {
                 UserEntity user = userRepository.findById(post.getUser().getId())
-                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
-                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 TagEntity tag = tagRepository.findById(post.getTag().getId())
-                        .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
 
                 if (post.getCategory().getMajor().getId() == userDetailsEntity.getMajor().getId()) {
                     if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
                         PostListDto postListDto = new PostListDto(post.getId(), userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription(),
-                                post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(),post.isRewarded());
+                                post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(),post.isRewarded(), post.getSlug());
                         pendingPostList.add(postListDto);
                     }
                 }
@@ -550,21 +542,21 @@ public class PostServices {
         List<PostListDto> approvePostList = new ArrayList<>();
 
         UserDetailsEntity userDetailsEntity = userDetailsRepository.findByUserAccount(userEntity)
-                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
         for (PostEntity post : list) {
 
             if (isApprove(post.getId())) {
                 UserEntity user = userRepository.findById(post.getUser().getId())
-                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
-                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 TagEntity tag = tagRepository.findById(post.getTag().getId())
-                        .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
 
                 if (post.getCategory().getMajor().getId() == userDetailsEntity.getMajor().getId()) {
                     if (!tag.getTagName().equalsIgnoreCase("Q&A")){
                         PostListDto postListDto = new PostListDto(post.getId(),userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getDescription(),
-                                post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL() ,post.isRewarded());
+                                post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL() ,post.isRewarded(), post.getSlug());
                         approvePostList.add(postListDto);
                     }
                 }
@@ -575,21 +567,21 @@ public class PostServices {
 
     public void approvePost(int postId, UserEntity user){
         PostDetailsEntity postDetails = postDetailsRepository.findByPostId(postId)
-                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
 
         postDetails.setType("Approve");
-        postDetails.setDateOfAction(localDateTime);
+        postDetails.setDateOfAction(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
         postDetails.setUser(user);
         postDetailsRepository.save(postDetails);
     }
 
     public void declinePost(int postId, String reasonOfDecline, UserEntity user){
         PostDetailsEntity postDetails = postDetailsRepository.findByPostId(postId)
-                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
 
         postDetails.setType("Decline");
         postDetails.setReasonOfDeclination(reasonOfDecline);
-        postDetails.setDateOfAction(localDateTime);
+        postDetails.setDateOfAction(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
         postDetails.setUser(user);
         postDetailsRepository.save(postDetails);
     }
@@ -597,10 +589,10 @@ public class PostServices {
     // give reward
     public void giveReward(int postId){
         PostEntity post = postRepository.findById(postId)
-                .orElseThrow(()-> new AppException("Unknown post", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(()-> new AppException("Unknown post", HttpStatus.NOT_FOUND));
 
         if (!isApprove(post.getId()) && !isPending(post.getId())) {
-            throw new AppException("Invalid postId", HttpStatus.UNAUTHORIZED);
+            throw new AppException("Invalid postId", HttpStatus.NOT_FOUND);
         }
 
         post.setRewarded(true);
@@ -610,10 +602,10 @@ public class PostServices {
     // remove reward
     public void removeReward(int postId){
         PostEntity post = postRepository.findById(postId)
-                .orElseThrow(()-> new AppException("Unknown post", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(()-> new AppException("Unknown post", HttpStatus.NOT_FOUND));
 
         if (!isApprove(post.getId()) && !isPending(post.getId())) {
-            throw new AppException("Invalid postId", HttpStatus.UNAUTHORIZED);
+            throw new AppException("Invalid postId", HttpStatus.NOT_FOUND);
         }
 
         post.setRewarded(false);
@@ -628,11 +620,11 @@ public class PostServices {
         for (PostEntity post: postList) {
             if(isPending(post.getId())) {
                 UserEntity user = userRepository.findById(post.getUser().getId())
-                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
-                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 TagEntity tag = tagRepository.findById(post.getTag().getId())
-                        .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
 
                     if (tag.getTagName().equalsIgnoreCase("Q&A")) {
                         QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), userDetails.getFullName(),post.getTitle(), post.getContent(),
@@ -646,33 +638,33 @@ public class PostServices {
 
     public void approveQAPost(int postId, UserEntity user){
         PostDetailsEntity postDetails = postDetailsRepository.findByPostId(postId)
-                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
         PostEntity post = postRepository.findById(postId)
-                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
         if (post.getTag().getTagName().equalsIgnoreCase("Q&A")) {
             postDetails.setType("Approve");
-            postDetails.setDateOfAction(localDateTime);
+            postDetails.setDateOfAction(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
             postDetails.setUser(user);
             postDetailsRepository.save(postDetails);
         }else  {
-            throw new AppException("This postId does not belong to Q&A tag", HttpStatus.UNAUTHORIZED);
+            throw new AppException("This postId does not belong to Q&A tag", HttpStatus.NOT_FOUND);
         }
 
     }
 
     public void declineQAPost(int postId, String reasonOfDecline, UserEntity user){
         PostDetailsEntity postDetails = postDetailsRepository.findByPostId(postId)
-                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
         PostEntity post = postRepository.findById(postId)
-                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
         if (post.getTag().getTagName().equalsIgnoreCase("Q&A")) {
         postDetails.setType("Decline");
         postDetails.setReasonOfDeclination(reasonOfDecline);
-            postDetails.setDateOfAction(localDateTime);
+            postDetails.setDateOfAction(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
         postDetails.setUser(user);
         postDetailsRepository.save(postDetails);
         }else  {
-            throw new AppException("This postId does not belong to Q&A tag", HttpStatus.UNAUTHORIZED);
+            throw new AppException("This postId does not belong to Q&A tag", HttpStatus.NOT_FOUND);
         }
     }
 

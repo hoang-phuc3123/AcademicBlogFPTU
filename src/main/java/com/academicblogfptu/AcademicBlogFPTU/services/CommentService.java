@@ -59,12 +59,12 @@ public class CommentService {
         CommentEntity comment = new CommentEntity();
 
         PostEntity post = postRepository.findById(createCommentDto.getPostId())
-                        .orElseThrow(()-> new AppException("Unknown post", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(()-> new AppException("Unknown post", HttpStatus.NOT_FOUND));
 
         UserDetailsEntity userDetails = userDetailsRepository.findByUserId(user.getId());
 
         comment.setContent(createCommentDto.getContent());
-        comment.setDateOfComment(localDateTime);
+        comment.setDateOfComment(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
         comment.setNumOfUpvote(0);
         comment.setNumOfDownvote(0);
         comment.setEdited(false);
@@ -79,7 +79,7 @@ public class CommentService {
 
     public CommentDto editComment(CommentDto commentDto, UserEntity user){
         CommentEntity comment = commentRepository.findById(commentDto.getCommentId())
-                .orElseThrow(()-> new AppException("Unknown comment",  HttpStatus.UNAUTHORIZED));
+                .orElseThrow(()-> new AppException("Unknown comment",  HttpStatus.NOT_FOUND));
 
         UserDetailsEntity userDetails = userDetailsRepository.findByUserId(user.getId());
 
@@ -97,12 +97,12 @@ public class CommentService {
     public void deleteComment(int commentId) {
 
         CommentEntity comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new AppException("Unknown comment", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown comment", HttpStatus.NOT_FOUND));
 
         Optional<PendingReportEntity> pendingReportEntity = pendingReportRepository.findByCommentId(commentId);
 
         if (pendingReportEntity.isPresent()){
-            throw new AppException("Reported comment !!!", HttpStatus.UNAUTHORIZED);
+            throw new AppException("Reported comment !!!", HttpStatus.NOT_FOUND);
         }
 
         List<VoteEntity> votes = voteRepository.findByCommentId(commentId);
@@ -127,15 +127,15 @@ public class CommentService {
         CommentEntity comment = new CommentEntity();
 
         PostEntity post = postRepository.findById(replyCommentDto.getPostId())
-                .orElseThrow(()-> new AppException("Unknown post", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(()-> new AppException("Unknown post", HttpStatus.NOT_FOUND));
 
         CommentEntity parentComment = commentRepository.findById(replyCommentDto.getParentCommentId())
-                .orElseThrow(()-> new AppException("Unknown post", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(()-> new AppException("Unknown post", HttpStatus.NOT_FOUND));
 
         UserDetailsEntity userDetails = userDetailsRepository.findByUserId(user.getId());
 
         comment.setContent(replyCommentDto.getContent());
-        comment.setDateOfComment(localDateTime);
+        comment.setDateOfComment(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
         comment.setNumOfUpvote(0);
         comment.setNumOfDownvote(0);
         comment.setEdited(false);
@@ -156,13 +156,13 @@ public class CommentService {
         PendingReportEntity reportComment = new PendingReportEntity();
 
         CommentEntity comment = commentRepository.findById(reportCommentDto.getCommentId())
-                .orElseThrow(()-> new AppException("Unknown comment", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(()-> new AppException("Unknown comment", HttpStatus.NOT_FOUND));
 
         UserEntity user = userRepository.findById(comment.getUser().getId())
-                .orElseThrow(()-> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(()-> new AppException("Unknown user", HttpStatus.NOT_FOUND));
 
         reportComment.setContent(comment.getContent());
-        reportComment.setDateOfReport(localDateTime);
+        reportComment.setDateOfReport(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
         reportComment.setReportType("Comment");
         reportComment.setComment(comment);
         reportComment.setUser(user);
@@ -173,7 +173,7 @@ public class CommentService {
 
     public void pendingReportReason(PendingReportEntity report, int reasonOfReportId) {
         ReportReasonEntity reason = reportReasonRepository.findById(reasonOfReportId)
-                .orElseThrow(()-> new AppException("Unknown reason", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(()-> new AppException("Unknown reason", HttpStatus.NOT_FOUND));
 
         PendingReportReasonEntity pendingReportReason = new PendingReportReasonEntity();
 

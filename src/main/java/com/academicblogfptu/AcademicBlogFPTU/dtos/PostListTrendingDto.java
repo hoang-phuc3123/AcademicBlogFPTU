@@ -38,4 +38,6 @@ public class PostListTrendingDto {
     private Integer numOfUpVote;
 
     private Integer numOfDownVote;
+
+    private String slug;
 }

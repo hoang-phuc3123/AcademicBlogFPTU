@@ -21,4 +21,5 @@ public class EditPostDto {
     private int tagId;
     private String coverURL;
     private String slug;
+    private Integer length;
 }
