@@ -38,4 +38,6 @@ public class PostListDto {
 
     @JsonProperty("is_rewarded")
     private boolean isRewarded;
+
+    private String slug;
 }

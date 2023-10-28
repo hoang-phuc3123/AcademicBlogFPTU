@@ -1,8 +1,11 @@
 package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
+import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.*;
 import com.academicblogfptu.AcademicBlogFPTU.entities.PostEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
+import com.academicblogfptu.AcademicBlogFPTU.repositories.UserRepository;
 import com.academicblogfptu.AcademicBlogFPTU.services.PostServices;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
@@ -13,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,15 +25,21 @@ public class PostController {
     @Autowired
     private final PostServices postServices;
 
+    @Autowired
+    private final UserRepository userRepository;
+
+    @Autowired
+    private final UserAuthProvider userAuthProvider;
+
     @GetMapping("users/post-list")
     public ResponseEntity<List<PostListDto>> getPostList(){
         List<PostListDto> list = postServices.viewAllPost();
         return ResponseEntity.ok(list);
     }
 
-    @GetMapping("users/view-post")
-    public ResponseEntity<PostDto> viewAPost(@RequestParam int postId){
-        PostDto post = postServices.viewPostById(postId);
+    @PostMapping("users/view-post")
+    public ResponseEntity<PostDto> viewAPost(@RequestBody PostDto postDto){
+        PostDto post = postServices.viewPostById(postDto.getPostId());
         return ResponseEntity.ok(post);
     }
 
@@ -40,8 +50,11 @@ public class PostController {
     }
 
     @PostMapping("users/request-post")
-    public ResponseEntity<PostDto> requestPost(@RequestBody RequestPostDto requestPostDto){
-        PostDto newPost = postServices.requestPost(requestPostDto);
+    public ResponseEntity<PostDto> requestPost(@RequestHeader("Authorization") String headerValue,@RequestBody RequestPostDto requestPostDto){
+        Optional<UserEntity> user = userRepository.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
+        UserEntity userEntity = user.get();
+
+        PostDto newPost = postServices.requestPost(requestPostDto, userEntity);
         postServices.postDetail(newPost.getPostId());
         return ResponseEntity.ok(newPost);
     }

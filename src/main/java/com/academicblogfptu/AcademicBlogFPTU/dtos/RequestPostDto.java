@@ -18,11 +18,9 @@ public class RequestPostDto {
     private String description;
     private String content;
     private boolean allowComment;
-    private int accountId;
     private int categoryId;
     private int tagId;
     private String coverURL;
-    private List<String> imageURL;
-    private List<String> videoURL;
     private String slug;
+    private Integer length;
 }
