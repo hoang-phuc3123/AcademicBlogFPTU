@@ -99,7 +99,7 @@ public class CommentService {
         CommentEntity comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new AppException("Unknown comment", HttpStatus.NOT_FOUND));
 
-        Optional<PendingReportEntity> pendingReportEntity = pendingReportRepository.findByCommentId(commentId);
+        Optional<PendingReportEntity> pendingReportEntity = pendingReportRepository.findByContentIdAndReportType(commentId,"Comment");
 
         if (pendingReportEntity.isPresent()){
             throw new AppException("Reported comment !!!", HttpStatus.NOT_FOUND);
@@ -164,7 +164,7 @@ public class CommentService {
         reportComment.setContent(comment.getContent());
         reportComment.setDateOfReport(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
         reportComment.setReportType("Comment");
-        reportComment.setComment(comment);
+        reportComment.setContentId(comment.getId());
         reportComment.setUser(user);
 
         pendingReportRepository.save(reportComment);

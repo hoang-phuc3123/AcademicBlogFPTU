@@ -27,9 +27,8 @@ public class PendingReportEntity {
 
     private String reportType;
 
-    @ManyToOne
-    @JoinColumn(name = "comment_id")
-    private CommentEntity comment;
+
+    private int contentId;
 
     @ManyToOne
     @JoinColumn(name = "account_id")
