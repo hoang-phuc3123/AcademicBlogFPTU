@@ -56,14 +56,6 @@ public class AdminServices {
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    public List<UserEntity> getAllUsers(){
-        return userRepository.findAll();
-    }
-
-    public List<UserDetailsEntity> getAllUserDetails() {
-        return userDetailsRepository.findAll();
-    }
-
     public UserDto findById(int id) {
         UserEntity user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
@@ -96,7 +88,6 @@ public class AdminServices {
     public void RegisterUserDetail(RegisterDto userDetailsDto){
         Optional<UserEntity> optionalUser = userRepository.findByUsername(userDetailsDto.getUsername());
         UserEntity user = optionalUser.get();
-
         UserDetailsEntity newUserDetails = new UserDetailsEntity();
         newUserDetails.setEmail(userDetailsDto.getEmail());
         newUserDetails.setFullName(userDetailsDto.getFullname());
@@ -108,7 +99,7 @@ public class AdminServices {
         newUserDetails.setCoverURL(null);
         newUserDetails.setUserStory(null);
         newUserDetails.setUser(user);
-        MajorEntity majorEntity = majorRepository.findByMajorName("CÔNG NGHỆ THÔNG TIN").orElse(null) ;
+        MajorEntity majorEntity = majorRepository.findByMajorName("Kỹ Thuật Phần Mềm").orElse(null) ;
         newUserDetails.setMajor(majorEntity);
         userDetailsRepository.save(newUserDetails);
     }
@@ -161,8 +152,6 @@ public class AdminServices {
         userDetails.setMutetime(timespan);
         userDetailsRepository.save(userDetails);
     }
-
-
 
     public void unmuteUser(UserDto userDto) {
         Optional<UserEntity> optionalUser = userRepository.findByUsername(userDto.getUsername());

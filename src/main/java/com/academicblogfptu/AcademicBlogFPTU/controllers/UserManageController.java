@@ -60,6 +60,10 @@ public class UserManageController {
     @PostMapping("/register")
     public ResponseEntity<UserDto> RegisterAccount(@RequestHeader("Authorization") String headerValue, @RequestBody RegisterDto registerDto) {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
+            String email = registerDto.getEmail();
+            if (userService.isEmailExist(email).equals("true")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
             UserDto userDto = adminService.register(registerDto);
             adminService.RegisterUserDetail(registerDto);
             return ResponseEntity.ok(userDto);
@@ -88,7 +92,7 @@ public class UserManageController {
     public ResponseEntity<HashMap<String, String>> BanUser(@RequestHeader("Authorization") String headerValue, @RequestBody IdentificationDto identificationDto){
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             adminService.banUser(adminService.findById(identificationDto.getId()));
-            HashMap < String, String > responseMap = new HashMap<>();
+            HashMap <String, String> responseMap = new HashMap<>();
             responseMap.put("message", "Ban success.");
             return ResponseEntity.ok(responseMap);
         }
@@ -118,8 +122,6 @@ public class UserManageController {
             // Tính thời điểm kết thúc dựa trên thời điểm hiện tại và thời lượng cấm (đơn vị là giờ)
             long muteDurationMillis = muteDto.getMuteDuration() * 3600000; // 1 giờ = 3600000 ms
             Date muteEndTime = new Date(currentTime.getTime() + muteDurationMillis);
-
-            // Chuyển java.util.Date thành java.sql.Timestamp để lưu vào cơ sở dữ liệu
             Timestamp timestamp = new Timestamp(muteEndTime.getTime());
             adminService.muteUser(adminService.findById(muteDto.getId()), timestamp);
             HashMap <String, String> responseMap = new HashMap<>();
