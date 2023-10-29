@@ -60,10 +60,6 @@ public class UserManageController {
     @PostMapping("/register")
     public ResponseEntity<UserDto> RegisterAccount(@RequestHeader("Authorization") String headerValue, @RequestBody RegisterDto registerDto) {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
-            String email = registerDto.getEmail();
-            if (userService.isEmailExist(email).equals("true")) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-            }
             UserDto userDto = adminService.register(registerDto);
             adminService.RegisterUserDetail(registerDto);
             return ResponseEntity.ok(userDto);
