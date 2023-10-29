@@ -42,11 +42,11 @@ public class NotificationController {
     }
 
     @GetMapping("/read")
-    public ResponseEntity<String> readNotifications(@RequestHeader("Authorization") String headerValue, @RequestParam Integer id){
-        NotificationEntity notification = notificationServices.getNotification(id);
+    public ResponseEntity<String> readNotifications(@RequestHeader("Authorization") String headerValue, @RequestBody NotificationDto notificationDto){
+        NotificationEntity notification = notificationServices.getNotification(notificationDto.getNotificationId());
         if(notification.getUser().getId()
                 == userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))).getId()){
-            NotificationEntity readNotification = notificationServices.readNotification(id);
+            NotificationEntity readNotification = notificationServices.readNotification(notificationDto.getNotificationId());
             return ResponseEntity.ok(readNotification.getRelatedURL());
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

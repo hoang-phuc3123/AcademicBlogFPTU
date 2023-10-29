@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -18,7 +19,7 @@ public class NotificationDto {
     private String content;
     private int relatedId;
     private boolean isRead;
-    private Timestamp notifyTime;
+    private String notifyTime;
     private String type;
     private int triggerUser;
     private String fullNameOfTriggerUser;

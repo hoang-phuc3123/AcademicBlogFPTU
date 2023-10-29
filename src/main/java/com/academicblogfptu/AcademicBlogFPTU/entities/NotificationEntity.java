@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "notification")
@@ -26,7 +27,7 @@ public class NotificationEntity {
 
     private boolean isRead;
 
-    private Timestamp notifyAt;
+    private LocalDateTime notifyAt;
 
     private String type;
 
