@@ -106,7 +106,7 @@ public class UserServices {
         newUserDetails.setCoverURL(null);
         newUserDetails.setUserStory(null);
         newUserDetails.setUser(user);
-        MajorEntity majorEntity = majorRepository.findByMajorName("CÔNG NGHỆ THÔNG TIN").orElse(null) ;
+        MajorEntity majorEntity = majorRepository.findByMajorName("Kỹ Thuật Phần Mềm").orElse(null) ;
         newUserDetails.setMajor(majorEntity);
         userDetailsRepository.save(newUserDetails);
     }
