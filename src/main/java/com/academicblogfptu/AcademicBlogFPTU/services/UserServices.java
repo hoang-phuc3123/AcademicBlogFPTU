@@ -60,16 +60,6 @@ public class UserServices {
         UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
         if (passwordEncoder.matches(CharBuffer.wrap(loginDto.getPassword()), user.getPassword())) {
-            if (userDetails.isMuted()) {
-                long currentTimeMillis = System.currentTimeMillis() / 1000; // Thời gian hiện tại ở định dạng Unix time
-                if (userDetails.getMutetime() != null) {
-                    long muteTimeMillis = userDetails.getMutetime().getTime() / 1000; // Chuyển đổi Timestamp thành Unix time
-                    if (muteTimeMillis < currentTimeMillis) {
-                        userDetails.setMuted(false);
-                        userDetails.setMutetime(null);
-                    }
-                }
-            }
             return new UserDto(user.getId(),user.getUsername(), userDetails.getFullName(), userDetails.isBanned(), userDetails.isMuted(),userDetails.getMutetime(),user.getRole().getRoleName(),"" , "");
         }
         throw new AppException("Invalid password", HttpStatus.UNAUTHORIZED);
@@ -88,16 +78,6 @@ public class UserServices {
             UserEntity user = optionalUser.get();
             UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                     .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
-            if (userDetails.isMuted()) {
-                long currentTimeMillis = System.currentTimeMillis() / 1000; // Thời gian hiện tại ở định dạng Unix time
-                if (userDetails.getMutetime() != null) {
-                    long muteTimeMillis = userDetails.getMutetime().getTime() / 1000; // Chuyển đổi Timestamp thành Unix time
-                    if (muteTimeMillis < currentTimeMillis) {
-                        userDetails.setMuted(false);
-                        userDetails.setMutetime(null);
-                    }
-                }
-            }
             return new UserDto(user.getId(), user.getUsername(), userDetails.getFullName(),userDetails.isBanned(), userDetails.isMuted(), userDetails.getMutetime(), user.getRole().getRoleName(), "" ,"");
         } else {
             // Nếu không tìm thấy, tạo một tài khoản mới và trả về thông tin của tài khoản mới
