@@ -19,7 +19,6 @@ public class RealTimeMuteServices {
     public void checkMuteStatus() {
         // Lấy danh sách user_details từ cơ sở dữ liệu
         List<UserDetailsEntity> userDetailsList = userDetailsRepository.findAll();
-        System.out.println("Da lay danh sach");
         for (UserDetailsEntity userDetails : userDetailsList) {
             if (userDetails.isMuted()) {
                 if (userDetails.getMutetime() != null) {
