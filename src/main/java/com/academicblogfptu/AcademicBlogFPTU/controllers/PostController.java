@@ -84,6 +84,12 @@ public class PostController {
         return ResponseEntity.ok(list);
     }
 
+    @GetMapping("posts/shorts")
+    public ResponseEntity<List<PostListDto>> viewShortPost(){
+        List<PostListDto> list = postServices.viewShort();
+        return ResponseEntity.ok(list);
+    }
+
     @GetMapping("posts/q-a")
     public ResponseEntity<List<QuestionAnswerDto>> viewQuestionAndAnswerPost(){
         List<QuestionAnswerDto> list = postServices.viewQuestionAndAnswerPost();

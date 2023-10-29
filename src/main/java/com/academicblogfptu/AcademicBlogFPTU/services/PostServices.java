@@ -263,28 +263,6 @@ public class PostServices {
 
         postDetailsRepository.save(newPostDetails);
     }
-
-    public List<String> getImageURL(int postId) {
-        List<String> imgURLs = new ArrayList<>();
-
-        // Get image URLs
-        List<ImageEntity> images = imageRepository.findByPostId(postId);
-        for (ImageEntity image : images) {
-            imgURLs.add(image.getImageURL());
-        }
-        return imgURLs;
-    }
-
-    public List<String> getVideoURL(int postId) {
-        List<String> videoURLs = new ArrayList<>();
-
-        // Get image URLs
-        List<VideoEntity> videos = videoRepository.findByPostId(postId);
-        for (VideoEntity video : videos) {
-            videoURLs.add(video.getVideoURL());
-        }
-        return videoURLs;
-    }
     public PostDto editPost(EditPostDto editPostDto){
         PostEntity post = postRepository.findById(editPostDto.getPostId())
                 .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
@@ -443,6 +421,28 @@ public class PostServices {
             }
         }
         return trendingPost;
+    }
+
+    public List<PostListDto> viewShort(){
+        List<PostEntity> postList = postRepository.findAll();
+        List<PostListDto> shortPost = new ArrayList<>();
+
+        for (PostEntity post: postList) {
+            if(isApprove(post.getId()) && post.getLength() <= 500) {
+                UserEntity user = userRepository.findById(post.getUser().getId())
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+                UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+                TagEntity tag = tagRepository.findById(post.getTag().getId())
+                        .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
+                if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
+                    PostListDto postListDto = new PostListDto(post.getId(), userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription(),
+                            post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(),post.isRewarded(), post.getSlug());
+                    shortPost.add(postListDto);
+                }
+            }
+        }
+        return shortPost;
     }
 
     // View edit post history
