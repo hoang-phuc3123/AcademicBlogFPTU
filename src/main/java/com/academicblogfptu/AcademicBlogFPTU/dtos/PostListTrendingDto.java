@@ -16,6 +16,8 @@ import java.util.List;
 public class PostListTrendingDto {
     private int postId;
 
+    private Integer userId;
+
     private String accountName;
 
     private String avatarURL;

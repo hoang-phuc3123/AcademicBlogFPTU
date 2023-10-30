@@ -80,8 +80,11 @@ public class CommentController {
     }
 
     @PostMapping("/comments/report")
-    public ResponseEntity<Boolean> reportComment(@RequestBody ReportCommentDto reportCommentDto){
-        PendingReportEntity pendingReportEntity =  commentService.reportComment(reportCommentDto);
+    public ResponseEntity<Boolean> reportComment(@RequestHeader("Authorization") String headerValue,@RequestBody ReportCommentDto reportCommentDto){
+        Optional<UserEntity> user = userRepository.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
+        UserEntity reporter = user.get();
+
+        PendingReportEntity pendingReportEntity =  commentService.reportComment(reportCommentDto, reporter);
         commentService.pendingReportReason(pendingReportEntity, reportCommentDto.getReasonOfReportId());
         return ResponseEntity.ok(true);
     }

@@ -17,6 +17,8 @@ public class QuestionAnswerDto {
 
     private int postId;
 
+    private Integer userId;
+
     private String accountName;
 
     private String title;

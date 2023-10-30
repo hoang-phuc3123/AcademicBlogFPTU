@@ -174,7 +174,7 @@ public class AdminServices {
         userDetailsRepository.save(userDetails);
     }
 
-    public List<ReportedCommentDto> viewPendingReport(){
+    public List<ReportedCommentDto> viewPendingReportComment(){
 
         List<PendingReportEntity> reports = pendingReportRepository.findAll();
 
@@ -183,15 +183,15 @@ public class AdminServices {
         for (PendingReportEntity pendingReport: reports) {
             if (pendingReport.getReportType().equalsIgnoreCase("Comment")){
                 UserEntity user = userRepository.findById(pendingReport.getUser().getId())
-                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
-                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
 
                 PendingReportReasonEntity pendingReportReason = pendingReportReasonRepository.findByReportId(pendingReport.getId())
-                        .orElseThrow(() -> new AppException("Unknown report", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(() -> new AppException("Unknown report", HttpStatus.NOT_FOUND));
 
                 ReportReasonEntity reason = reportReasonRepository.findById(pendingReportReason.getReason().getId())
-                        .orElseThrow(() -> new AppException("Unknown reason", HttpStatus.UNAUTHORIZED));
+                        .orElseThrow(() -> new AppException("Unknown reason", HttpStatus.NOT_FOUND));
 
                 ReportedCommentDto reportedCommentDto = new ReportedCommentDto(pendingReport.getId(), pendingReport.getDateOfReport().format(formatter), pendingReport.getReportType(),
                         pendingReport.getContentId(), pendingReport.getContent() , userDetails.getFullName(), reason.getReasonName());
@@ -203,10 +203,10 @@ public class AdminServices {
 
     public void deleteReportComment(int commentId){
         PendingReportEntity pendingReport = pendingReportRepository.findByContentIdAndReportType(commentId,"Comment")
-                .orElseThrow(() -> new AppException("Unknown pending report", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown pending report", HttpStatus.NOT_FOUND));
 
         PendingReportReasonEntity pendingReportReason = pendingReportReasonRepository.findByReportId(pendingReport.getId())
-                .orElseThrow(() -> new AppException("Unknown pending report reason", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown pending report reason", HttpStatus.NOT_FOUND));
 
         if (pendingReportReason != null) {
             pendingReportReasonRepository.delete(pendingReportReason);

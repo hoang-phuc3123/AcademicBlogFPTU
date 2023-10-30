@@ -21,7 +21,7 @@ public class ReportedCommentDto {
 
     private String content;
 
-    private String accountName;
+    private String reporterName;
 
     private String reasonOfReport;
 }

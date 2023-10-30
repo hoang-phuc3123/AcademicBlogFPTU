@@ -20,6 +20,8 @@ import java.util.List;
 public class PostListDto {
     private int postId;
 
+    private Integer userId;
+
     private String accountName;
 
     private String avatarURL;
