@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name="bagde")
+@Table(name="badge")
 @Data
 @NoArgsConstructor
 public class BadgeEntity {
@@ -13,7 +13,7 @@ public class BadgeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "bagde_name")
+    @Column(name = "badge_name")
     private String badgeName;
 
 }

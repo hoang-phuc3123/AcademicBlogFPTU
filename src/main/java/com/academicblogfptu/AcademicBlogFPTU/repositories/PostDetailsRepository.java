@@ -8,5 +8,7 @@ import java.util.Optional;
 public interface PostDetailsRepository extends JpaRepository<PostDetailsEntity, Integer> {
 
     Optional<PostDetailsEntity> findByPostId(int id);
+    Long countByUserIdAndType(int id,String type);
+
 }
 

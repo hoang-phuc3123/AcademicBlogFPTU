@@ -168,10 +168,12 @@ public class CommentService {
         reportComment.setDateOfReport(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
         reportComment.setReportType("Comment");
         reportComment.setContentId(comment.getId());
+
         reportComment.setUser(reporter);
 
         pendingReportRepository.save(reportComment);
         return reportComment;
+
     }
 
     public void pendingReportReason(PendingReportEntity report, int reasonOfReportId) {

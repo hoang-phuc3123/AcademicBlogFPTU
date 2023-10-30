@@ -21,5 +21,4 @@ public class UserBadgeEntity {
     @ManyToOne
     @JoinColumn(name = "badge_id")
     private BadgeEntity badge;
-
 }
