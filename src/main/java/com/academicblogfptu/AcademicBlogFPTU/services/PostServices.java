@@ -86,9 +86,9 @@ public class PostServices {
         return false;
     }
 
-    public PostDto viewPostById(int postId) {
-        PostEntity post = postRepository.findById(postId)
-                .orElseThrow(() -> new AppException("Post with ID " + postId + " not found", HttpStatus.NOT_FOUND));
+    public PostDto viewPostById(String slug) {
+        PostEntity post = postRepository.findBySlug(slug)
+                .orElseThrow(() -> new AppException("Post with slug " + slug + " not found", HttpStatus.NOT_FOUND));
 
         UserEntity user = userRepository.findById(post.getUser().getId())
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
@@ -103,7 +103,7 @@ public class PostServices {
 
         return new PostDto(post.getId(),user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() , post.getTitle(), post.getDescription() , post.getContent(),
                 post.getDateOfPost().format(formatter), numOfUpvote, numOfDownvote, post.isRewarded(), post.isEdited(), post.isAllowComment(),
-                getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(), post.getSlug(), getCommentsForPost(postId));
+                getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(), post.getSlug(), getCommentsForPost(post.getId()));
     }
     public List<CommentDto> getCommentsForPost(int postId) {
         List<CommentDto> comments = new ArrayList<>();
@@ -249,7 +249,7 @@ public class PostServices {
         return new PostDto(newPostEntity.getId(), user.getId() ,userDetails.getFullName() , userDetails.getProfileURL(),newPostEntity.getTitle(), newPostEntity.getDescription(), newPostEntity.getContent(), newPostEntity.getDateOfPost().format(formatter)
         , newPostEntity.getNumOfUpvote(), newPostEntity.getNumOfDownvote(), newPostEntity.isRewarded(), newPostEntity.isEdited()
         , newPostEntity.isAllowComment() ,getRelatedCategories(newPostEntity.getCategory().getId()), newPostEntity.getTag().getTagName(),
-                newPostEntity.getCoverURL(), newPostEntity.getSlug(), null);
+                newPostEntity.getCoverURL(), newPostEntity.getSlug(), getCommentsForPost(newPostEntity.getId()));
     }
 
     public void postDetail(int postId){
@@ -332,7 +332,7 @@ public class PostServices {
 
         return new PostDto(newPost.getId(), user.getId(),userDetails.getFullName() , userDetails.getProfileURL(),newPost.getTitle(), newPost.getDescription(),newPost.getContent(), newPost.getDateOfPost().format(formatter)
                 , newPost.getNumOfUpvote(), newPost.getNumOfDownvote(), newPost.isRewarded(), newPost.isEdited()
-                , newPost.isAllowComment() ,getRelatedCategories(newPost.getCategory().getId()), newPost.getTag().getTagName(), newPost.getCoverURL(), newPost.getSlug(), null);
+                , newPost.isAllowComment() ,getRelatedCategories(newPost.getCategory().getId()), newPost.getTag().getTagName(), newPost.getCoverURL(), newPost.getSlug(), getCommentsForPost(newPost.getId()));
     }
 
     public List<PostListDto> viewRewardedPost() {
