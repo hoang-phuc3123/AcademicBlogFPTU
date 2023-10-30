@@ -39,7 +39,7 @@ public class PostController {
 
     @PostMapping("users/view-post")
     public ResponseEntity<PostDto> viewAPost(@RequestBody PostDto postDto){
-        PostDto post = postServices.viewPostById(postDto.getPostId());
+        PostDto post = postServices.viewPostById(postDto.getSlug());
         return ResponseEntity.ok(post);
     }
 
