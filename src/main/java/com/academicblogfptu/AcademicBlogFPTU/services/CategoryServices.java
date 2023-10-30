@@ -65,9 +65,9 @@ public class CategoryServices {
         }
     }
 
-    public CategoryEntity updateTag(CategoryDto updatedCategory) {
+    public CategoryEntity updateCategory(CategoryDto updatedCategory) {
         CategoryEntity existingCategory = categoryRepository.findById(updatedCategory.getId())
-                .orElseThrow(() -> new AppException("Unknown category", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new AppException("Unknown category", HttpStatus.NOT_FOUND));
         existingCategory.setCategoryName(updatedCategory.getCategoryName());
         return categoryRepository.save(existingCategory);
     }

@@ -166,9 +166,9 @@ public class CommentService {
         reportComment.setReportType("Comment");
         reportComment.setContentId(comment.getId());
         reportComment.setUser(user);
-
         pendingReportRepository.save(reportComment);
         return  reportComment;
+
     }
 
     public void pendingReportReason(PendingReportEntity report, int reasonOfReportId) {
