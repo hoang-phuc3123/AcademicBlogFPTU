@@ -68,7 +68,7 @@ public class PostServices {
                         .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
 
                 if (!tag.getTagName().equalsIgnoreCase("Q&A")){
-                    PostListDto postListDto = new PostListDto(post.getId(),userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getDescription(),
+                    PostListDto postListDto = new PostListDto(post.getId(), user.getId(),userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getDescription(),
                             post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL() ,post.isRewarded(), post.getSlug());
                     postList.add(postListDto);
                 }
@@ -101,7 +101,7 @@ public class PostServices {
         int numOfUpvote = (post.getNumOfUpvote() != null) ? post.getNumOfUpvote() : 0;
         int numOfDownvote = (post.getNumOfDownvote() != null) ? post.getNumOfDownvote() : 0;
 
-        return new PostDto(post.getId(), userDetails.getFullName(), userDetails.getProfileURL() , post.getTitle(), post.getDescription() , post.getContent(),
+        return new PostDto(post.getId(),user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() , post.getTitle(), post.getDescription() , post.getContent(),
                 post.getDateOfPost().format(formatter), numOfUpvote, numOfDownvote, post.isRewarded(), post.isEdited(), post.isAllowComment(),
                 getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(), post.getSlug(), getCommentsForPost(postId));
     }
@@ -246,7 +246,7 @@ public class PostServices {
         postRepository.save(newPostEntity);
 
 
-        return new PostDto(newPostEntity.getId(), userDetails.getFullName() , userDetails.getProfileURL(),newPostEntity.getTitle(), newPostEntity.getDescription(), newPostEntity.getContent(), newPostEntity.getDateOfPost().format(formatter)
+        return new PostDto(newPostEntity.getId(), user.getId() ,userDetails.getFullName() , userDetails.getProfileURL(),newPostEntity.getTitle(), newPostEntity.getDescription(), newPostEntity.getContent(), newPostEntity.getDateOfPost().format(formatter)
         , newPostEntity.getNumOfUpvote(), newPostEntity.getNumOfDownvote(), newPostEntity.isRewarded(), newPostEntity.isEdited()
         , newPostEntity.isAllowComment() ,getRelatedCategories(newPostEntity.getCategory().getId()), newPostEntity.getTag().getTagName(),
                 newPostEntity.getCoverURL(), newPostEntity.getSlug(), null);
@@ -263,6 +263,19 @@ public class PostServices {
 
         postDetailsRepository.save(newPostDetails);
     }
+
+    public void postDetailLecturer(int postId){
+        Optional<PostEntity> post = postRepository.findById(postId);
+        PostEntity postEntity = post.get();
+
+        PostDetailsEntity newPostDetails = new PostDetailsEntity();
+        newPostDetails.setDateOfAction(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
+        newPostDetails.setType("Approve");
+        newPostDetails.setPost(postEntity);
+
+        postDetailsRepository.save(newPostDetails);
+    }
+
     public PostDto editPost(EditPostDto editPostDto){
         PostEntity post = postRepository.findById(editPostDto.getPostId())
                 .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
@@ -317,7 +330,7 @@ public class PostServices {
         postDetails.setDateOfAction(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
         postDetailsRepository.save(postDetails);
 
-        return new PostDto(newPost.getId(), userDetails.getFullName() , userDetails.getProfileURL(),newPost.getTitle(), newPost.getDescription(),newPost.getContent(), newPost.getDateOfPost().format(formatter)
+        return new PostDto(newPost.getId(), user.getId(),userDetails.getFullName() , userDetails.getProfileURL(),newPost.getTitle(), newPost.getDescription(),newPost.getContent(), newPost.getDateOfPost().format(formatter)
                 , newPost.getNumOfUpvote(), newPost.getNumOfDownvote(), newPost.isRewarded(), newPost.isEdited()
                 , newPost.isAllowComment() ,getRelatedCategories(newPost.getCategory().getId()), newPost.getTag().getTagName(), newPost.getCoverURL(), newPost.getSlug(), null);
     }
@@ -335,7 +348,7 @@ public class PostServices {
                 TagEntity tag = tagRepository.findById(post.getTag().getId())
                         .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
                 if (!tag.getTagName().equalsIgnoreCase("Q&A")){
-                    PostListDto postListDto = new PostListDto(post.getId(),userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription() ,
+                    PostListDto postListDto = new PostListDto(post.getId(), user.getId(),userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription() ,
                             post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL() ,post.isRewarded(), post.getSlug());
                     rewardedPostList.add(postListDto);
                 }
@@ -361,7 +374,7 @@ public class PostServices {
                     int numOfUpvote = (post.getNumOfUpvote() != null) ? post.getNumOfUpvote() : 0;
                     int numOfDownvote = (post.getNumOfDownvote() != null) ? post.getNumOfDownvote() : 0;
 
-                    QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), userDetails.getFullName(),post.getTitle(), post.getContent(),
+                    QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), user.getId() , userDetails.getFullName(),post.getTitle(), post.getContent(),
                             post.getDateOfPost().format(formatter),numOfUpvote,numOfDownvote ,getRelatedCategories(post.getCategory().getId()),tag.getTagName(), post.getCoverURL(), post.isRewarded());
                     QAPostList.add(questionAnswerDto);
                 }
@@ -383,7 +396,7 @@ public class PostServices {
                 TagEntity tag = tagRepository.findById(post.getTag().getId())
                         .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
                 if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
-                    PostListDto postListDto = new PostListDto(post.getId(), userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription(),
+                    PostListDto postListDto = new PostListDto(post.getId(), user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription(),
                             post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(),post.isRewarded(), post.getSlug());
                     latestPost.add(postListDto);
                     latestPost.sort(Comparator.comparing(PostListDto::getDateOfPost).reversed());
@@ -409,13 +422,12 @@ public class PostServices {
                     TagEntity tag = tagRepository.findById(post.getTag().getId())
                             .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
                     if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
-                        PostListTrendingDto postListTrendingDto = new PostListTrendingDto(post.getId(), userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription(),
+                        PostListTrendingDto postListTrendingDto = new PostListTrendingDto(post.getId(), user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription(),
                                 post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(),post.isRewarded(), post.getNumOfUpvote(), post.getNumOfDownvote(), post.getSlug());
                         trendingPost.add(postListTrendingDto);
                         Collections.sort(trendingPost, Comparator.comparingInt(
                                 trendingPosts -> trendingPosts.getNumOfUpVote() - trendingPosts.getNumOfDownVote()));
                         Collections.reverse(trendingPost);
-
                     }
                 }
             }
@@ -436,7 +448,7 @@ public class PostServices {
                 TagEntity tag = tagRepository.findById(post.getTag().getId())
                         .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
                 if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
-                    PostListDto postListDto = new PostListDto(post.getId(), userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription(),
+                    PostListDto postListDto = new PostListDto(post.getId(), user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription(),
                             post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(),post.isRewarded(), post.getSlug());
                     shortPost.add(postListDto);
                 }
@@ -480,7 +492,7 @@ public class PostServices {
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
         TagEntity tag = tagRepository.findById(postEntity.getTag().getId())
                 .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
-        postEditHistoryList.add(new PostDto(postEntity.getId(), userDetails.getFullName(), userDetails.getProfileURL(), postEntity.getTitle(), postEntity.getDescription(),
+        postEditHistoryList.add(new PostDto(postEntity.getId(), user.getId(),userDetails.getFullName(), userDetails.getProfileURL(), postEntity.getTitle(), postEntity.getDescription(),
                 postEntity.getContent(), postEntity.getDateOfPost().format(formatter), postEntity.getNumOfUpvote(), postEntity.getNumOfDownvote(),
                 postEntity.isRewarded(), postEntity.isEdited(), postEntity.isAllowComment(), getRelatedCategories(postEntity.getCategory().getId()),
                 tag.getTagName(), postEntity.getCoverURL(), postEntity.getSlug(), null
@@ -527,7 +539,7 @@ public class PostServices {
 
                 if (post.getCategory().getMajor().getId() == userDetailsEntity.getMajor().getId()) {
                     if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
-                        PostListDto postListDto = new PostListDto(post.getId(), userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription(),
+                        PostListDto postListDto = new PostListDto(post.getId(), user.getId(),userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription(),
                                 post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(),post.isRewarded(), post.getSlug());
                         pendingPostList.add(postListDto);
                     }
@@ -555,7 +567,7 @@ public class PostServices {
 
                 if (post.getCategory().getMajor().getId() == userDetailsEntity.getMajor().getId()) {
                     if (!tag.getTagName().equalsIgnoreCase("Q&A")){
-                        PostListDto postListDto = new PostListDto(post.getId(),userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getDescription(),
+                        PostListDto postListDto = new PostListDto(post.getId(),user.getId(),userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getDescription(),
                                 post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL() ,post.isRewarded(), post.getSlug());
                         approvePostList.add(postListDto);
                     }
@@ -627,7 +639,7 @@ public class PostServices {
                         .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
 
                     if (tag.getTagName().equalsIgnoreCase("Q&A")) {
-                        QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), userDetails.getFullName(),post.getTitle(), post.getContent(),
+                        QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), user.getId() ,userDetails.getFullName(),post.getTitle(), post.getContent(),
                                 post.getDateOfPost().format(formatter), post.getNumOfUpvote(), post.getNumOfDownvote() ,getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(), post.isRewarded());
                         QApendingPostList.add(questionAnswerDto);
                     }
