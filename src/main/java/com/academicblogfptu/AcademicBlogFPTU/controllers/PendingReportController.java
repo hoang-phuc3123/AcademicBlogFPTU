@@ -42,7 +42,7 @@ public class PendingReportController {
     @GetMapping("/reported-comment")
     public ResponseEntity<List<ReportedCommentDto>> viewReportedComments(@RequestHeader("Authorization") String headerValue){
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
-            List<ReportedCommentDto> reportCommentList = adminServices.viewPendingReport();
+            List<ReportedCommentDto> reportCommentList = adminServices.viewPendingReportComment();
             return ResponseEntity.ok(reportCommentList);
         }
         else {

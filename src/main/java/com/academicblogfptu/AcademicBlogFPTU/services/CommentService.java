@@ -118,6 +118,11 @@ public class CommentService {
     private void deleteReplyComments(CommentEntity parentComment) {
         List<CommentEntity> replyComments = commentRepository.findByParentComment(parentComment);
         for (CommentEntity reply : replyComments) {
+            Optional<PendingReportEntity> pendingReportEntity = pendingReportRepository.findByContentIdAndReportType(reply.getId(),"Comment");
+
+            if (pendingReportEntity.isPresent()){
+                throw new AppException("Reported reply comment !!!", HttpStatus.NOT_FOUND);
+            }
             deleteReplyComments(reply);
             commentRepository.delete(reply);
         }
@@ -152,23 +157,23 @@ public class CommentService {
         return reportReasonRepository.findAll();
     }
 
-    public PendingReportEntity reportComment(ReportCommentDto reportCommentDto){
+    public PendingReportEntity reportComment(ReportCommentDto reportCommentDto, UserEntity reporter){
         PendingReportEntity reportComment = new PendingReportEntity();
 
         CommentEntity comment = commentRepository.findById(reportCommentDto.getCommentId())
                 .orElseThrow(()-> new AppException("Unknown comment", HttpStatus.NOT_FOUND));
 
-        UserEntity user = userRepository.findById(comment.getUser().getId())
-                .orElseThrow(()-> new AppException("Unknown user", HttpStatus.NOT_FOUND));
 
         reportComment.setContent(comment.getContent());
         reportComment.setDateOfReport(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
         reportComment.setReportType("Comment");
         reportComment.setContentId(comment.getId());
-        reportComment.setUser(user);
+
+        reportComment.setUser(reporter);
 
         pendingReportRepository.save(reportComment);
-        return  reportComment;
+        return reportComment;
+
     }
 
     public void pendingReportReason(PendingReportEntity report, int reasonOfReportId) {

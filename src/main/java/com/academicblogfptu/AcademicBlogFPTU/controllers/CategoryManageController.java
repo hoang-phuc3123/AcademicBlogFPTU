@@ -45,7 +45,7 @@ public class CategoryManageController {
     public ResponseEntity<CategoryEntity> updateTag(@RequestHeader("Authorization") String headerValue, @RequestBody CategoryDto updatedCategory) {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             CategoryEntity _updatedCategory = new CategoryEntity();
-            _updatedCategory = categoryServices.updateTag(updatedCategory);
+            _updatedCategory = categoryServices.updateCategory(updatedCategory);
             return ResponseEntity.ok(_updatedCategory);
         }
         else {
