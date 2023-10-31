@@ -102,6 +102,19 @@ public class MajorController {
         }
     }
 
+    @GetMapping("/users/check-major")
+    public ResponseEntity<String> selectMajor(@RequestHeader("Authorization") String headerValue) {
+        String username = userAuthProvider.getUser(headerValue.replace("Bearer ", ""));
+        Optional<UserEntity> optionalUser = userRepository.findByUsername(username);
+        UserEntity user = optionalUser.get();
+        Optional<UserDetailsEntity> userDetails = userDetailsRepository.findByUserAccount(user);
+        UserDetailsEntity userDetail = userDetails.get();
+        if (userDetail.getMajor() == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("False");
+        }
+        else return ResponseEntity.ok("True");
+    }
+
     @PostMapping("/users/select-major")
     public ResponseEntity<String> selectMajor(@RequestHeader("Authorization") String headerValue, @RequestBody SelectMajorDto majorDto) {
         String username = userAuthProvider.getUser(headerValue.replace("Bearer ", ""));
