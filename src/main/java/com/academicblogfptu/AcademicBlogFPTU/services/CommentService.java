@@ -48,6 +48,9 @@ public class CommentService {
     @Autowired
     private final VoteRepository voteRepository;
 
+    @Autowired
+    private final AdminServices adminServices;
+
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     ZoneId vietnamZone = ZoneId.of("Asia/Ho_Chi_Minh");
@@ -99,11 +102,7 @@ public class CommentService {
         CommentEntity comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new AppException("Unknown comment", HttpStatus.NOT_FOUND));
 
-        Optional<PendingReportEntity> pendingReportEntity = pendingReportRepository.findByContentIdAndReportType(commentId,"Comment");
-
-        if (pendingReportEntity.isPresent()){
-            throw new AppException("Reported comment !!!", HttpStatus.NOT_FOUND);
-        }
+        Optional<List<PendingReportEntity>> pendingReportEntity = pendingReportRepository.findByContentIdAndReportType(comment.getId(),"Comment");
 
         List<VoteEntity> votes = voteRepository.findByCommentId(commentId);
         if (votes != null){
@@ -112,16 +111,19 @@ public class CommentService {
             }
         }
 
+        if (pendingReportEntity.isPresent()){
+            adminServices.deleteReportComment(comment.getId());
+        }
         deleteReplyComments(comment);
         commentRepository.delete(comment);
     }
     private void deleteReplyComments(CommentEntity parentComment) {
         List<CommentEntity> replyComments = commentRepository.findByParentComment(parentComment);
         for (CommentEntity reply : replyComments) {
-            Optional<PendingReportEntity> pendingReportEntity = pendingReportRepository.findByContentIdAndReportType(reply.getId(),"Comment");
+            Optional<List<PendingReportEntity>> pendingReportEntity = pendingReportRepository.findByContentIdAndReportType(reply.getId(),"Comment");
 
             if (pendingReportEntity.isPresent()){
-                throw new AppException("Reported reply comment !!!", HttpStatus.NOT_FOUND);
+                adminServices.deleteReportComment(reply.getId());
             }
             deleteReplyComments(reply);
             commentRepository.delete(reply);

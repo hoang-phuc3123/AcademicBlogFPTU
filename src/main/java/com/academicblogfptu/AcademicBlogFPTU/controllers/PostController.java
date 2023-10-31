@@ -132,4 +132,11 @@ public class PostController {
         postServices.deletePostById(postId.getPostId());
         return ResponseEntity.ok(true);
     }
+
+    @PostMapping("drafts/edit")
+    public ResponseEntity<PostDto> editDraft(@RequestBody EditPostDto editPostDto){
+        PostDto editDraft = postServices.editPost(editPostDto);
+        postServices.postDetail(editDraft.getPostId(), "Draft");
+        return ResponseEntity.ok(editDraft);
+    }
 }
