@@ -1,19 +1,17 @@
 package com.academicblogfptu.AcademicBlogFPTU.dtos;
 
-
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TagDto {
+@Builder
+public class MajorDto {
 
-    private int tagId;
-    private String tagName;
+    private int id;
+    private String majorName;
 
 }
-
