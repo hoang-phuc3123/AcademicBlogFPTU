@@ -2,15 +2,11 @@ package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.RefreshTokenDto;
-import com.academicblogfptu.AcademicBlogFPTU.repositories.TokenRepository;
 import com.academicblogfptu.AcademicBlogFPTU.services.TokenServices;
-import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -54,6 +50,5 @@ public class TokenRefreshController {
         return ResponseEntity.ok(responseMap);
 
     }
-
 
 }
