@@ -60,6 +60,31 @@ public class GoogleLoginController {
                 String email = (String) jsonData.get("email");
                 String name = (String) jsonData.get("given_name");
                 String picture = (String) jsonData.get("picture");
+                if (!picture.isEmpty()) {
+                    URL imageUploadUrl = new URL("https://lvnsoft.store/save-image.php");
+                    HttpURLConnection imageConnection = (HttpURLConnection) imageUploadUrl.openConnection();
+                    imageConnection.setRequestMethod("POST");
+                    String imageData = "imageUrl=" + picture;
+                    imageConnection.setDoOutput(true);
+                    imageConnection.getOutputStream().write(imageData.getBytes("UTF-8"));
+                    int imageResponseCode = imageConnection.getResponseCode();
+                    if (imageResponseCode == HttpURLConnection.HTTP_OK) {
+                        // Xử lý phản hồi thành công
+                        BufferedReader imageReader = new BufferedReader(new InputStreamReader(imageConnection.getInputStream()));
+                        StringBuilder imageResponse = new StringBuilder();
+                        String imageLine;
+                        while ((imageLine = imageReader.readLine()) != null) {
+                            imageResponse.append(imageLine);
+                        }
+                        imageReader.close();
+                        if (imageResponse.toString().contains("Upload")) {
+                            picture = imageResponse.toString();
+                        }
+                    }
+                }
+                else {
+                    picture = null;
+                }
                 UserDetailsDto userDetailsDto = new UserDetailsDto(email, name, picture);
                 LoginRequestDto loginDto = new LoginRequestDto(email, generateRandomPassword(10).toCharArray());
                 UserDto userDto = userService.register(loginDto);

@@ -20,4 +20,5 @@ public interface UserDetailsRepository extends JpaRepository<UserDetailsEntity, 
 
     @Query("SELECT ue.id, ue.username, ue.password, ude.fullName, ude.email, ude.phone, ue.role FROM UserDetailsEntity ude JOIN ude.user ue")
     List<Object[]> getAllUsersInfo();
+
 }
