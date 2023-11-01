@@ -252,25 +252,26 @@ public class PostServices {
                 newPostEntity.getCoverURL(), newPostEntity.getSlug(), getCommentsForPost(newPostEntity.getId()));
     }
 
-    public void postDetail(int postId){
+    public void postDetail(int postId, String type){
         Optional<PostEntity> post = postRepository.findById(postId);
         PostEntity postEntity = post.get();
 
         PostDetailsEntity newPostDetails = new PostDetailsEntity();
         newPostDetails.setDateOfAction(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
-        newPostDetails.setType("Request");
+        newPostDetails.setType(type);
         newPostDetails.setPost(postEntity);
 
         postDetailsRepository.save(newPostDetails);
     }
 
-    public void postDetailLecturer(int postId){
+    public void postDetailLecturer(int postId, UserEntity user){
         Optional<PostEntity> post = postRepository.findById(postId);
         PostEntity postEntity = post.get();
 
         PostDetailsEntity newPostDetails = new PostDetailsEntity();
         newPostDetails.setDateOfAction(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
         newPostDetails.setType("Approve");
+        newPostDetails.setUser(user);
         newPostDetails.setPost(postEntity);
 
         postDetailsRepository.save(newPostDetails);
@@ -374,7 +375,7 @@ public class PostServices {
                     int numOfUpvote = (post.getNumOfUpvote() != null) ? post.getNumOfUpvote() : 0;
                     int numOfDownvote = (post.getNumOfDownvote() != null) ? post.getNumOfDownvote() : 0;
 
-                    QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), user.getId() , userDetails.getFullName(),post.getTitle(), post.getContent(),
+                    QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), user.getId() , userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getContent(),
                             post.getDateOfPost().format(formatter),numOfUpvote,numOfDownvote ,getRelatedCategories(post.getCategory().getId()),tag.getTagName(), post.getCoverURL(), post.isRewarded());
                     QAPostList.add(questionAnswerDto);
                 }
@@ -510,6 +511,39 @@ public class PostServices {
         postRepository.save(post);
     }
 
+    public boolean isDraft(int id) {
+        PostDetailsEntity post = postDetailsRepository.findByPostId(id)
+                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
+        if (post.getType().equalsIgnoreCase("Draft")) {
+            return true;
+        }
+        return false;
+    }
+
+    public List<PostListDto> viewDraft(int userId) {
+        List<PostEntity> list = postRepository.findAll();
+        List<PostListDto> draftList = new ArrayList<>();
+        for (PostEntity post : list) {
+
+            if (isDraft(post.getId()) && post.getUser().getId() == userId) {
+                UserEntity user = userRepository.findById(post.getUser().getId())
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+                UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+                TagEntity tag = tagRepository.findById(post.getTag().getId())
+                        .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
+
+                if (!tag.getTagName().equalsIgnoreCase("Q&A")){
+                    PostListDto postListDto = new PostListDto(post.getId(), user.getId(),userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getDescription(),
+                            post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL() ,post.isRewarded(), post.getSlug());
+                    draftList.add(postListDto);
+                }
+            }
+        }
+        return draftList;
+    }
+
+
     // For lecturer
     // View pending post
     public boolean isPending(int id) {
@@ -639,7 +673,7 @@ public class PostServices {
                         .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
 
                     if (tag.getTagName().equalsIgnoreCase("Q&A")) {
-                        QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), user.getId() ,userDetails.getFullName(),post.getTitle(), post.getContent(),
+                        QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), user.getId() ,userDetails.getFullName(),userDetails.getProfileURL(),post.getTitle(), post.getContent(),
                                 post.getDateOfPost().format(formatter), post.getNumOfUpvote(), post.getNumOfDownvote() ,getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(), post.isRewarded());
                         QApendingPostList.add(questionAnswerDto);
                     }

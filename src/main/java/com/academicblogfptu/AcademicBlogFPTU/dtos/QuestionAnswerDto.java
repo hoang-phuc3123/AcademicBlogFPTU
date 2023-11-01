@@ -21,6 +21,8 @@ public class QuestionAnswerDto {
 
     private String accountName;
 
+    private String avatarURL;
+
     private String title;
 
     private String content;

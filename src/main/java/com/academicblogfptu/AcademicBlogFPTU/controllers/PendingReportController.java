@@ -53,7 +53,6 @@ public class PendingReportController {
     @PostMapping("/delete-reported-comment")
     public ResponseEntity<Boolean> deleteReportedComment(@RequestHeader("Authorization") String headerValue, @RequestBody ReportedCommentDto reportedCommentDto){
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
-            adminServices.deleteReportComment(reportedCommentDto.getReportedCommentId());
             commentService.deleteComment(reportedCommentDto.getReportedCommentId());
             return  ResponseEntity.ok(true);
         }

@@ -191,16 +191,19 @@ public class AdminServices {
     }
 
     public void deleteReportComment(int commentId){
-        PendingReportEntity pendingReport = pendingReportRepository.findByContentIdAndReportType(commentId,"Comment")
+        List<PendingReportEntity> pendingReports = pendingReportRepository.findByContentIdAndReportType(commentId,"Comment")
                 .orElseThrow(() -> new AppException("Unknown pending report", HttpStatus.NOT_FOUND));
 
-        PendingReportReasonEntity pendingReportReason = pendingReportReasonRepository.findByReportId(pendingReport.getId())
-                .orElseThrow(() -> new AppException("Unknown pending report reason", HttpStatus.NOT_FOUND));
+        if (pendingReports != null) {
+            for (PendingReportEntity pendingReport: pendingReports) {
+                PendingReportReasonEntity pendingReportReason = pendingReportReasonRepository.findByReportId(pendingReport.getId())
+                        .orElseThrow(() -> new AppException("Unknown pending report reason", HttpStatus.NOT_FOUND));
+                pendingReportReasonRepository.delete(pendingReportReason);
+            }
 
-        if (pendingReportReason != null) {
-            pendingReportReasonRepository.delete(pendingReportReason);
+            for (PendingReportEntity pendingReport: pendingReports) {
+                pendingReportRepository.delete(pendingReport);
+            }
         }
-
-        pendingReportRepository.delete(pendingReport);
     }
 }
