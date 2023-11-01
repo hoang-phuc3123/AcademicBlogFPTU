@@ -1,12 +1,18 @@
 package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.PostDtos.*;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.*;
+import com.academicblogfptu.AcademicBlogFPTU.entities.PostEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
+import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.UserRepository;
 import com.academicblogfptu.AcademicBlogFPTU.services.PostServices;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.config.RepositoryConfigurationSource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,9 +57,9 @@ public class PostController {
 
         PostDto newPost = postServices.requestPost(requestPostDto, userEntity);
         if (userEntity.getRole().getRoleName().equalsIgnoreCase("lecturer")){
-            postServices.postDetailLecturer(newPost.getPostId(), userEntity);
+            postServices.postDetailLecturer(newPost.getPostId(),userEntity);
         }else  {
-            postServices.postDetail(newPost.getPostId(), "Request");
+            postServices.postDetail(newPost.getPostId(),"Request");
         }
         return ResponseEntity.ok(newPost);
     }
@@ -65,9 +71,9 @@ public class PostController {
 
         PostDto post = postServices.editPost(editPostDto);
         if (userEntity.getRole().getRoleName().equalsIgnoreCase("lecturer")){
-            postServices.postDetailLecturer(post.getPostId(), userEntity);
+            postServices.postDetailLecturer(post.getPostId(),userEntity);
         }else {
-            postServices.postDetail(post.getPostId(), "Request");
+            postServices.postDetail(post.getPostId(),"Request");
         }
         return ResponseEntity.ok(post);
     }
@@ -106,37 +112,5 @@ public class PostController {
     public ResponseEntity<List<PostDto>> viewPostEditHistory(@RequestBody PostDto postId){
         List<PostDto> postEditHistoryList = postServices.viewPostEditHistory(postId.getPostId());
         return ResponseEntity.ok(postEditHistoryList);
-    }
-
-    @PostMapping("drafts/add")
-    public ResponseEntity<PostDto> addDraft(@RequestHeader("Authorization") String headerValue,@RequestBody RequestPostDto requestPostDto){
-        Optional<UserEntity> user = userRepository.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
-        UserEntity userEntity = user.get();
-
-        PostDto newDraft = postServices.requestPost(requestPostDto, userEntity);
-        postServices.postDetail(newDraft.getPostId(), "Draft");
-        return ResponseEntity.ok(newDraft);
-    }
-
-    @GetMapping("drafts/view")
-    public ResponseEntity<List<PostListDto>> viewDraft(@RequestHeader("Authorization") String headerValue){
-        Optional<UserEntity> user = userRepository.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
-        UserEntity userEntity = user.get();
-
-        List<PostListDto> draftList = postServices.viewDraft(userEntity.getId());
-        return ResponseEntity.ok(draftList);
-    }
-
-    @PostMapping("drafts/delete")
-    public ResponseEntity<Boolean> deleteDraftById(@RequestBody PostDto postId){
-        postServices.deletePostById(postId.getPostId());
-        return ResponseEntity.ok(true);
-    }
-
-    @PostMapping("drafts/edit")
-    public ResponseEntity<PostDto> editDraft(@RequestBody EditPostDto editPostDto){
-        PostDto editDraft = postServices.editPost(editPostDto);
-        postServices.postDetail(editDraft.getPostId(), "Draft");
-        return ResponseEntity.ok(editDraft);
     }
 }

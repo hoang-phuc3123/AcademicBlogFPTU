@@ -2,8 +2,8 @@ package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.TagDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.TagDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.TagEntity;
 import com.academicblogfptu.AcademicBlogFPTU.services.TagServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;

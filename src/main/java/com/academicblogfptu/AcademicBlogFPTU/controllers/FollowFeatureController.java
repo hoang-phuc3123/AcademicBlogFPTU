@@ -1,10 +1,9 @@
 package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.FollowDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.FollowerDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDto;
-import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.FollowDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.FollowerDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDto;
 import com.academicblogfptu.AcademicBlogFPTU.services.FollowerServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import lombok.RequiredArgsConstructor;

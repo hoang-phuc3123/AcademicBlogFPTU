@@ -1,12 +1,10 @@
 package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.MajorDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.SelectMajorDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDetailsDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.MajorDtos.MajorDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.MajorDtos.SelectMajorDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.MajorEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.TagEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.UserDetailsEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.MajorRepository;

@@ -1,8 +1,7 @@
 package com.academicblogfptu.AcademicBlogFPTU.services;
 
-import com.academicblogfptu.AcademicBlogFPTU.dtos.TagDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.TagDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.TagEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.TagRepository;
 import lombok.RequiredArgsConstructor;

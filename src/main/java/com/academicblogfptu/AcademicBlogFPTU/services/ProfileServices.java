@@ -1,8 +1,8 @@
 package com.academicblogfptu.AcademicBlogFPTU.services;
 
-import com.academicblogfptu.AcademicBlogFPTU.dtos.PostListDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.ProfileDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.QuestionAnswerDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.PostDtos.PostListDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.ProfileDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.PostDtos.QuestionAnswerDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.*;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.*;
