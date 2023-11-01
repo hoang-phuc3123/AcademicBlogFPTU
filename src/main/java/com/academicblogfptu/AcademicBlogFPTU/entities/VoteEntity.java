@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import jakarta.persistence.*;
 
 import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "vote")
@@ -21,7 +23,7 @@ public class VoteEntity {
 
     private String typeOfVote;
 
-    private Date voteTime;
+    private LocalDateTime voteTime;
 
     @ManyToOne
     @JoinColumn(name = "account_id")

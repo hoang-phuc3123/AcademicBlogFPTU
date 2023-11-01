@@ -1,16 +1,13 @@
 package com.academicblogfptu.AcademicBlogFPTU.services;
 
-import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.TagDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.CategoryDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.CategoryEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.MajorEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.TagEntity;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,7 +1,7 @@
 package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.RefreshTokenDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.RefreshTokenDto;
 import com.academicblogfptu.AcademicBlogFPTU.services.TokenServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,10 +1,9 @@
 package com.academicblogfptu.AcademicBlogFPTU.services;
 
-import com.academicblogfptu.AcademicBlogFPTU.dtos.LoginRequestDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.ResetPasswordDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDetailsDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDto;
-import com.academicblogfptu.AcademicBlogFPTU.entities.MajorEntity;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.LoginRequestDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.ResetPasswordDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDetailsDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.UserDetailsEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.RoleEntity;

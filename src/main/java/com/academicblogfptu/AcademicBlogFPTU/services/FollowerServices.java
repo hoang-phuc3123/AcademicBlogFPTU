@@ -1,12 +1,10 @@
 package com.academicblogfptu.AcademicBlogFPTU.services;
 
-import com.academicblogfptu.AcademicBlogFPTU.dtos.FollowDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.FollowerDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.FollowDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.FollowerDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.FollowerEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.UserDetailsEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
-import com.academicblogfptu.AcademicBlogFPTU.exceptions.UserNotFoundException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.FollowerRepository;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.UserDetailsRepository;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.UserRepository;

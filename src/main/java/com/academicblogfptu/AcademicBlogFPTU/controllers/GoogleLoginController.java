@@ -1,10 +1,10 @@
 package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.GoogleTokenDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.LoginRequestDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDetailsDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.GoogleTokenDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.LoginRequestDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDetailsDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDto;
 import com.academicblogfptu.AcademicBlogFPTU.services.TokenServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import lombok.RequiredArgsConstructor;

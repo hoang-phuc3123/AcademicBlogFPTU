@@ -1,11 +1,14 @@
 package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.*;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.CommentDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.CreateCommentDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.ReplyCommentDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.ReportCommentDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.PostDtos.PostDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.PendingReportEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.ReportReasonEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
-import com.academicblogfptu.AcademicBlogFPTU.repositories.ReportReasonRepository;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.UserRepository;
 import com.academicblogfptu.AcademicBlogFPTU.services.CommentService;
 import com.academicblogfptu.AcademicBlogFPTU.services.PostServices;
