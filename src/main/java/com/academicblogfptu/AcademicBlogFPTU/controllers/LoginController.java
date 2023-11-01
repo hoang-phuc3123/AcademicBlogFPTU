@@ -25,7 +25,7 @@ public class LoginController {
     public ResponseEntity<UserDto> login(@RequestBody LoginRequestDto loginRequestDto) {
         UserDto userDto = userService.login(loginRequestDto);
         String refreshToken = UUID.randomUUID().toString();
-        String token = userAuthProvider.createToken(userDto.getUsername(),900000);
+        String token = userAuthProvider.createToken(userDto.getUsername(),90000000);
         userDto.setToken(token);
         userDto.setRefreshToken(refreshToken);
         tokenService.StoreToken(token, refreshToken);
