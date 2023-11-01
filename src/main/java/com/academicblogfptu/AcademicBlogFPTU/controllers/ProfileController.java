@@ -1,7 +1,7 @@
 package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.ProfileDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.ProfileDto;
 import com.academicblogfptu.AcademicBlogFPTU.services.ProfileServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import lombok.RequiredArgsConstructor;

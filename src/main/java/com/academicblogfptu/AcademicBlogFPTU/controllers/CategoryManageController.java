@@ -2,19 +2,16 @@ package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryRequestDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.TagDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.CategoryDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.CategoryRequestDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.CategoryEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.TagEntity;
 import com.academicblogfptu.AcademicBlogFPTU.services.CategoryServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

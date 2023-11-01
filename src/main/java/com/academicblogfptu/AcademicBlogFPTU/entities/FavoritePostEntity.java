@@ -4,6 +4,7 @@ import lombok.Data;
 
 import jakarta.persistence.*;
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -15,7 +16,7 @@ public class FavoritePostEntity {
     private int id;
 
     @Column(name = "save_at", nullable = false)
-    private Date saveAt;
+    private LocalDateTime saveAt;
 
     @Column(name = "post_id")
     private int postId;

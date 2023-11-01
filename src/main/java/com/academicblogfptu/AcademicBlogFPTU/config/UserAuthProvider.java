@@ -1,7 +1,7 @@
 package com.academicblogfptu.AcademicBlogFPTU.config;
 
-import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDetailsDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDetailsDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDto;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
