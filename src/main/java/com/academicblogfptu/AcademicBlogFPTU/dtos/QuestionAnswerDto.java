@@ -25,6 +25,8 @@ public class QuestionAnswerDto {
 
     private String title;
 
+    private String description;
+
     private String content;
 
     private String dateOfPost;
@@ -41,4 +43,6 @@ public class QuestionAnswerDto {
 
     @JsonProperty("is_rewarded")
     private boolean isRewarded;
+
+    private String slug;
 }
