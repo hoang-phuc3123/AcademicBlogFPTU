@@ -36,7 +36,7 @@ public class CommentController {
     @Autowired
     private final PostServices postServices;
 
-    @PostMapping("/comments/create")
+    @PostMapping("comments/create")
     public ResponseEntity<CommentDto> createComment(@RequestHeader("Authorization") String headerValue, @RequestBody CreateCommentDto createCommentDto){
         Optional<UserEntity> user = userRepository.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
         UserEntity userEntity = user.get();
@@ -46,7 +46,7 @@ public class CommentController {
     }
 
 
-    @PostMapping("/comments/edit")
+    @PostMapping("comments/edit")
     public ResponseEntity<CommentDto> editComment(@RequestHeader("Authorization") String headerValue, @RequestBody CommentDto commentDto){
         Optional<UserEntity> user = userRepository.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
         UserEntity userEntity = user.get();
@@ -55,13 +55,13 @@ public class CommentController {
         return ResponseEntity.ok(editComment);
     }
 
-    @PostMapping("/comments/delete")
+    @PostMapping("comments/delete")
     public ResponseEntity<Boolean> deleteComment(@RequestBody CommentDto commentId){
         commentService.deleteComment(commentId.getCommentId());
         return ResponseEntity.ok(true);
     }
 
-    @PostMapping("/comments/reply")
+    @PostMapping("comments/reply")
     public ResponseEntity<CommentDto> replyComment(@RequestHeader("Authorization") String headerValue, @RequestBody ReplyCommentDto replyCommentDto){
         Optional<UserEntity> user = userRepository.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
         UserEntity userEntity = user.get();
@@ -70,19 +70,19 @@ public class CommentController {
         return ResponseEntity.ok(newComment);
     }
 
-    @PostMapping("/comments/toggle")
+    @PostMapping("comments/toggle")
     public ResponseEntity<Boolean> commentToggle(@RequestBody PostDto postId){
         postServices.commentToggle(postId.getPostId());
         return ResponseEntity.ok(true);
     }
 
-    @GetMapping("/report/report-reason")
+    @GetMapping("report/report-reason")
     public ResponseEntity<List<ReportReasonEntity>> viewReportReason(){
         List<ReportReasonEntity> reportReasons = commentService.viewReportReason();
         return ResponseEntity.ok(reportReasons);
     }
 
-    @PostMapping("/comments/report")
+    @PostMapping("comments/report")
     public ResponseEntity<Boolean> reportComment(@RequestHeader("Authorization") String headerValue,@RequestBody ReportCommentDto reportCommentDto){
         Optional<UserEntity> user = userRepository.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
         UserEntity reporter = user.get();

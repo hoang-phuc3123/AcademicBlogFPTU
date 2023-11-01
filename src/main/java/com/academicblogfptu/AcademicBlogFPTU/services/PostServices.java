@@ -376,8 +376,8 @@ public class PostServices {
                     int numOfUpvote = (post.getNumOfUpvote() != null) ? post.getNumOfUpvote() : 0;
                     int numOfDownvote = (post.getNumOfDownvote() != null) ? post.getNumOfDownvote() : 0;
 
-                    QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), user.getId() , userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getContent(),
-                            post.getDateOfPost().format(formatter),numOfUpvote,numOfDownvote ,getRelatedCategories(post.getCategory().getId()),tag.getTagName(), post.getCoverURL(), post.isRewarded());
+                    QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), user.getId() , userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getDescription(),post.getContent(),
+                            post.getDateOfPost().format(formatter),numOfUpvote,numOfDownvote ,getRelatedCategories(post.getCategory().getId()),tag.getTagName(), post.getCoverURL(), post.isRewarded(), post.getSlug());
                     QAPostList.add(questionAnswerDto);
                 }
             }
@@ -442,7 +442,7 @@ public class PostServices {
         List<PostListDto> shortPost = new ArrayList<>();
 
         for (PostEntity post: postList) {
-            if(isApprove(post.getId()) && post.getLength() <= 500) {
+            if(isApprove(post.getId()) && post.getLength() <= 300) {
                 UserEntity user = userRepository.findById(post.getUser().getId())
                         .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
@@ -620,6 +620,11 @@ public class PostServices {
         postDetails.setDateOfAction(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
         postDetails.setUser(user);
         postDetailsRepository.save(postDetails);
+
+        PostEntity postEntity = postRepository.findById(postId)
+                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
+        postEntity.setDateOfPost(postDetails.getDateOfAction());
+        postRepository.save(postEntity);
     }
 
     public void declinePost(int postId, String reasonOfDecline, UserEntity user){
@@ -674,8 +679,8 @@ public class PostServices {
                         .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
 
                     if (tag.getTagName().equalsIgnoreCase("Q&A")) {
-                        QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), user.getId() ,userDetails.getFullName(),userDetails.getProfileURL(),post.getTitle(), post.getContent(),
-                                post.getDateOfPost().format(formatter), post.getNumOfUpvote(), post.getNumOfDownvote() ,getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(), post.isRewarded());
+                        QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), user.getId() ,userDetails.getFullName(),userDetails.getProfileURL(),post.getTitle(), post.getDescription() ,post.getContent(),
+                                post.getDateOfPost().format(formatter), post.getNumOfUpvote(), post.getNumOfDownvote() ,getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(), post.isRewarded(), post.getSlug());
                         QApendingPostList.add(questionAnswerDto);
                     }
             }
@@ -693,6 +698,10 @@ public class PostServices {
             postDetails.setDateOfAction(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
             postDetails.setUser(user);
             postDetailsRepository.save(postDetails);
+
+            post.setDateOfPost(postDetails.getDateOfAction());
+            postRepository.save(post);
+
         }else  {
             throw new AppException("This postId does not belong to Q&A tag", HttpStatus.NOT_FOUND);
         }
