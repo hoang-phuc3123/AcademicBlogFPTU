@@ -143,6 +143,7 @@ public class FavoriteServices {
 
                     QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), user.getId() , userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getDescription(),post.getContent(),
                             post.getDateOfPost().format(formatter),numOfUpvote,numOfDownvote ,postServices.getRelatedCategories(post.getCategory().getId()),tag.getTagName(), post.getCoverURL(), post.isRewarded(), post.getSlug());
+
                     dto.setQuestionAnswerDto(questionAnswerDto);
                     responseDtos.add(dto);
                 }
