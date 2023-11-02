@@ -60,15 +60,4 @@ public class PendingReportController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
-
-    @GetMapping("/reported-profile")
-    public ResponseEntity<List<ReportedProfileDto>> viewReportedProfile(@RequestHeader("Authorization") String headerValue){
-        if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
-            List<ReportedProfileDto> reportedProfile = adminServices.viewReportedProfile();
-            return ResponseEntity.ok(reportedProfile);
-        }
-        else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-    }
 }
