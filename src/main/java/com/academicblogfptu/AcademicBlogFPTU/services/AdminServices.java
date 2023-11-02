@@ -2,6 +2,8 @@ package com.academicblogfptu.AcademicBlogFPTU.services;
 
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.ReportedCommentDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.RegisterDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.ReportProfileDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.ReportedProfileDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.*;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
@@ -53,6 +55,12 @@ public class AdminServices {
 
     @Autowired
     private final ReportReasonRepository reportReasonRepository;
+
+    @Autowired
+    private final FollowerRepository followerRepository;
+
+    @Autowired
+    private final PostDetailsRepository postDetailsRepository;
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 

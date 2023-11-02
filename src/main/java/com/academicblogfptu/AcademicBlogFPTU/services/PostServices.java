@@ -11,9 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+
 
 
 @RequiredArgsConstructor
@@ -458,6 +460,40 @@ public class PostServices {
         }
         return shortPost;
     }
+
+    public List<PostListDto> filterPosts(int categoryId, int tagId, String title) {
+        List<PostEntity> postList = postRepository.findAll();
+        List<PostListDto> filterPost = new ArrayList<>();
+
+        if (categoryId == 0 && tagId == 0 && title.isEmpty()){
+            return filterPost;
+        }
+
+        for (PostEntity post : postList) {
+            if ((categoryId == 0 || post.getCategory().getId() == categoryId) &&
+                    (tagId == 0 || post.getTag().getId() == tagId) &&
+                    (title.isEmpty() || post.getTitle().contains(title))) {
+                if (isApprove(post.getId())){
+                    UserEntity user = userRepository.findById(post.getUser().getId())
+                            .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+
+                    UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
+                            .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+
+                    TagEntity tag = tagRepository.findById(post.getTag().getId())
+                            .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
+
+                    PostListDto postListDto = new PostListDto(post.getId(),  user.getId(), userDetails.getFullName(), userDetails.getProfileURL(), post.getTitle(), post.getDescription(),
+                            post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(), post.isRewarded(), post.getSlug()
+                    );
+
+                    filterPost.add(postListDto);
+                }
+            }
+        }
+        return filterPost;
+    }
+
 
     // View edit post history
     public List<PostDto> viewPostEditHistory(int postId) {
