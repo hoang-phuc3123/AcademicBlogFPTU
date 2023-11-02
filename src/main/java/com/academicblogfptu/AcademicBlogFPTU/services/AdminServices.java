@@ -214,39 +214,4 @@ public class AdminServices {
             }
         }
     }
-
-    public List<ReportedProfileDto> viewReportedProfile(){
-
-        List<PendingReportEntity> reports = pendingReportRepository.findAll();
-
-        List<ReportedProfileDto> reportedProfiles = new ArrayList<>();
-
-        for (PendingReportEntity pendingReport: reports) {
-            if (pendingReport.getReportType().equalsIgnoreCase("Profile")){
-                UserEntity user = userRepository.findById(pendingReport.getContentId())
-                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
-                UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
-                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
-
-                UserEntity reporter = userRepository.findById(pendingReport.getUser().getId())
-                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
-                UserDetailsEntity reporterDetails = userDetailsRepository.findByUserAccount(reporter)
-                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
-
-                PendingReportReasonEntity pendingReportReason = pendingReportReasonRepository.findByReportId(pendingReport.getId())
-                        .orElseThrow(() -> new AppException("Unknown report", HttpStatus.NOT_FOUND));
-
-                ReportReasonEntity reason = reportReasonRepository.findById(pendingReportReason.getReason().getId())
-                        .orElseThrow(() -> new AppException("Unknown reason", HttpStatus.NOT_FOUND));
-
-                Long numOfFollower = followerRepository.countByUserId(user.getId());
-                Long numOfPost = postDetailsRepository.countByUserIdAndType(user.getId(), "Approve");
-
-                ReportedProfileDto reportedProfileDto = new ReportedProfileDto(user.getId(), userDetails.getFullName(), userDetails.getProfileURL(),
-                        numOfFollower, numOfPost, userDetails.getWeightOfReport(), reporterDetails.getFullName(), reason.getReasonName());
-                reportedProfiles.add(reportedProfileDto);
-            }
-        }
-        return reportedProfiles;
-    }
 }
