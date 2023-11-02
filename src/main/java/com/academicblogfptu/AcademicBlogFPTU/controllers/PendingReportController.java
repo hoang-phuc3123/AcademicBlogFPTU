@@ -2,6 +2,7 @@ package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.ReportedCommentDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.ReportedProfileDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDto;
 import com.academicblogfptu.AcademicBlogFPTU.services.AdminServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.CommentService;
@@ -54,6 +55,17 @@ public class PendingReportController {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             commentService.deleteComment(reportedCommentDto.getReportedCommentId());
             return  ResponseEntity.ok(true);
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+    @GetMapping("/reported-profile")
+    public ResponseEntity<List<ReportedProfileDto>> viewReportedProfile(@RequestHeader("Authorization") String headerValue){
+        if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
+            List<ReportedProfileDto> reportedProfile = adminServices.viewReportedProfile();
+            return ResponseEntity.ok(reportedProfile);
         }
         else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

@@ -2,6 +2,8 @@ package com.academicblogfptu.AcademicBlogFPTU.services;
 
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.ReportedCommentDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.RegisterDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.ReportProfileDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.ReportedProfileDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.*;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
@@ -53,6 +55,12 @@ public class AdminServices {
 
     @Autowired
     private final ReportReasonRepository reportReasonRepository;
+
+    @Autowired
+    private final FollowerRepository followerRepository;
+
+    @Autowired
+    private final PostDetailsRepository postDetailsRepository;
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -205,5 +213,40 @@ public class AdminServices {
                 pendingReportRepository.delete(pendingReport);
             }
         }
+    }
+
+    public List<ReportedProfileDto> viewReportedProfile(){
+
+        List<PendingReportEntity> reports = pendingReportRepository.findAll();
+
+        List<ReportedProfileDto> reportedProfiles = new ArrayList<>();
+
+        for (PendingReportEntity pendingReport: reports) {
+            if (pendingReport.getReportType().equalsIgnoreCase("Profile")){
+                UserEntity user = userRepository.findById(pendingReport.getContentId())
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+                UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+
+                UserEntity reporter = userRepository.findById(pendingReport.getUser().getId())
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+                UserDetailsEntity reporterDetails = userDetailsRepository.findByUserAccount(reporter)
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+
+                PendingReportReasonEntity pendingReportReason = pendingReportReasonRepository.findByReportId(pendingReport.getId())
+                        .orElseThrow(() -> new AppException("Unknown report", HttpStatus.NOT_FOUND));
+
+                ReportReasonEntity reason = reportReasonRepository.findById(pendingReportReason.getReason().getId())
+                        .orElseThrow(() -> new AppException("Unknown reason", HttpStatus.NOT_FOUND));
+
+                Long numOfFollower = followerRepository.countByUserId(user.getId());
+                Long numOfPost = postDetailsRepository.countByUserIdAndType(user.getId(), "Approve");
+
+                ReportedProfileDto reportedProfileDto = new ReportedProfileDto(user.getId(), userDetails.getFullName(), userDetails.getProfileURL(),
+                        numOfFollower, numOfPost, userDetails.getWeightOfReport(), reporterDetails.getFullName(), reason.getReasonName());
+                reportedProfiles.add(reportedProfileDto);
+            }
+        }
+        return reportedProfiles;
     }
 }

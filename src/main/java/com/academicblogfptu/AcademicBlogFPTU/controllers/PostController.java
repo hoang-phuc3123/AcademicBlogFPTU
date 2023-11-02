@@ -114,6 +114,12 @@ public class PostController {
         return ResponseEntity.ok(postEditHistoryList);
     }
 
+    @PostMapping("posts/filter")
+    public ResponseEntity<List<PostListDto>> viewFilteredPost(@RequestBody RequestPostDto filter){
+        List<PostListDto> filterPost = postServices.filterPosts(filter.getCategoryId(), filter.getTagId(), filter.getTitle());
+        return ResponseEntity.ok(filterPost);
+    }
+
     @PostMapping("drafts/add")
     public ResponseEntity<PostDto> addDraft(@RequestHeader("Authorization") String headerValue,@RequestBody RequestPostDto requestPostDto){
         Optional<UserEntity> user = userRepository.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
@@ -145,4 +151,5 @@ public class PostController {
         postServices.postDetail(editDraft.getPostId(), "Draft");
         return ResponseEntity.ok(editDraft);
     }
+
 }

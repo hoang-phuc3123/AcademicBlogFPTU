@@ -12,5 +12,4 @@ public interface PostRepository extends JpaRepository<PostEntity, Integer> {
 
     Optional<PostEntity> findBySlug(String slug);
     Long countByUserId(int id);
-
 }
