@@ -12,4 +12,8 @@ public interface PostRepository extends JpaRepository<PostEntity, Integer> {
 
     Optional<PostEntity> findBySlug(String slug);
     Long countByUserId(int id);
+
+    @Query(value = "SELECT COUNT(*) FROM post p JOIN post_details pd ON p.id = pd.post_id WHERE p.account_id = :userId AND pd.type = :type", nativeQuery = true)
+    long countByUserIdAndType(int userId, String type);
+
 }

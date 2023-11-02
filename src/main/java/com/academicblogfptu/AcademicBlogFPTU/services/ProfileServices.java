@@ -56,7 +56,7 @@ public class ProfileServices {
         List<PostListDto> postList = getAllPost(id);
         List<QuestionAnswerDto> QAList = getAllQuestionAndAnswerPost(id);
         Long numOfFollower = followerRepository.countByUserId(id);
-        Long numOfPost = postDetailsRepository.countByUserIdAndType(id, "Approve");
+        Long numOfPost = postRepository.countByUserIdAndType(id, "Approve");
 
         profile.setUserId(id);
         profile.setFullname(userDetails.getFullName());
