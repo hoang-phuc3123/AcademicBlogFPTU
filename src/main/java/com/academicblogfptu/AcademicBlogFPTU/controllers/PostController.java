@@ -114,6 +114,20 @@ public class PostController {
         return ResponseEntity.ok(postEditHistoryList);
     }
 
+    @PostMapping("posts/filter")
+    public ResponseEntity<List<PostListDto>> viewFilteredPost(@RequestBody FilterPostDto filter){
+        String title = (filter.getTitle() != null) ? filter.getTitle() : "";
+        List<PostListDto> filterPost = postServices.filterPosts(filter.getCategoryId(), filter.getTagId(), title);
+        return ResponseEntity.ok(filterPost);
+    }
+
+    @PostMapping("q-a/filter")
+    public ResponseEntity<List<QuestionAnswerDto>> viewFilteredQA(@RequestBody FilterPostDto filter){
+        String title = (filter.getTitle() != null) ? filter.getTitle() : "";
+        List<QuestionAnswerDto> filterPost = postServices.filterQA(filter.getCategoryId(), filter.getTagId(), title);
+        return ResponseEntity.ok(filterPost);
+    }
+
     @PostMapping("drafts/add")
     public ResponseEntity<PostDto> addDraft(@RequestHeader("Authorization") String headerValue,@RequestBody RequestPostDto requestPostDto){
         Optional<UserEntity> user = userRepository.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
@@ -145,4 +159,5 @@ public class PostController {
         postServices.postDetail(editDraft.getPostId(), "Draft");
         return ResponseEntity.ok(editDraft);
     }
+
 }
