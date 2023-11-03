@@ -461,39 +461,61 @@ public class PostServices {
         return shortPost;
     }
 
-    public List<PostListDto> filterPosts(int categoryId, int tagId, String title) {
-        List<PostEntity> postList = postRepository.findAll();
+    public List<PostListDto> filterPosts(Integer categoryId, Integer tagId, String title) {
+        List<PostEntity> postList = postRepository.findPostsByCategoryIdAndTagIdAndTitle(categoryId, tagId, title);
         List<PostListDto> filterPost = new ArrayList<>();
 
-        if (categoryId == 0 && tagId == 0 && title.isEmpty()){
-            return filterPost;
+        if (categoryId == null && tagId == null && title.isEmpty()){
+            return  filterPost;
         }
 
         for (PostEntity post : postList) {
-            if ((categoryId == 0 || post.getCategory().getId() == categoryId) &&
-                    (tagId == 0 || post.getTag().getId() == tagId) &&
-                    (title.isEmpty() || post.getTitle().contains(title))) {
-                if (isApprove(post.getId())){
-                    UserEntity user = userRepository.findById(post.getUser().getId())
-                            .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+            UserEntity user = userRepository.findById(post.getUser().getId())
+                    .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
 
-                    UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
-                            .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+            UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
+                    .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
 
-                    TagEntity tag = tagRepository.findById(post.getTag().getId())
-                            .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
+            TagEntity tag = tagRepository.findById(post.getTag().getId())
+                    .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
 
-                    PostListDto postListDto = new PostListDto(post.getId(),  user.getId(), userDetails.getFullName(), userDetails.getProfileURL(), post.getTitle(), post.getDescription(),
-                            post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(), post.isRewarded(), post.getSlug()
-                    );
-
-                    filterPost.add(postListDto);
-                }
+            if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
+                PostListDto postListDto = new PostListDto(post.getId(),  user.getId(), userDetails.getFullName(), userDetails.getProfileURL(), post.getTitle(), post.getDescription(),
+                        post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()),
+                        tag.getTagName(), post.getCoverURL(), post.isRewarded(), post.getSlug());
+                        filterPost.add(postListDto);
             }
         }
         return filterPost;
     }
 
+    public List<QuestionAnswerDto> filterQA(Integer categoryId, Integer tagId, String title) {
+        List<PostEntity> postList = postRepository.findPostsByCategoryIdAndTagIdAndTitle(categoryId, tagId, title);
+        List<QuestionAnswerDto> filterQA = new ArrayList<>();
+
+        if (categoryId == null && tagId == null && title.isEmpty()){
+            return  filterQA;
+        }
+
+        for (PostEntity post : postList) {
+            UserEntity user = userRepository.findById(post.getUser().getId())
+                    .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+
+            UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
+                    .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+
+            TagEntity tag = tagRepository.findById(post.getTag().getId())
+                    .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
+
+            if (tag.getTagName().equalsIgnoreCase("Q&A")) {
+                QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(),  user.getId(), userDetails.getFullName(), userDetails.getProfileURL(), post.getTitle(), post.getDescription(),
+                       post.getContent() ,post.getDateOfPost().format(formatter),post.getNumOfUpvote(), post.getNumOfDownvote(),getRelatedCategories(post.getCategory().getId()),
+                        tag.getTagName(), post.getCoverURL(), post.isRewarded(), post.getSlug());
+                filterQA.add(questionAnswerDto);
+            }
+        }
+        return filterQA;
+    }
 
     // View edit post history
     public List<PostDto> viewPostEditHistory(int postId) {

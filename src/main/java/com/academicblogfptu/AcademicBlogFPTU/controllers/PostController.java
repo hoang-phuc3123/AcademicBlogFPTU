@@ -115,8 +115,16 @@ public class PostController {
     }
 
     @PostMapping("posts/filter")
-    public ResponseEntity<List<PostListDto>> viewFilteredPost(@RequestBody RequestPostDto filter){
-        List<PostListDto> filterPost = postServices.filterPosts(filter.getCategoryId(), filter.getTagId(), filter.getTitle());
+    public ResponseEntity<List<PostListDto>> viewFilteredPost(@RequestBody FilterPostDto filter){
+        String title = (filter.getTitle() != null) ? filter.getTitle() : "";
+        List<PostListDto> filterPost = postServices.filterPosts(filter.getCategoryId(), filter.getTagId(), title);
+        return ResponseEntity.ok(filterPost);
+    }
+
+    @PostMapping("q-a/filter")
+    public ResponseEntity<List<QuestionAnswerDto>> viewFilteredQA(@RequestBody FilterPostDto filter){
+        String title = (filter.getTitle() != null) ? filter.getTitle() : "";
+        List<QuestionAnswerDto> filterPost = postServices.filterQA(filter.getCategoryId(), filter.getTagId(), title);
         return ResponseEntity.ok(filterPost);
     }
 
