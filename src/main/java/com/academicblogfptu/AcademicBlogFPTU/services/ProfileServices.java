@@ -159,13 +159,9 @@ public class ProfileServices {
         reportProfile.setDateOfReport(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
         reportProfile.setReportType("Profile");
         reportProfile.setContentId(user.getId());
-
         reportProfile.setUser(reporter);
 
         pendingReportRepository.save(reportProfile);
-
-        userDetails.setWeightOfReport(userDetails.getWeightOfReport() + 1);
-        userDetailsRepository.save(userDetails);
         return reportProfile;
     }
 }
