@@ -38,7 +38,7 @@ public class UserManageController {
     }
 
     @GetMapping("/activity-log")
-    public ResponseEntity<HashMap<String, Integer>> SetRole(@RequestHeader("Authorization") String headerValue) {
+    public ResponseEntity<HashMap<String, Integer>> ViewDashboard(@RequestHeader("Authorization") String headerValue) {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             List<UserDetailsEntity> userInfos = userDetailsRepository.findAll();
             List<PostEntity> totalPost = postRepository.findAll();
