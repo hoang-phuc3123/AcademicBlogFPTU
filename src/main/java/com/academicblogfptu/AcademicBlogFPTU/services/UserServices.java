@@ -128,16 +128,6 @@ public class UserServices {
         }
     }
 
-    public List<ListUserDtoV2> getUserList(){
-        List<UserDetailsEntity> userDetails = userDetailsRepository.findAll();
-        List<ListUserDtoV2> userList = new ArrayList<>();
 
-        for (UserDetailsEntity userDetailsEntity : userDetails) {
-            if (!userDetailsEntity.isBanned()){
-                ListUserDtoV2 user = new ListUserDtoV2(userDetailsEntity.getUser().getId(), userDetailsEntity.getProfileURL(), userDetailsEntity.getFullName());
-                userList.add(user);
-            }
-        }
-        return userList;
-    }
+
 }

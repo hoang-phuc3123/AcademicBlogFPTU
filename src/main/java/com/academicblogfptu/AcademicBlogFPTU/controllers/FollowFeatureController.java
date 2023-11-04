@@ -29,27 +29,17 @@ public class FollowFeatureController {
     @GetMapping("/follower/view")
     public ResponseEntity<List<FollowerDto>> getFollowers(@RequestHeader("Authorization") String headerValue, @RequestBody FollowDto followDto) {
 
-        if(followDto.getUserId() != 0){
             List<FollowerDto> followers = followerServices.getFollower(followDto.getUserId());
             return ResponseEntity.ok(followers);
-        }
 
-        UserDto user = userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
-        List<FollowerDto> followers = followerServices.getFollower(user.getId()) ;
-        return ResponseEntity.ok(followers);
     }
 
     @GetMapping("/following/view")
-    public ResponseEntity<List<FollowerDto>> getFollowing(@RequestHeader("Authorization") String headerValue, @RequestBody FollowDto followDto) {
+    public ResponseEntity<List<FollowerDto>> getFollowing(@RequestBody FollowDto followDto) {
 
-        if(followDto.getUserId() != 0){
             List<FollowerDto> followers = followerServices.getFollowed(followDto.getUserId());
             return ResponseEntity.ok(followers);
-        }
 
-        UserDto user = userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
-        List<FollowerDto> followers = followerServices.getFollowed(user.getId());
-        return ResponseEntity.ok(followers);
     }
 
     @PostMapping("/accounts/unfollow")
