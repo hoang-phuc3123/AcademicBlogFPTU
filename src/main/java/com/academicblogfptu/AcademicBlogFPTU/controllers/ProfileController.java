@@ -38,11 +38,10 @@ public class ProfileController {
     @Autowired
     private final CommentService commentService;
 
-    @GetMapping("/view")
+    @PostMapping("/view")
     public ResponseEntity<ProfileDto> viewProfile(@RequestBody ProfileDto profileDto){
         try{
             ProfileDto profile = profileServices.viewProfile(profileDto.getUserId());
-
             return ResponseEntity.ok(profile);
         }catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
