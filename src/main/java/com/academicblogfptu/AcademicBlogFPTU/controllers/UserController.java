@@ -1,13 +1,10 @@
 package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.ListUserDtoV2;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.RegisterDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDto;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,4 +20,6 @@ public class UserController {
         List<ListUserDtoV2> userList = userServices.getUserList();
         return ResponseEntity.ok(userList);
     }
+
+
 }
