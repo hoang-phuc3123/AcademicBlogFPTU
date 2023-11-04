@@ -5,6 +5,7 @@ import com.academicblogfptu.AcademicBlogFPTU.dtos.PostDtos.PostListDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.ProfileDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.PostDtos.QuestionAnswerDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.ReportProfileDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.SearchUserDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.*;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.*;
@@ -76,12 +77,6 @@ public class ProfileServices {
 
         UserDetailsEntity userDetails = userDetailsRepository.findByUserId(profileDto.getUserId());
 
-        if(profileDto.getProfileUrl()!=null){
-            userDetails.setProfileURL(profileDto.getProfileUrl());
-        }
-        if(profileDto.getCoverUrl()!=null){
-            userDetails.setCoverURL(profileDto.getCoverUrl());
-        }
         if(profileDto.getFullname()!=null){
             userDetails.setFullName(profileDto.getFullname());
         }
@@ -89,6 +84,26 @@ public class ProfileServices {
             userDetails.setUserStory(profileDto.getUserStory());
         }
         userDetailsRepository.save(userDetails);
+    }
+
+    public List<SearchUserDto> getAllUser(Integer id){
+        List<SearchUserDto> listUser = new ArrayList<>();
+        List<UserDetailsEntity> userDetailsEntities = userDetailsRepository.findAll();
+        for (UserDetailsEntity user : userDetailsEntities) {
+            if( !(user.getUser().getRole().getRoleName().equals("admin"))){
+                if(!user.isBanned()){
+                    Long numOfFollower = followerRepository.countByUserId(user.getUser().getId());
+                    if(followerRepository.findByUserIdAndFollowedBy(user.getUser().getId(), id).isPresent()){
+                        SearchUserDto dto = new SearchUserDto(user.getUser().getId(),user.getFullName(),user.getProfileURL(),numOfFollower,true);
+                        listUser.add(dto);
+                    }else{
+                        SearchUserDto dto = new SearchUserDto(user.getUser().getId(),user.getFullName(),user.getProfileURL(),numOfFollower,false);
+                        listUser.add(dto);
+                    }
+                }
+            }
+        }
+        return listUser;
     }
 
 
