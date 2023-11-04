@@ -414,13 +414,11 @@ public class PostServices {
 
     //View trending post
     public List<PostListTrendingDto> viewTrending(){
-        List<PostEntity> postList = postRepository.findAll();
+        List<PostEntity> postList = postRepository.findPostForLast7Days();
         List<PostListTrendingDto> trendingPost = new ArrayList<>();
-        LocalDateTime now = LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now());
-        LocalDateTime sevenDaysAgo = LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()).minusDays(7);
+
         for (PostEntity post: postList) {
             if(isApprove(post.getId())) {
-                if (post.getDateOfPost().format(formatter).compareTo(sevenDaysAgo.format(formatter)) > 0 && post.getDateOfPost().format(formatter).compareTo(now.format(formatter)) < 0) {
                     UserEntity user = userRepository.findById(post.getUser().getId())
                             .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                     UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
@@ -435,7 +433,6 @@ public class PostServices {
                                 trendingPosts -> trendingPosts.getNumOfUpVote() - trendingPosts.getNumOfDownVote()));
                         Collections.reverse(trendingPost);
                     }
-                }
             }
         }
         return trendingPost;

@@ -8,5 +8,6 @@ import java.util.Optional;
 
 public interface PendingReportRepository extends JpaRepository<PendingReportEntity, Integer> {
 
-    Optional<List<PendingReportEntity>> findByContentIdAndReportType(Integer contentId, String reportType);
+    List<PendingReportEntity> findByContentIdAndReportType(Integer contentId, String reportType);
+
 }

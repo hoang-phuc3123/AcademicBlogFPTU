@@ -100,7 +100,7 @@ public class CommentService {
         CommentEntity comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new AppException("Unknown comment", HttpStatus.NOT_FOUND));
 
-        Optional<List<PendingReportEntity>> pendingReportEntity = pendingReportRepository.findByContentIdAndReportType(comment.getId(),"Comment");
+        List<PendingReportEntity> pendingReportEntity = pendingReportRepository.findByContentIdAndReportType(comment.getId(),"Comment");
 
         List<VoteEntity> votes = voteRepository.findByCommentId(commentId);
         if (votes != null){
@@ -109,7 +109,7 @@ public class CommentService {
             }
         }
 
-        if (pendingReportEntity.isPresent()){
+        if (!pendingReportEntity.isEmpty()){
             adminServices.deleteReportComment(comment.getId());
         }
         deleteReplyComments(comment);
@@ -118,9 +118,9 @@ public class CommentService {
     private void deleteReplyComments(CommentEntity parentComment) {
         List<CommentEntity> replyComments = commentRepository.findByParentComment(parentComment);
         for (CommentEntity reply : replyComments) {
-            Optional<List<PendingReportEntity>> pendingReportEntity = pendingReportRepository.findByContentIdAndReportType(reply.getId(),"Comment");
+            List<PendingReportEntity> pendingReportEntity = pendingReportRepository.findByContentIdAndReportType(reply.getId(),"Comment");
 
-            if (pendingReportEntity.isPresent()){
+            if (!pendingReportEntity.isEmpty()){
                 adminServices.deleteReportComment(reply.getId());
             }
             deleteReplyComments(reply);
@@ -135,7 +135,7 @@ public class CommentService {
                 .orElseThrow(()-> new AppException("Unknown post", HttpStatus.NOT_FOUND));
 
         CommentEntity parentComment = commentRepository.findById(replyCommentDto.getParentCommentId())
-                .orElseThrow(()-> new AppException("Unknown post", HttpStatus.NOT_FOUND));
+                .orElseThrow(()-> new AppException("Unknown parent comment", HttpStatus.NOT_FOUND));
 
         UserDetailsEntity userDetails = userDetailsRepository.findByUserId(user.getId());
 

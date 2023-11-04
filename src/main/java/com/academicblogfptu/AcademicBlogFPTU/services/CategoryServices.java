@@ -1,10 +1,12 @@
 package com.academicblogfptu.AcademicBlogFPTU.services;
 
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.CategoryDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.TrendingCategoryDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.CategoryEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.MajorEntity;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.CategoryRepository;
+import com.academicblogfptu.AcademicBlogFPTU.repositories.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -112,7 +114,14 @@ public class CategoryServices {
         }
     }
 
+    public List<TrendingCategoryDto> trendingCategories(){
+        List<CategoryEntity> getTrendingCategories = categoryRepository.findTrendingCategoryForLast7Days();
+        List<TrendingCategoryDto> trendingCategories = new ArrayList<>();
 
-
-
+        for (CategoryEntity category : getTrendingCategories) {
+            TrendingCategoryDto trendingCategoryDto = new TrendingCategoryDto(category.getId(), category.getCategoryName(), category.getCategoryType());
+            trendingCategories.add(trendingCategoryDto);
+        }
+        return trendingCategories;
+    }
 }
