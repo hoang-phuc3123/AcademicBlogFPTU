@@ -37,7 +37,7 @@ public class UserManageController {
         return userDto.getRoleName().equals("admin");
     }
 
-    @GetMapping("/activity-log")
+    @GetMapping("/dashboard")
     public ResponseEntity<HashMap<String, Integer>> ViewDashboard(@RequestHeader("Authorization") String headerValue) {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             List<UserDetailsEntity> userInfos = userDetailsRepository.findAll();
