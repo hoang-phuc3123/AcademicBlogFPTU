@@ -15,12 +15,9 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class ReportedProfileDto {
-    private int userId;
+    private int reportedUserId;
     private String fullName;
     private String profileUrl;
-    private Long numOfFollower;
-    private Long numOfPost;
-    private int numOfReport;
-    private String reporter;
-    private String reasonOfReport;
+    private List<String> reasonOfReport;
+
 }
