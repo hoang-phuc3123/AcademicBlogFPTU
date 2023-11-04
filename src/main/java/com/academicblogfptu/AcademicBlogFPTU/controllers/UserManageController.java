@@ -2,13 +2,18 @@ package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.*;
+import com.academicblogfptu.AcademicBlogFPTU.entities.PostEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.RoleEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.UserDetailsEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
+import com.academicblogfptu.AcademicBlogFPTU.repositories.PostRepository;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.UserDetailsRepository;
 import com.academicblogfptu.AcademicBlogFPTU.services.AdminServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
@@ -26,10 +31,25 @@ public class UserManageController {
     private final AdminServices adminService;
     private final UserAuthProvider userAuthProvider;
     private final UserDetailsRepository userDetailsRepository;
-
+    private final PostRepository postRepository;
 
     public boolean isAdmin(UserDto userDto) {
         return userDto.getRoleName().equals("admin");
+    }
+
+    @GetMapping("/activity-log")
+    public ResponseEntity<HashMap<String, Integer>> SetRole(@RequestHeader("Authorization") String headerValue) {
+        if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
+            List<UserDetailsEntity> userInfos = userDetailsRepository.findAll();
+            List<PostEntity> totalPost = postRepository.findAll();
+            HashMap < String, Integer > responseMap = new HashMap<>();
+            responseMap.put("total_user", userInfos.size());
+            responseMap.put("total_post", totalPost.size());
+            return ResponseEntity.ok(responseMap);
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     @GetMapping("/users")
@@ -37,7 +57,6 @@ public class UserManageController {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             List<Object[]> userInfos = userDetailsRepository.getAllUsersInfo();
             List<ListUserDto> users = new ArrayList<>();
-
             for (Object[] userInfo : userInfos) {
                 ListUserDto userDetailsInfo = new ListUserDto();
                 userDetailsInfo.setId((Integer) userInfo[0]);
@@ -66,7 +85,6 @@ public class UserManageController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
-
     @PostMapping("/set-role")
     public ResponseEntity<HashMap<String, String>> SetRole(@RequestHeader("Authorization") String headerValue, @RequestBody SetRoleDto setRoleDto){
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
@@ -82,6 +100,7 @@ public class UserManageController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
+
     @PostMapping("/ban-user")
     public ResponseEntity<HashMap<String, String>> BanUser(@RequestHeader("Authorization") String headerValue, @RequestBody IdentificationDto identificationDto){
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
