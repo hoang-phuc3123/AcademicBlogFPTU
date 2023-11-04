@@ -6,6 +6,7 @@ import com.academicblogfptu.AcademicBlogFPTU.entities.*;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.*;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -57,8 +58,9 @@ public class PostServices {
     LocalDateTime localDateTime = LocalDateTime.now(vietnamZone);
 
 
-    public List<PostListDto> viewAllPost() {
-        List<PostEntity> list = postRepository.findAll();
+    public List<PostListDto> viewAllPost(int page, int postOfPage) {
+        int offSet = (page - 1)*postOfPage;
+        List<PostEntity> list = postRepository.findPostsPaged(offSet, postOfPage);
         List<PostListDto> postList = new ArrayList<>();
         for (PostEntity post : list) {
 

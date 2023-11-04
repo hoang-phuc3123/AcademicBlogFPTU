@@ -33,8 +33,8 @@ public class PostController {
     private final UserAuthProvider userAuthProvider;
 
     @GetMapping("users/post-list")
-    public ResponseEntity<List<PostListDto>> getPostList(){
-        List<PostListDto> list = postServices.viewAllPost();
+    public ResponseEntity<List<PostListDto>> getPostList(@RequestBody OffSetFetchDto offSetFetchDto){
+        List<PostListDto> list = postServices.viewAllPost(offSetFetchDto.getPage(), offSetFetchDto.getPostOfPage());
         return ResponseEntity.ok(list);
     }
 
