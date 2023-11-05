@@ -103,7 +103,7 @@ public class FavoriteServices {
 
                 if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
                     PostListDto postListDto = new PostListDto(post.getId(), user.getId() ,userDetails.getFullName(), userDetails.getProfileURL(), post.getTitle(), post.getDescription(),
-                            post.getDateOfPost().format(formatter), postServices.getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(), post.isRewarded(), post.getSlug());
+                            post.getDateOfPost().format(formatter), postServices.getRelatedCategoriesName(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(), post.isRewarded(), post.getSlug());
 
                     dto.setPostListDto(postListDto);
                     responseDtos.add(dto);

@@ -1,12 +1,12 @@
 package com.academicblogfptu.AcademicBlogFPTU.services;
 
+import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.CategoryListDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.CommentDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.PostDtos.*;
 import com.academicblogfptu.AcademicBlogFPTU.entities.*;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.*;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -74,7 +74,7 @@ public class PostServices {
 
                 if (!tag.getTagName().equalsIgnoreCase("Q&A")){
                     PostListDto postListDto = new PostListDto(post.getId(), user.getId(),userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getDescription(),
-                            post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL() ,post.isRewarded(), post.getSlug());
+                            post.getDateOfPost().format(formatter), getRelatedCategoriesName(post.getCategory().getId()), tag.getTagName(), post.getCoverURL() ,post.isRewarded(), post.getSlug());
                     postList.add(postListDto);
                 }
             }
@@ -93,7 +93,7 @@ public class PostServices {
         return false;
     }
 
-    public PostDto viewPostById(String slug) {
+    public PostDto viewPostBySlug(String slug) {
         PostEntity post = postRepository.findBySlug(slug)
                 .orElseThrow(() -> new AppException("Post with slug " + slug + " not found", HttpStatus.NOT_FOUND));
 
@@ -110,7 +110,7 @@ public class PostServices {
 
         return new PostDto(post.getId(),user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() , post.getTitle(), post.getDescription() , post.getContent(),
                 post.getDateOfPost().format(formatter), numOfUpvote, numOfDownvote, post.isRewarded(), post.isEdited(), post.isAllowComment(),
-                getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(), post.getSlug(), getCommentsForPost(post.getId()));
+                getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), tag, post.getCoverURL(), post.getSlug(), getCommentsForPost(post.getId()));
     }
     public List<CommentDto> getCommentsForPost(int postId) {
         List<CommentDto> comments = new ArrayList<>();
@@ -118,7 +118,7 @@ public class PostServices {
         List<CommentEntity> rootComments = commentRepository.findByPostIdAndParentCommentIsNull(postId);
 
         for (CommentEntity rootComment : rootComments) {
-            Integer parentCommentId = (rootComment.getParentComment() !=  null) ? rootComment.getParentComment().getId() : 0;
+            Integer parentCommentId = (rootComment.getParentComment() !=  null) ? rootComment.getParentComment().getId() : null;
             UserDetailsEntity userDetails = userDetailsRepository.findByUserId(rootComment.getUser().getId());
             CommentDto commentDto = new CommentDto(rootComment.getId(), userDetails.getFullName(), userDetails.getProfileURL(), rootComment.getContent(),
                     rootComment.isEdited(), rootComment.getNumOfUpvote(), rootComment.getNumOfDownvote(),
@@ -152,9 +152,71 @@ public class PostServices {
         }
     }
 
+    public List<CategoryListDto> getCategoriesOfPost(List<CategoryEntity> getRelatedCategories){
+        List<CategoryListDto> getCategories = new ArrayList<>();
+        for (CategoryEntity category: getRelatedCategories) {
+            CategoryListDto categoryListDto = new CategoryListDto(category.getId(), category.getCategoryName(), category.getCategoryType());
+            getCategories.add(categoryListDto);
+        }
+        getCategories.sort(Comparator.comparing(CategoryListDto::getCategoryId));
+        return getCategories;
+    }
+
+
+    public List<CategoryEntity> getRelatedCategories(Integer categoryId) {
+        List<CategoryEntity> relatedCategories = new ArrayList<>();
+
+        if (categoryId == null) {
+            // Handle the case where categoryId is null (or perform appropriate error handling)
+            return relatedCategories;
+        }
+
+        // Find the initial category by its id
+        CategoryEntity initialCategory = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new EntityNotFoundException("Category with name " + categoryId + " not found"));
+
+        // Add the initial category to the list
+        relatedCategories.add(initialCategory);
+        if (initialCategory.getParentID() != null) {
+            findParentCategory(initialCategory, relatedCategories);
+            if (!initialCategory.getCategoryType().equals("Semester") ){
+                findChildCategories(initialCategory, relatedCategories);
+            }
+        }
+
+        //relatedCategories.sort(Comparator.comparing(String::length).reversed());
+        return relatedCategories;
+    }
+
+    private void findParentCategory(CategoryEntity category, List<CategoryEntity> relatedCategories) {
+        // Find and add the parent category (if it exists)
+        Integer parentID = category.getParentID();
+        if (parentID != null) {
+            CategoryEntity parentCategory = categoryRepository.findById(parentID).orElse(null);
+            if (parentCategory != null && !relatedCategories.contains(parentCategory.getCategoryName())) {
+                relatedCategories.add(parentCategory);
+                // Stop when the parent is the root category (has no parent)
+                if (parentCategory.getParentID() != null) {
+                    findParentCategory(parentCategory, relatedCategories);
+                }
+            }
+        }
+    }
+
+    private void findChildCategories(CategoryEntity category, List<CategoryEntity> relatedCategories) {
+        // Find and add child categories
+        List<CategoryEntity> childCategories = categoryRepository.findByParentID(category.getId());
+        for (CategoryEntity child : childCategories) {
+            if (child != null && !relatedCategories.contains(child.getCategoryName())) {
+                relatedCategories.add(child);
+                findChildCategories(child, relatedCategories);
+            }
+        }
+    }
+
 
     @SuppressWarnings("unchecked")
-    public List<CategoryEntity> getRelatedCategories(Integer categoryId) {
+    public List<CategoryEntity> getRelatedCategoriesName(Integer categoryId) {
         List relatedCategories = new ArrayList<>();
 
         if (categoryId == null) {
@@ -169,9 +231,9 @@ public class PostServices {
         // Add the initial category to the list
         relatedCategories.add(initialCategory.getCategoryName());
         if (initialCategory.getParentID() != null) {
-            findParentCategory(initialCategory, relatedCategories);
+            findParentCategoryName(initialCategory, relatedCategories);
             if (!initialCategory.getCategoryType().equals("Semester") ){
-                findChildCategories(initialCategory, relatedCategories);
+                findChildCategoriesName(initialCategory, relatedCategories);
             }
         }
 
@@ -179,7 +241,7 @@ public class PostServices {
         return relatedCategories;
     }
 
-    private void findParentCategory(CategoryEntity category, List<String> relatedCategories) {
+    private void findParentCategoryName(CategoryEntity category, List<String> relatedCategories) {
         // Find and add the parent category (if it exists)
         Integer parentID = category.getParentID();
         if (parentID != null) {
@@ -188,19 +250,19 @@ public class PostServices {
                 relatedCategories.add(parentCategory.getCategoryName());
                 // Stop when the parent is the root category (has no parent)
                 if (parentCategory.getParentID() != null) {
-                    findParentCategory(parentCategory, relatedCategories);
+                    findParentCategoryName(parentCategory, relatedCategories);
                 }
             }
         }
     }
 
-    private void findChildCategories(CategoryEntity category, List<String> relatedCategories) {
+    private void findChildCategoriesName(CategoryEntity category, List<String> relatedCategories) {
         // Find and add child categories
         List<CategoryEntity> childCategories = categoryRepository.findByParentID(category.getId());
         for (CategoryEntity child : childCategories) {
             if (child != null && !relatedCategories.contains(child.getCategoryName())) {
                 relatedCategories.add(child.getCategoryName());
-                findChildCategories(child, relatedCategories);
+                findChildCategoriesName(child, relatedCategories);
             }
         }
     }
@@ -255,7 +317,7 @@ public class PostServices {
 
         return new PostDto(newPostEntity.getId(), user.getId() ,userDetails.getFullName() , userDetails.getProfileURL(),newPostEntity.getTitle(), newPostEntity.getDescription(), newPostEntity.getContent(), newPostEntity.getDateOfPost().format(formatter)
         , newPostEntity.getNumOfUpvote(), newPostEntity.getNumOfDownvote(), newPostEntity.isRewarded(), newPostEntity.isEdited()
-        , newPostEntity.isAllowComment() ,getRelatedCategories(newPostEntity.getCategory().getId()), newPostEntity.getTag().getTagName(),
+        , newPostEntity.isAllowComment() ,getCategoriesOfPost(getRelatedCategories(newPostEntity.getCategory().getId())), newPostEntity.getTag(),
                 newPostEntity.getCoverURL(), newPostEntity.getSlug(), getCommentsForPost(newPostEntity.getId()));
     }
 
@@ -340,7 +402,7 @@ public class PostServices {
 
         return new PostDto(newPost.getId(), user.getId(),userDetails.getFullName() , userDetails.getProfileURL(),newPost.getTitle(), newPost.getDescription(),newPost.getContent(), newPost.getDateOfPost().format(formatter)
                 , newPost.getNumOfUpvote(), newPost.getNumOfDownvote(), newPost.isRewarded(), newPost.isEdited()
-                , newPost.isAllowComment() ,getRelatedCategories(newPost.getCategory().getId()), newPost.getTag().getTagName(), newPost.getCoverURL(), newPost.getSlug(), getCommentsForPost(newPost.getId()));
+                , newPost.isAllowComment() ,getCategoriesOfPost(getRelatedCategories(newPost.getCategory().getId())), newPost.getTag(), newPost.getCoverURL(), newPost.getSlug(), getCommentsForPost(newPost.getId()));
     }
 
     public List<PostListDto> viewRewardedPost() {
@@ -357,7 +419,7 @@ public class PostServices {
                         .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
                 if (!tag.getTagName().equalsIgnoreCase("Q&A")){
                     PostListDto postListDto = new PostListDto(post.getId(), user.getId(),userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription() ,
-                            post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL() ,post.isRewarded(), post.getSlug());
+                            post.getDateOfPost().format(formatter), getRelatedCategoriesName(post.getCategory().getId()), tag.getTagName(), post.getCoverURL() ,post.isRewarded(), post.getSlug());
                     rewardedPostList.add(postListDto);
                 }
             }
@@ -383,7 +445,7 @@ public class PostServices {
                     int numOfDownvote = (post.getNumOfDownvote() != null) ? post.getNumOfDownvote() : 0;
 
                     QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), user.getId() , userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getDescription(),post.getContent(),
-                            post.getDateOfPost().format(formatter),numOfUpvote,numOfDownvote ,getRelatedCategories(post.getCategory().getId()),tag.getTagName(), post.getCoverURL(), post.isRewarded(), post.getSlug());
+                            post.getDateOfPost().format(formatter),numOfUpvote,numOfDownvote ,getRelatedCategoriesName(post.getCategory().getId()),tag.getTagName(), post.getCoverURL(), post.isRewarded(), post.getSlug());
                     QAPostList.add(questionAnswerDto);
                 }
             }
@@ -405,7 +467,7 @@ public class PostServices {
                         .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
                 if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
                     PostListDto postListDto = new PostListDto(post.getId(), user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription(),
-                            post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(),post.isRewarded(), post.getSlug());
+                            post.getDateOfPost().format(formatter), getRelatedCategoriesName(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(),post.isRewarded(), post.getSlug());
                     latestPost.add(postListDto);
                     latestPost.sort(Comparator.comparing(PostListDto::getDateOfPost).reversed());
                 }
@@ -418,23 +480,22 @@ public class PostServices {
     public List<PostListTrendingDto> viewTrending(){
         List<PostEntity> postList = postRepository.findPostForLast7Days();
         List<PostListTrendingDto> trendingPost = new ArrayList<>();
-
         for (PostEntity post: postList) {
             if(isApprove(post.getId())) {
-                    UserEntity user = userRepository.findById(post.getUser().getId())
-                            .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
-                    UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
-                            .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
-                    TagEntity tag = tagRepository.findById(post.getTag().getId())
-                            .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
-                    if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
-                        PostListTrendingDto postListTrendingDto = new PostListTrendingDto(post.getId(), user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription(),
-                                post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(),post.isRewarded(), post.getNumOfUpvote(), post.getNumOfDownvote(), post.getSlug());
-                        trendingPost.add(postListTrendingDto);
-                        Collections.sort(trendingPost, Comparator.comparingInt(
-                                trendingPosts -> trendingPosts.getNumOfUpVote() - trendingPosts.getNumOfDownVote()));
-                        Collections.reverse(trendingPost);
-                    }
+                UserEntity user = userRepository.findById(post.getUser().getId())
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+                UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+                TagEntity tag = tagRepository.findById(post.getTag().getId())
+                        .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
+                if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
+                    PostListTrendingDto postListTrendingDto = new PostListTrendingDto(post.getId(), user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription(),
+                            post.getDateOfPost().format(formatter), getRelatedCategoriesName(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(),post.isRewarded(), post.getNumOfUpvote(), post.getNumOfDownvote(), post.getSlug());
+                    trendingPost.add(postListTrendingDto);
+                    trendingPost.sort(Comparator.comparingInt(
+                            trendingPosts -> trendingPosts.getNumOfUpVote() - trendingPosts.getNumOfDownVote()));
+                    Collections.reverse(trendingPost);
+                }
             }
         }
         return trendingPost;
@@ -454,7 +515,7 @@ public class PostServices {
                         .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
                 if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
                     PostListDto postListDto = new PostListDto(post.getId(), user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription(),
-                            post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(),post.isRewarded(), post.getSlug());
+                            post.getDateOfPost().format(formatter), getRelatedCategoriesName(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(),post.isRewarded(), post.getSlug());
                     shortPost.add(postListDto);
                 }
             }
@@ -482,7 +543,7 @@ public class PostServices {
 
             if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
                 PostListDto postListDto = new PostListDto(post.getId(),  user.getId(), userDetails.getFullName(), userDetails.getProfileURL(), post.getTitle(), post.getDescription(),
-                        post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()),
+                        post.getDateOfPost().format(formatter), getRelatedCategoriesName(post.getCategory().getId()),
                         tag.getTagName(), post.getCoverURL(), post.isRewarded(), post.getSlug());
                         filterPost.add(postListDto);
             }
@@ -510,7 +571,7 @@ public class PostServices {
 
             if (tag.getTagName().equalsIgnoreCase("Q&A")) {
                 QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(),  user.getId(), userDetails.getFullName(), userDetails.getProfileURL(), post.getTitle(), post.getDescription(),
-                       post.getContent() ,post.getDateOfPost().format(formatter),post.getNumOfUpvote(), post.getNumOfDownvote(),getRelatedCategories(post.getCategory().getId()),
+                       post.getContent() ,post.getDateOfPost().format(formatter),post.getNumOfUpvote(), post.getNumOfDownvote(),getRelatedCategoriesName(post.getCategory().getId()),
                         tag.getTagName(), post.getCoverURL(), post.isRewarded(), post.getSlug());
                 filterQA.add(questionAnswerDto);
             }
@@ -555,8 +616,8 @@ public class PostServices {
                 .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
         postEditHistoryList.add(new PostDto(postEntity.getId(), user.getId(),userDetails.getFullName(), userDetails.getProfileURL(), postEntity.getTitle(), postEntity.getDescription(),
                 postEntity.getContent(), postEntity.getDateOfPost().format(formatter), postEntity.getNumOfUpvote(), postEntity.getNumOfDownvote(),
-                postEntity.isRewarded(), postEntity.isEdited(), postEntity.isAllowComment(), getRelatedCategories(postEntity.getCategory().getId()),
-                tag.getTagName(), postEntity.getCoverURL(), postEntity.getSlug(), null
+                postEntity.isRewarded(), postEntity.isEdited(), postEntity.isAllowComment(), getCategoriesOfPost(getRelatedCategories(postEntity.getCategory().getId())),
+                tag, postEntity.getCoverURL(), postEntity.getSlug(), null
         ));
     }
 
@@ -595,7 +656,7 @@ public class PostServices {
 
                 if (!tag.getTagName().equalsIgnoreCase("Q&A")){
                     PostListDto postListDto = new PostListDto(post.getId(), user.getId(),userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getDescription(),
-                            post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL() ,post.isRewarded(), post.getSlug());
+                            post.getDateOfPost().format(formatter), getRelatedCategoriesName(post.getCategory().getId()), tag.getTagName(), post.getCoverURL() ,post.isRewarded(), post.getSlug());
                     draftList.add(postListDto);
                 }
             }
@@ -634,7 +695,7 @@ public class PostServices {
                 if (post.getCategory().getMajor().getId() == userDetailsEntity.getMajor().getId()) {
                     if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
                         PostListDto postListDto = new PostListDto(post.getId(), user.getId(),userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription(),
-                                post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(),post.isRewarded(), post.getSlug());
+                                post.getDateOfPost().format(formatter), getRelatedCategoriesName(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(),post.isRewarded(), post.getSlug());
                         pendingPostList.add(postListDto);
                     }
                 }
@@ -662,7 +723,7 @@ public class PostServices {
                 if (post.getCategory().getMajor().getId() == userDetailsEntity.getMajor().getId()) {
                     if (!tag.getTagName().equalsIgnoreCase("Q&A")){
                         PostListDto postListDto = new PostListDto(post.getId(),user.getId(),userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getDescription(),
-                                post.getDateOfPost().format(formatter), getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL() ,post.isRewarded(), post.getSlug());
+                                post.getDateOfPost().format(formatter), getRelatedCategoriesName(post.getCategory().getId()), tag.getTagName(), post.getCoverURL() ,post.isRewarded(), post.getSlug());
                         approvePostList.add(postListDto);
                     }
                 }
@@ -739,7 +800,7 @@ public class PostServices {
 
                     if (tag.getTagName().equalsIgnoreCase("Q&A")) {
                         QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), user.getId() ,userDetails.getFullName(),userDetails.getProfileURL(),post.getTitle(), post.getDescription() ,post.getContent(),
-                                post.getDateOfPost().format(formatter), post.getNumOfUpvote(), post.getNumOfDownvote() ,getRelatedCategories(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(), post.isRewarded(), post.getSlug());
+                                post.getDateOfPost().format(formatter), post.getNumOfUpvote(), post.getNumOfDownvote() ,getRelatedCategoriesName(post.getCategory().getId()), tag.getTagName(), post.getCoverURL(), post.isRewarded(), post.getSlug());
                         QApendingPostList.add(questionAnswerDto);
                     }
             }
