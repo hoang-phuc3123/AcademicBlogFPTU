@@ -36,10 +36,8 @@ public class FollowFeatureController {
 
     @GetMapping("/following/view")
     public ResponseEntity<List<FollowerDto>> getFollowing(@RequestBody FollowDto followDto) {
-
             List<FollowerDto> followers = followerServices.getFollowed(followDto.getUserId());
             return ResponseEntity.ok(followers);
-
     }
 
     @PostMapping("/accounts/unfollow")
@@ -53,6 +51,7 @@ public class FollowFeatureController {
         followerServices.follow(followDto);
         return ResponseEntity.ok("Success");
     }
+
 
 
 

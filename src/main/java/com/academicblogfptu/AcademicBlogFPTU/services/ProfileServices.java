@@ -5,14 +5,19 @@ import com.academicblogfptu.AcademicBlogFPTU.dtos.PostDtos.PostListDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.ProfileDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.PostDtos.QuestionAnswerDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.ReportProfileDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.SearchRequestDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.SearchUserDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.*;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -105,6 +110,31 @@ public class ProfileServices {
         }
         return listUser;
     }
+
+    public List<SearchUserDto> getSearchResult(SearchRequestDto searchRequestDto){
+
+        Pageable page = PageRequest.of(searchRequestDto.getPage()-1,searchRequestDto.getUsersOfPage());
+        Page<UserDetailsEntity> pageResult = userDetailsRepository.findUsersPage(searchRequestDto.getSearch(),page);
+        List<SearchUserDto> searchResults = new ArrayList<>();
+        pageResult.getContent().forEach(userDetailsEntity -> {
+            if( !(userDetailsEntity.getUser().getRole().getRoleName().equals("admin"))){
+                if(!userDetailsEntity.isBanned()){
+                    Long numOfFollower = followerRepository.countByUserId(userDetailsEntity.getUser().getId());
+                    if(followerRepository.findByUserIdAndFollowedBy(userDetailsEntity.getUser().getId(), searchRequestDto.getUserId()).isPresent()){
+                        SearchUserDto dto = new SearchUserDto(userDetailsEntity.getUser().getId(),userDetailsEntity.getFullName(),userDetailsEntity.getProfileURL(),numOfFollower,true);
+                        searchResults.add(dto);
+                    }else{
+                        SearchUserDto dto = new SearchUserDto(userDetailsEntity.getUser().getId(),userDetailsEntity.getFullName(),userDetailsEntity.getProfileURL(),numOfFollower,false);
+                        searchResults.add(dto);
+                    }
+                }
+            }
+        });
+        return searchResults;
+    }
+
+
+
 
 
     public List<PostListDto> getAllPost(int id) {

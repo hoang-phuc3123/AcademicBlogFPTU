@@ -2,6 +2,8 @@ package com.academicblogfptu.AcademicBlogFPTU.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import java.sql.Date;
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "news")
 @Data
@@ -17,11 +19,11 @@ public class NewsEntity {
 
     private String content;
 
-    private Date newsAt;
+    private LocalDateTime newsAt;
 
     @ManyToOne
     @JoinColumn(name = "sent_by")
-    private UserEntity sentBy;
+    private UserEntity user;
 
 
 }

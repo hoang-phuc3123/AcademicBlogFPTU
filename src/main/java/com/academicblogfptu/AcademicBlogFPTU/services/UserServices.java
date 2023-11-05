@@ -128,6 +128,17 @@ public class UserServices {
         }
     }
 
+    public void changePassword(ChangePasswordDto changePasswordDto){
+        UserEntity user = userRepository.findById(changePasswordDto.getUserId())
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+        if(!passwordEncoder.matches(CharBuffer.wrap(changePasswordDto.getOldPassword()), user.getPassword())){
+            throw new AppException("Password not match",HttpStatus.UNAUTHORIZED);
+        }else{
+            user.setPassword(passwordEncoder.encode(CharBuffer.wrap(changePasswordDto.getNewPassword())));
+            userRepository.save(user);
+        }
+    }
+
 
 
 }
