@@ -82,6 +82,8 @@ public class PostServices {
         return postList;
     }
 
+
+
     public boolean isApprove(int id) {
         PostDetailsEntity post = postDetailsRepository.findByPostId(id)
                 .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
