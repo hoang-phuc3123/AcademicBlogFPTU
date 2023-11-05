@@ -1,5 +1,6 @@
 package com.academicblogfptu.AcademicBlogFPTU.dtos.PostDtos;
 
+import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.CategoryListDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.CategoryEntity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
