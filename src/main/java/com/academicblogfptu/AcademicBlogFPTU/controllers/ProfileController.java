@@ -2,6 +2,7 @@ package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.ReportCommentDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.ChangePasswordDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.ProfileDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.ReportProfileDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.PendingReportEntity;
@@ -46,6 +47,14 @@ public class ProfileController {
         }catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<String> changePassword(@RequestHeader("Authorization") String headerValue, @RequestBody ChangePasswordDto changePasswordDto){
+        int id = userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))).getId();
+        changePasswordDto.setUserId(id);
+        userService.changePassword(changePasswordDto);
+        return ResponseEntity.ok("Success");
     }
 
     @PostMapping("/edit")

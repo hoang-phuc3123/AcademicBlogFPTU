@@ -37,7 +37,6 @@ public class TagManageController {
     public ResponseEntity<List<TagEntity>> getAllTags(@RequestHeader("Authorization") String headerValue) {
             List<TagEntity> tags = tagService.getAllTags();
             return ResponseEntity.ok(tags);
-
     }
 
     @PostMapping("/admin/new-tag")
