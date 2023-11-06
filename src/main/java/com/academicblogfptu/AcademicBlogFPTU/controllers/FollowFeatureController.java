@@ -26,7 +26,7 @@ public class FollowFeatureController {
     private final UserAuthProvider userAuthProvider;
 
 
-    @GetMapping("/follower/view")
+    @PostMapping("/follower/view")
     public ResponseEntity<List<FollowerDto>> getFollowers(@RequestHeader("Authorization") String headerValue, @RequestBody FollowDto followDto) {
 
             List<FollowerDto> followers = followerServices.getFollower(followDto.getUserId());
@@ -34,7 +34,7 @@ public class FollowFeatureController {
 
     }
 
-    @GetMapping("/following/view")
+    @PostMapping("/following/view")
     public ResponseEntity<List<FollowerDto>> getFollowing(@RequestBody FollowDto followDto) {
             List<FollowerDto> followers = followerServices.getFollowed(followDto.getUserId());
             return ResponseEntity.ok(followers);
