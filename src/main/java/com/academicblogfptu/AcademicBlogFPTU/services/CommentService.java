@@ -86,9 +86,10 @@ public class CommentService {
 
         comment.setContent(commentDto.getContent());
         comment.setEdited(true);
+        comment.setDateOfComment(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
         commentRepository.save(comment);
 
-        Integer parentCommentId = (comment.getParentComment() !=  null) ? comment.getParentComment().getId() : 0;
+        Integer parentCommentId = (comment.getParentComment() !=  null) ? comment.getParentComment().getId() : null;
 
         return new CommentDto(comment.getId(), userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
                 comment.isEdited(), comment.getNumOfUpvote(), comment.getNumOfDownvote(),

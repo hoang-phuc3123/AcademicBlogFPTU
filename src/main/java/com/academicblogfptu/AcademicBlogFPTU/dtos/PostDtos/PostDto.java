@@ -1,6 +1,7 @@
 package com.academicblogfptu.AcademicBlogFPTU.dtos.PostDtos;
 
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.CategoryListDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.TagDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.CommentDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.CategoryEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.TagEntity;
@@ -48,7 +49,7 @@ public class PostDto {
 
     private List<CategoryListDto> category;
 
-    private TagEntity tag;
+    private TagDto tag;
 
     private String coverURL;
 
