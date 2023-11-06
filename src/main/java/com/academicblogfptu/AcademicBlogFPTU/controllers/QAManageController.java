@@ -50,6 +50,17 @@ public class QAManageController {
         }
     }
 
+    @GetMapping("/q-a/approved")
+    public ResponseEntity<List<QuestionAnswerDto>> viewQAApproved(@RequestHeader("Authorization") String headerValue) {
+        if (isMentor(userServices.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
+            List<QuestionAnswerDto> qaApprovedPostList = postServices.viewQAApprovedPost();
+            return ResponseEntity.ok(qaApprovedPostList);
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
     @PostMapping("/q-a/approve")
     public ResponseEntity<Boolean> approveQAPost(@RequestHeader("Authorization") String headerValue, @RequestBody PostDto postId) {
         if (isMentor(userServices.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
