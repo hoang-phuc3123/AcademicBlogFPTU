@@ -122,7 +122,11 @@ public class VoteServices {
             vote.setUserId(voteEntity.getUser().getId());
             vote.setTypeOfVote(vote.getTypeOfVote());
             vote.setPostId(voteEntity.getPost().getId());
-            vote.setCommentId(voteEntity.getComment().getId());
+            if(voteEntity.getComment()==null){
+                vote.setCommentId(null);
+            }else{
+                vote.setCommentId(voteEntity.getComment().getId());
+            }
             vote.setVoteTime(voteEntity.getVoteTime().format(formatter));
             return vote;
         }catch (Exception e){
