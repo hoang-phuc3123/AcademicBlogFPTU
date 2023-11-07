@@ -11,4 +11,5 @@ public interface TokenRepository extends JpaRepository<TokenEntity, String> {
 
     Optional<TokenEntity> findByRefreshToken(String refreshToken);
 
+
 }

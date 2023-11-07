@@ -1,11 +1,9 @@
 package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.ReportedCommentDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.*;
-import com.academicblogfptu.AcademicBlogFPTU.entities.PostEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.RoleEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.UserDetailsEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.*;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.PostRepository;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.UserDetailsRepository;
 import com.academicblogfptu.AcademicBlogFPTU.services.AdminServices;
@@ -13,7 +11,6 @@ import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
@@ -32,6 +29,7 @@ public class UserManageController {
     private final UserAuthProvider userAuthProvider;
     private final UserDetailsRepository userDetailsRepository;
     private final PostRepository postRepository;
+    private final VisitHistoryRepository visitHistoryRepository;
 
     public boolean isAdmin(UserDto userDto) {
         return userDto.getRoleName().equals("admin");
@@ -42,9 +40,13 @@ public class UserManageController {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             List<UserDetailsEntity> userInfos = userDetailsRepository.findAll();
             List<PostEntity> totalPost = postRepository.findAll();
-            HashMap < String, Integer > responseMap = new HashMap<>();
+            List<ReportedProfileDto> reportedProfileDto = adminService.viewReportProfile();
+            List<ReportedCommentDto> reportCommentList = adminService.viewPendingReportComment();
+            HashMap <String, Integer> responseMap = new HashMap<>();
             responseMap.put("total_user", userInfos.size());
             responseMap.put("total_post", totalPost.size());
+            responseMap.put("total_reported_profile", reportedProfileDto.size());
+            responseMap.put("total_reported_comment", reportCommentList.size());
             return ResponseEntity.ok(responseMap);
         }
         else {
