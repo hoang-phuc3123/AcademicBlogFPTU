@@ -51,10 +51,11 @@ public class VoteServices {
 
         PostEntity post = postRepository.findById(voteDto.getPostId()).orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
 
-        if(voteRepository.findByPostIdAndUserIdAndCommentId(voteDto.getPostId(),voteDto.getUserId(),voteDto.getCommentId())!=null){
-            throw new AppException("Already vote",HttpStatus.IM_USED);
-        }
+        List<VoteEntity> existedVote = voteRepository.findByPostIdAndUserIdAndCommentId(voteDto.getPostId(),voteDto.getUserId(),voteDto.getCommentId());
 
+        if(!existedVote.isEmpty()){
+            throw new AppException("Already vote",HttpStatus.FOUND);
+        }
 
         VoteEntity vote = new VoteEntity();
         vote.setVoteTime(LocalDateTime.now());
@@ -65,7 +66,7 @@ public class VoteServices {
         if(voteDto.getCommentId() != null){
             CommentEntity comment = commentRepository.findById(voteDto.getCommentId()).orElseThrow(() -> new AppException("Unknown comment", HttpStatus.NOT_FOUND));
             if(vote.getTypeOfVote().equalsIgnoreCase("up")){
-                comment.setNumOfDownvote(comment.getNumOfUpvote()+1);
+                comment.setNumOfUpvote(comment.getNumOfUpvote()+1);
             }else{
                 comment.setNumOfDownvote(comment.getNumOfDownvote()+1);
             }
@@ -88,28 +89,25 @@ public class VoteServices {
 
     public void removeAVote(VoteDto voteDto){
 
-        VoteEntity vote = voteRepository.findById(voteDto.getVoteId()).orElseThrow(() -> new AppException("Unknown vote", HttpStatus.NOT_FOUND));
-
-        PostEntity post = postRepository.findById(vote.getPost().getId()).orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
-
-        if(vote.getComment()!= null){
+        if(voteDto.getCommentId()!= null){
+            VoteEntity vote = voteRepository.findByUserIdAndCommentId(voteDto.getUserId(),voteDto.getCommentId()).orElseThrow(() -> new AppException("Unknown vote", HttpStatus.NOT_FOUND));
             CommentEntity comment = commentRepository.findById(voteDto.getCommentId()).orElseThrow(() -> new AppException("Unknown comment", HttpStatus.NOT_FOUND));
             if(vote.getTypeOfVote().equalsIgnoreCase("up")){
-                comment.setNumOfDownvote(comment.getNumOfUpvote() - 1);
+                comment.setNumOfUpvote(comment.getNumOfUpvote() - 1);
             }else{
                 comment.setNumOfDownvote(comment.getNumOfDownvote() - 1);
             }
-            vote.setComment(comment);
-            vote.setPost(post);
             commentRepository.save(comment);
             voteRepository.delete(vote);
         }else{
-            if(vote.getTypeOfVote().equalsIgnoreCase("up")){
-                post.setNumOfDownvote(post.getNumOfUpvote() - 1);
+            VoteEntity vote = voteRepository.findByPostIdAndUserIdAndCommentIdIsNull(voteDto.getPostId(),voteDto.getUserId()).orElseThrow(() -> new AppException("Unknown vote", HttpStatus.NOT_FOUND));
+            PostEntity post = postRepository.findById(vote.getPost().getId()).orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
+            if(vote.getTypeOfVote().equals("up")){
+                Integer numOfVote = post.getNumOfUpvote() - 1;
+                post.setNumOfUpvote(numOfVote);
             }else{
                 post.setNumOfDownvote(post.getNumOfDownvote() - 1);
             }
-            vote.setPost(post);
             postRepository.save(post);
             voteRepository.delete(vote);
         }

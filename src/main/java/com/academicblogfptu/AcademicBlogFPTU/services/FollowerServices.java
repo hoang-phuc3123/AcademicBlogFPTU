@@ -60,7 +60,7 @@ public class FollowerServices {
 
         // convert entity to dto
         FollowerDto dto = new FollowerDto();
-        dto.setId(followerEntity.getId());
+        dto.setId(userDetails.getUser().getId());
         dto.setFullName(userDetails.getFullName());
         dto.setProfileUrl(userDetails.getProfileURL());
         return dto;

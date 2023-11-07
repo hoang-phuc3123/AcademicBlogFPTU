@@ -64,12 +64,15 @@ public class FavoriteServices {
         }
     }
     public void removeFavorite(FavoriteDto favoriteDto){
-        FavoritePostEntity entity = favoriteRepository.findByIdAndUserId(favoriteDto.getFavoriteId(),favoriteDto.getUserId())
-                .orElseThrow(() -> new AppException("Unknown favorite", HttpStatus.NOT_FOUND));
-        try{
-            favoriteRepository.delete(entity);
-        }catch (Exception e){
-            throw new AppException(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        FavoritePostEntity entity = favoriteRepository.findByPostIdAndUserId(favoriteDto.getPostId(),favoriteDto.getUserId());
+        if(entity == null){
+            throw new AppException("Unknown favorite",HttpStatus.NOT_FOUND);
+        }else {
+            try{
+                favoriteRepository.delete(entity);
+            }catch (Exception e){
+                throw new AppException(e.getMessage(), HttpStatus.UNAUTHORIZED);
+            }
         }
     }
 

@@ -42,8 +42,9 @@ public class VoteController {
 
     @PostMapping("/vote/remove")
     public ResponseEntity<String> removeAVote(@RequestHeader("Authorization") String headerValue, @RequestBody VoteDto voteDto){
-            voteServices.removeAVote(voteDto);
-            return ResponseEntity.ok("Success");
+        voteDto.setUserId(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))).getId());
+        voteServices.removeAVote(voteDto);
+        return ResponseEntity.ok("Success");
     }
 
 
