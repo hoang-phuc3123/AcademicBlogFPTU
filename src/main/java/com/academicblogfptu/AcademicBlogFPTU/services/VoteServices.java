@@ -121,6 +121,7 @@ public class VoteServices {
             vote.setVoteId(voteEntity.getId());
             vote.setUserId(voteEntity.getUser().getId());
             vote.setTypeOfVote(voteEntity.getTypeOfVote());
+
             vote.setPostId(voteEntity.getPost().getId());
             if(voteEntity.getComment()==null){
                 vote.setCommentId(null);
