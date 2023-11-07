@@ -29,7 +29,6 @@ public class UserManageController {
     private final UserAuthProvider userAuthProvider;
     private final UserDetailsRepository userDetailsRepository;
     private final PostRepository postRepository;
-    private final VisitHistoryRepository visitHistoryRepository;
 
     public boolean isAdmin(UserDto userDto) {
         return userDto.getRoleName().equals("admin");
