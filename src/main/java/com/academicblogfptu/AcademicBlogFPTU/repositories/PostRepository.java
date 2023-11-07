@@ -1,8 +1,5 @@
 package com.academicblogfptu.AcademicBlogFPTU.repositories;
 
-import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.TrendingCategoryDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.PostDtos.PostListDto;
-import com.academicblogfptu.AcademicBlogFPTU.entities.CategoryEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.PostEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

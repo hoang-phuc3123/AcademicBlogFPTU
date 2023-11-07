@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class TrendingCategoryDto {
+public class CategoryListDto {
     private int categoryId;
 
     private String categoryName;

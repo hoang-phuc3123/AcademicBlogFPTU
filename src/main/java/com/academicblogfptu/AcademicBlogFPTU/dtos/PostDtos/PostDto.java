@@ -1,7 +1,10 @@
 package com.academicblogfptu.AcademicBlogFPTU.dtos.PostDtos;
 
+import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.CategoryListDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.TagDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.CommentDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.CategoryEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.TagEntity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -44,9 +47,9 @@ public class PostDto {
 
     private boolean allowComment;
 
-    private List<CategoryEntity> category;
+    private List<CategoryListDto> category;
 
-    private String tag;
+    private TagDto tag;
 
     private String coverURL;
 

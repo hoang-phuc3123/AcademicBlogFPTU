@@ -34,7 +34,7 @@ public class PostController {
 
     @PostMapping("users/view-post")
     public ResponseEntity<PostDto> viewAPost(@RequestBody PostDto postDto){
-        PostDto post = postServices.viewPostById(postDto.getSlug());
+        PostDto post = postServices.viewPostBySlug(postDto.getSlug());
         return ResponseEntity.ok(post);
     }
 
@@ -152,6 +152,24 @@ public class PostController {
         PostDto editDraft = postServices.editPost(editPostDto);
         postServices.postDetail(editDraft.getPostId(), "Draft");
         return ResponseEntity.ok(editDraft);
+    }
+
+    @GetMapping("posts/followed")
+    public ResponseEntity<List<PostListDto>> getFollowedPost(@RequestHeader("Authorization") String headerValue){
+        Optional<UserEntity> user = userRepository.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
+        UserEntity userEntity = user.get();
+
+        List<PostListDto> followedlist = postServices.viewFollowedPost(userEntity.getId());
+        return ResponseEntity.ok(followedlist);
+    }
+
+    @GetMapping("q-a/followed")
+    public ResponseEntity<List<QuestionAnswerDto>> getFollowedQA(@RequestHeader("Authorization") String headerValue){
+        Optional<UserEntity> user = userRepository.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
+        UserEntity userEntity = user.get();
+
+        List<QuestionAnswerDto> followedlist = postServices.viewFollowedQA(userEntity.getId());
+        return ResponseEntity.ok(followedlist);
     }
 
 }

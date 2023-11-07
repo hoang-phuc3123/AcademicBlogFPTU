@@ -4,7 +4,7 @@ package com.academicblogfptu.AcademicBlogFPTU.controllers;
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.CategoryDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.CategoryRequestDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.TrendingCategoryDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.CategoryListDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.CategoryEntity;
 import com.academicblogfptu.AcademicBlogFPTU.services.CategoryServices;
@@ -100,8 +100,8 @@ public class CategoryManageController {
     }
 
     @GetMapping("/categories/trending")
-    public ResponseEntity<List<TrendingCategoryDto>> getTrendingCategories() {
-        List<TrendingCategoryDto> categories = categoryServices.trendingCategories();
+    public ResponseEntity<List<CategoryListDto>> getTrendingCategories() {
+        List<CategoryListDto> categories = categoryServices.trendingCategories();
         return ResponseEntity.ok(categories);
     }
 }
