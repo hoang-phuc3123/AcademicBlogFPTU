@@ -482,11 +482,28 @@ public class PostServices {
     }
 
     public List<PostListDto> filterPosts(Integer categoryId, Integer tagId, String title) {
-        List<PostEntity> postList = postRepository.findPostsByCategoryIdAndTagIdAndTitle(categoryId, tagId, title);
+        List<PostEntity> postList;
         List<PostListDto> filterPost = new ArrayList<>();
 
         if (categoryId == null && tagId == null && title.isEmpty()){
             return  filterPost;
+        }
+
+        if (categoryId != null) {
+            // Check if the categoryId has a parent ID
+            CategoryEntity category = categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new AppException("Unknown Category", HttpStatus.NOT_FOUND));
+
+            if (category.getParentID() == null && category.getCategoryType().equalsIgnoreCase("Specialization")) {
+
+                postList = postRepository.findPostsByCategoryIdsAndTagIdAndTitle(categoryId, tagId, title);
+            } else {
+                // If it's not a specialization category, just fetch posts for the specified category
+                postList = postRepository.findPostsByCategoryIdAndTagIdAndTitle(categoryId, tagId, title);
+            }
+        } else {
+            // If categoryId is null, fetch posts based on tagId and title
+            postList = postRepository.findPostsByCategoryIdAndTagIdAndTitle(null, tagId, title);
         }
 
         for (PostEntity post : postList) {
@@ -503,18 +520,36 @@ public class PostServices {
                 PostListDto postListDto = new PostListDto(post.getId(),  user.getId(), userDetails.getFullName(), userDetails.getProfileURL(), post.getTitle(), post.getDescription(),
                         post.getDateOfPost().format(formatter), getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())),
                         getTagOfPost(tag), post.getCoverURL(), post.isRewarded(), post.getSlug());
-                        filterPost.add(postListDto);
+                filterPost.add(postListDto);
             }
         }
         return filterPost;
     }
 
+
     public List<QuestionAnswerDto> filterQA(Integer categoryId, Integer tagId, String title) {
-        List<PostEntity> postList = postRepository.findPostsByCategoryIdAndTagIdAndTitle(categoryId, tagId, title);
+        List<PostEntity> postList;
         List<QuestionAnswerDto> filterQA = new ArrayList<>();
 
         if (categoryId == null && tagId == null && title.isEmpty()){
-            return  filterQA;
+            return filterQA;
+        }
+
+        if (categoryId != null) {
+            // Check if the categoryId has a parent ID
+            CategoryEntity category = categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new AppException("Unknown Category", HttpStatus.NOT_FOUND));
+
+            if (category.getParentID() == null && category.getCategoryType().equalsIgnoreCase("Specialization")) {
+
+                postList = postRepository.findPostsByCategoryIdsAndTagIdAndTitle(categoryId, tagId, title);
+            } else {
+                // If it's not a specialization category, just fetch posts for the specified category
+                postList = postRepository.findPostsByCategoryIdAndTagIdAndTitle(categoryId, tagId, title);
+            }
+        } else {
+            // If categoryId is null, fetch posts based on tagId and title
+            postList = postRepository.findPostsByCategoryIdAndTagIdAndTitle(null, tagId, title);
         }
 
         for (PostEntity post : postList) {
