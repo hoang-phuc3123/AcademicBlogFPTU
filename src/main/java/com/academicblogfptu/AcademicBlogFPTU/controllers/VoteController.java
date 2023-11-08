@@ -26,7 +26,7 @@ public class VoteController {
     private final UserAuthProvider userAuthProvider;
 
 
-    @GetMapping("/vote/check-vote")
+    @PostMapping("/vote/check-vote")
     public ResponseEntity<List<VoteDto>> isVoted(@RequestHeader("Authorization") String headerValue, @RequestBody VoteDto voteDto){
         voteDto.setUserId(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))).getId());
         List<VoteDto> votesInPost = voteServices.getVoteInPost(voteDto.getPostId(),voteDto.getUserId());
