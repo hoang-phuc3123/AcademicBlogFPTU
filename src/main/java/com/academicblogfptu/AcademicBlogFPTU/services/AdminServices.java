@@ -252,4 +252,20 @@ public class AdminServices {
             }
         }
     }
+
+    public void deletePendingReportedProfile(int userId){
+        List<PendingReportEntity> pendingReports = pendingReportRepository.findByContentIdAndReportType(userId,"Profile");
+
+        if (pendingReports != null) {
+            for (PendingReportEntity pendingReport: pendingReports) {
+                PendingReportReasonEntity pendingReportReason = pendingReportReasonRepository.findByReportId(pendingReport.getId())
+                        .orElseThrow(() -> new AppException("Unknown pending report reason", HttpStatus.NOT_FOUND));
+                pendingReportReasonRepository.delete(pendingReportReason);
+            }
+
+            for (PendingReportEntity pendingReport: pendingReports) {
+                pendingReportRepository.delete(pendingReport);
+            }
+        }
+    }
 }
