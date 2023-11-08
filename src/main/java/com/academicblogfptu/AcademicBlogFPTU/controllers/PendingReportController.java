@@ -50,6 +50,17 @@ public class PendingReportController {
         }
     }
 
+    @PostMapping("/dismiss-reported-profile")
+    public ResponseEntity<Boolean> dismissReportedProfile(@RequestHeader("Authorization") String headerValue , @RequestBody ReportedProfileDto reportedProfileDto){
+        if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
+            adminServices.deletePendingReportedProfile(reportedProfileDto.getReportedUserId());
+            return ResponseEntity.ok(true);
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
     @GetMapping("/reported-comment")
     public ResponseEntity<List<ReportedCommentDto>> viewReportedComments(@RequestHeader("Authorization") String headerValue){
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
@@ -62,7 +73,7 @@ public class PendingReportController {
     }
 
     @PostMapping("/dismiss-reported-comment")
-    public ResponseEntity<Boolean> viewReportedComments(@RequestHeader("Authorization") String headerValue , @RequestBody ReportedCommentDto reportedCommentDto){
+    public ResponseEntity<Boolean> dismissReportedComment(@RequestHeader("Authorization") String headerValue , @RequestBody ReportedCommentDto reportedCommentDto){
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             adminServices.deleteReportComment(reportedCommentDto.getReportedCommentId());
             return ResponseEntity.ok(true);
