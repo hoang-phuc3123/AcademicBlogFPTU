@@ -120,7 +120,8 @@ public class VoteServices {
             VoteDto vote = new VoteDto();
             vote.setVoteId(voteEntity.getId());
             vote.setUserId(voteEntity.getUser().getId());
-            vote.setTypeOfVote(vote.getTypeOfVote());
+            vote.setTypeOfVote(voteEntity.getTypeOfVote());
+
             vote.setPostId(voteEntity.getPost().getId());
             if(voteEntity.getComment()==null){
                 vote.setCommentId(null);
