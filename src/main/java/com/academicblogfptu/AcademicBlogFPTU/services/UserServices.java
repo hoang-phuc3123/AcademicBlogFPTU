@@ -94,20 +94,24 @@ public class UserServices {
     public void RegisterUserDetail(UserDetailsDto userDetailsDto){
         Optional<UserEntity> optionalUser = userRepository.findByUsername(userDetailsDto.getEmail());
         UserEntity user = optionalUser.get();
-
-        UserDetailsEntity newUserDetails = new UserDetailsEntity();
-        newUserDetails.setEmail(userDetailsDto.getEmail());
-        newUserDetails.setFullName(userDetailsDto.getGivenName());
-        newUserDetails.setPhone(null);
-        newUserDetails.setBanned(false);
-        newUserDetails.setWeightOfReport(0);
-        newUserDetails.setProfileURL(userDetailsDto.getProfileUrl());
-        newUserDetails.setCoverURL(null);
-        newUserDetails.setUserStory(null);
-        newUserDetails.setUser(user);
-        //MajorEntity majorEntity = majorRepository.findByMajorName("Kỹ Thuật Phần Mềm").orElse(null) ;
-        newUserDetails.setMajor(null);
-        userDetailsRepository.save(newUserDetails);
+        Optional<UserDetailsEntity> optionalUserDetailsEntity = userDetailsRepository.findByUserAccount(user);
+        if (optionalUserDetailsEntity.isPresent()) {
+            optionalUserDetailsEntity.get().setFullName(userDetailsDto.getGivenName());
+            optionalUserDetailsEntity.get().setProfileURL(userDetailsDto.getProfileUrl());
+        }
+        else {
+            UserDetailsEntity newUserDetails = new UserDetailsEntity();
+            newUserDetails.setEmail(userDetailsDto.getEmail());
+            newUserDetails.setFullName(userDetailsDto.getGivenName());
+            newUserDetails.setPhone(null);
+            newUserDetails.setBanned(false);
+            newUserDetails.setWeightOfReport(0);
+            newUserDetails.setProfileURL(userDetailsDto.getProfileUrl());
+            newUserDetails.setUser(user);
+            //MajorEntity majorEntity = majorRepository.findByMajorName("Kỹ Thuật Phần Mềm").orElse(null) ;
+            newUserDetails.setMajor(null);
+            userDetailsRepository.save(newUserDetails);
+        }
     }
 
     public UserDto resetPass(ResetPasswordDto resetPasswordDto) {
