@@ -18,6 +18,7 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @RequiredArgsConstructor
@@ -65,10 +66,11 @@ public class PostServices {
     LocalDateTime localDateTime = LocalDateTime.now(vietnamZone);
 
 
-    public List<PostListDto> viewAllPost(int page, int postOfPage) {
+    public Map<String, Object> viewAllPost(int page, int postOfPage) {
         int offSet = (page - 1)*postOfPage;
         List<PostEntity> list = postRepository.findPostsPaged(offSet, postOfPage);
         List<PostListDto> postList = new ArrayList<>();
+        Map<String, Object> result = new HashMap<>();
         for (PostEntity post : list) {
 
             if (isApprove(post.getId())) {
@@ -86,7 +88,10 @@ public class PostServices {
                 }
             }
         }
-        return postList;
+        result.put("Posts", postList);
+        result.put("TotalPost", postRepository.countTotalPost());
+
+        return result;
     }
 
 
@@ -365,6 +370,11 @@ public class PostServices {
 
     public List<PostListDto> viewRewardedPost() {
         List<PostEntity> list = postRepository.findAll();
+
+        list.sort(Comparator
+                .comparingInt((PostEntity post) -> post.getNumOfUpvote() - post.getNumOfDownvote())
+                .thenComparing(PostEntity::getDateOfPost).reversed());
+
         List<PostListDto> rewardedPostList = new ArrayList<>();
         for (PostEntity post : list) {
 
@@ -388,6 +398,11 @@ public class PostServices {
     public List<QuestionAnswerDto> viewQuestionAndAnswerPost() {
         List<PostEntity> list = postRepository.findAll();
         List<QuestionAnswerDto> QAPostList = new ArrayList<>();
+
+        list.sort(Comparator
+                .comparingInt((PostEntity post) -> post.getNumOfUpvote() - post.getNumOfDownvote())
+                .thenComparing(PostEntity::getDateOfPost).reversed());
+
         for (PostEntity post : list) {
 
             if (isApprove(post.getId())) {
@@ -415,6 +430,10 @@ public class PostServices {
         List<PostEntity> postList = postRepository.findAll();
         List<PostListDto> latestPost = new ArrayList<>();
 
+        postList.sort(Comparator
+                .comparing(PostEntity::getDateOfPost).reversed()
+                .thenComparingInt((PostEntity post) -> post.getNumOfUpvote() - post.getNumOfDownvote()));
+
         for (PostEntity post: postList) {
             if(isApprove(post.getId())) {
                 UserEntity user = userRepository.findById(post.getUser().getId())
@@ -427,7 +446,7 @@ public class PostServices {
                     PostListDto postListDto = new PostListDto(post.getId(), user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription(),
                             post.getDateOfPost().format(formatter), getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(),post.isRewarded(), post.getSlug());
                     latestPost.add(postListDto);
-                    latestPost.sort(Comparator.comparing(PostListDto::getDateOfPost).reversed());
+                    //latestPost.sort(Comparator.comparing(PostListDto::getDateOfPost).reversed());
                 }
             }
         }
@@ -462,6 +481,10 @@ public class PostServices {
     public List<PostListDto> viewShort(){
         List<PostEntity> postList = postRepository.findAll();
         List<PostListDto> shortPost = new ArrayList<>();
+
+        postList.sort(Comparator
+                .comparingInt((PostEntity post) -> post.getNumOfUpvote() - post.getNumOfDownvote())
+                .thenComparing(PostEntity::getDateOfPost).reversed());
 
         for (PostEntity post: postList) {
             if(isApprove(post.getId()) && post.getLength() <= 300) {
@@ -505,6 +528,10 @@ public class PostServices {
             // If categoryId is null, fetch posts based on tagId and title
             postList = postRepository.findPostsByCategoryIdAndTagIdAndTitle(null, tagId, title);
         }
+
+        postList.sort(Comparator
+                .comparingInt((PostEntity post) -> post.getNumOfUpvote() - post.getNumOfDownvote())
+                .thenComparing(PostEntity::getDateOfPost).reversed());
 
         for (PostEntity post : postList) {
             UserEntity user = userRepository.findById(post.getUser().getId())
@@ -551,6 +578,10 @@ public class PostServices {
             // If categoryId is null, fetch posts based on tagId and title
             postList = postRepository.findPostsByCategoryIdAndTagIdAndTitle(null, tagId, title);
         }
+
+        postList.sort(Comparator
+                .comparingInt((PostEntity post) -> post.getNumOfUpvote() - post.getNumOfDownvote())
+                .thenComparing(PostEntity::getDateOfPost).reversed());
 
         for (PostEntity post : postList) {
             UserEntity user = userRepository.findById(post.getUser().getId())
@@ -634,12 +665,23 @@ public class PostServices {
         return false;
     }
 
-    public List<PostListDto> viewDraft(int userId) {
+    public boolean isDeclined(int id) {
+        PostDetailsEntity post = postDetailsRepository.findByPostId(id)
+                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
+        if (post.getType().equalsIgnoreCase("Decline")) {
+            return true;
+        }
+        return false;
+    }
+
+    public  Map<String, List<PostListDto>> viewDraft(int userId) {
         List<PostEntity> list = postRepository.findAll();
         List<PostListDto> draftList = new ArrayList<>();
+        List<PostListDto> declineList = new ArrayList<>();
+        Map<String, List<PostListDto>> result = new HashMap<>();
         for (PostEntity post : list) {
 
-            if (isDraft(post.getId()) && post.getUser().getId() == userId) {
+            if ((isDraft(post.getId()) || isDeclined(post.getId())) && post.getUser().getId() == userId) {
                 UserEntity user = userRepository.findById(post.getUser().getId())
                         .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
@@ -647,20 +689,33 @@ public class PostServices {
                 TagEntity tag = tagRepository.findById(post.getTag().getId())
                         .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
 
-                if (!tag.getTagName().equalsIgnoreCase("Q&A")){
+                if (!(tag.getTagName().equalsIgnoreCase("Q&A") && isDeclined(post.getId()))){
                     PostListDto postListDto = new PostListDto(post.getId(), user.getId(),userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getDescription(),
                             post.getDateOfPost().format(formatter), getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL() ,post.isRewarded(), post.getSlug());
-                    draftList.add(postListDto);
+
+                    if (isDraft(post.getId())) {
+                        draftList.add(postListDto);
+                    } else if (isDeclined(post.getId())) {
+                        declineList.add(postListDto);
+                    }
                 }
             }
         }
-        return draftList;
+        result.put("DeclinePostList", declineList);
+        result.put("DraftList", draftList);
+
+
+        return result;
     }
 
     public List<PostListDto> viewFollowedPost(int userId) {
         List<FollowerEntity> followedAccount = followerRepository.findByFollowedBy(userId);
 
         List<PostEntity> posts = postRepository.findPostForLast7Days();
+
+        posts.sort(Comparator
+                .comparingInt((PostEntity post) -> post.getNumOfUpvote() - post.getNumOfDownvote())
+                .thenComparing(PostEntity::getDateOfPost).reversed());
 
         List<PostListDto> followedPost = new ArrayList<>();
 
@@ -690,6 +745,10 @@ public class PostServices {
         List<FollowerEntity> followedAccount = followerRepository.findByFollowedBy(userId);
 
         List<PostEntity> posts = postRepository.findPostForLast7Days();
+
+        posts.sort(Comparator
+                .comparingInt((PostEntity post) -> post.getNumOfUpvote() - post.getNumOfDownvote())
+                .thenComparing(PostEntity::getDateOfPost).reversed());
 
         List<QuestionAnswerDto> followedQA = new ArrayList<>();
 
@@ -758,6 +817,10 @@ public class PostServices {
     public List<PostListDto> viewApprovedPost(UserEntity userEntity) {
         List<PostEntity> list = postRepository.findAll();
         List<PostListDto> approvePostList = new ArrayList<>();
+
+        list.sort(Comparator
+                .comparingInt((PostEntity post) -> post.getNumOfUpvote() - post.getNumOfDownvote())
+                .thenComparing(PostEntity::getDateOfPost).reversed());
 
         UserDetailsEntity userDetailsEntity = userDetailsRepository.findByUserAccount(userEntity)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
@@ -862,6 +925,10 @@ public class PostServices {
     public List<QuestionAnswerDto> viewQAApprovedPost(){
         List<PostEntity> postList = postRepository.findAll();
         List<QuestionAnswerDto> QAapprovedPostList = new ArrayList<>();
+
+        postList.sort(Comparator
+                .comparingInt((PostEntity post) -> post.getNumOfUpvote() - post.getNumOfDownvote())
+                .thenComparing(PostEntity::getDateOfPost).reversed());
 
         for (PostEntity post: postList) {
             if(isApprove(post.getId())) {

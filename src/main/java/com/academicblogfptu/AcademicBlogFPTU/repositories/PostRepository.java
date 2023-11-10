@@ -50,7 +50,7 @@ public interface PostRepository extends JpaRepository<PostEntity, Integer> {
             "FROM post p " +
             "JOIN post_details pd ON p.id = pd.post_id " +
             "WHERE pd.type = 'Approve' " +
-            "ORDER BY p.id " +
+            "ORDER BY (p.num_of_upvote - p.num_of_downvote) desc, p.date_of_post desc " +
             "OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY", nativeQuery = true)
     List<PostEntity> findPostsPaged(int offset, int limit);
 
@@ -58,4 +58,7 @@ public interface PostRepository extends JpaRepository<PostEntity, Integer> {
             "WHERE p.date_of_post >= DATEADD(day, -7, GETDATE())",
             nativeQuery = true)
     List<PostEntity> findPostForLast7Days();
+
+    @Query(value = "SELECT COUNT(*) FROM post p JOIN post_details pd ON p.id = pd.post_id WHERE pd.type = 'Approve'", nativeQuery = true)
+    int countTotalPost();
 }

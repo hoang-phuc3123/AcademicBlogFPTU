@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -27,8 +28,8 @@ public class PostController {
     private final UserAuthProvider userAuthProvider;
 
     @PostMapping("users/post-list")
-    public ResponseEntity<List<PostListDto>> getPostList(@RequestBody OffSetFetchDto offSetFetchDto){
-        List<PostListDto> list = postServices.viewAllPost(offSetFetchDto.getPage(), offSetFetchDto.getPostOfPage());
+    public ResponseEntity<Map<String, Object>> getPostList(@RequestBody OffSetFetchDto offSetFetchDto){
+        Map<String, Object> list = postServices.viewAllPost(offSetFetchDto.getPage(), offSetFetchDto.getPostOfPage());
         return ResponseEntity.ok(list);
     }
 
@@ -133,11 +134,11 @@ public class PostController {
     }
 
     @GetMapping("drafts/view")
-    public ResponseEntity<List<PostListDto>> viewDraft(@RequestHeader("Authorization") String headerValue){
+    public ResponseEntity<Map<String, List<PostListDto>>> viewDraft(@RequestHeader("Authorization") String headerValue){
         Optional<UserEntity> user = userRepository.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
         UserEntity userEntity = user.get();
 
-        List<PostListDto> draftList = postServices.viewDraft(userEntity.getId());
+        Map<String, List<PostListDto>> draftList = postServices.viewDraft(userEntity.getId());
         return ResponseEntity.ok(draftList);
     }
 
