@@ -140,7 +140,15 @@ public class AdminServices {
         UserEntity user = optionalUser.get();
         UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+
+        List<PendingReportEntity> pendingReportProfile = pendingReportRepository.findByContentIdAndReportType(user.getId(),"Profile");
+
+        if (!pendingReportProfile.isEmpty()){
+            deletePendingReportedProfile(user.getId());
+        }
+
         userDetails.setBanned(true);
+
         userDetailsRepository.save(userDetails);
     }
 
@@ -194,7 +202,7 @@ public class AdminServices {
     public List<String> listOfReportReason (int contentId) {
         List<PendingReportEntity> reports = pendingReportRepository.findByContentIdAndReportType(contentId, "Profile");
 
-        List<String> reportReasonOfComment = new ArrayList<>();
+        List<String> reportReasonOfProfile = new ArrayList<>();
 
         for (PendingReportEntity pendingReport: reports) {
             PendingReportReasonEntity pendingReportReason = pendingReportReasonRepository.findByReportId(pendingReport.getId())
@@ -203,11 +211,11 @@ public class AdminServices {
             ReportReasonEntity reason = reportReasonRepository.findById(pendingReportReason.getReason().getId())
                     .orElseThrow(() -> new AppException("Unknown reason", HttpStatus.NOT_FOUND));
 
-            if (!reportReasonOfComment.contains(reason.getReasonName())) {
-                reportReasonOfComment.add(reason.getReasonName());
+            if (!reportReasonOfProfile.contains(reason.getReasonName())) {
+                reportReasonOfProfile.add(reason.getReasonName());
             }
         }
-        return reportReasonOfComment;
+        return reportReasonOfProfile;
     }
 
     public List<ReportedCommentDto> viewPendingReportComment(){
@@ -240,6 +248,10 @@ public class AdminServices {
     public void deleteReportComment(int commentId){
         List<PendingReportEntity> pendingReports = pendingReportRepository.findByContentIdAndReportType(commentId,"Comment");
 
+        if (pendingReports.isEmpty()){
+           throw new AppException("Unknown reported comment", HttpStatus.NOT_FOUND);
+        }
+
         if (pendingReports != null) {
             for (PendingReportEntity pendingReport: pendingReports) {
                 PendingReportReasonEntity pendingReportReason = pendingReportReasonRepository.findByReportId(pendingReport.getId())
@@ -255,6 +267,10 @@ public class AdminServices {
 
     public void deletePendingReportedProfile(int userId){
         List<PendingReportEntity> pendingReports = pendingReportRepository.findByContentIdAndReportType(userId,"Profile");
+
+        if (pendingReports.isEmpty()){
+           throw new AppException("Unknown reported profile", HttpStatus.NOT_FOUND);
+        }
 
         if (pendingReports != null) {
             for (PendingReportEntity pendingReport: pendingReports) {
