@@ -97,7 +97,6 @@ public class UserServices {
         Optional<UserDetailsEntity> optionalUserDetailsEntity = userDetailsRepository.findByUserAccount(user);
         if (optionalUserDetailsEntity.isPresent()) {
             optionalUserDetailsEntity.get().setFullName(userDetailsDto.getGivenName());
-            optionalUserDetailsEntity.get().setProfileURL(userDetailsDto.getProfileUrl());
         }
         else {
             UserDetailsEntity newUserDetails = new UserDetailsEntity();
