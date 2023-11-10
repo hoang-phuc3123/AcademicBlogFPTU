@@ -134,11 +134,11 @@ public class PostController {
     }
 
     @GetMapping("drafts/view")
-    public ResponseEntity<Map<String, List<PostListDto>>> viewDraft(@RequestHeader("Authorization") String headerValue){
+    public ResponseEntity<Map<String, List<?>>> viewDraft(@RequestHeader("Authorization") String headerValue){
         Optional<UserEntity> user = userRepository.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
         UserEntity userEntity = user.get();
 
-        Map<String, List<PostListDto>> draftList = postServices.viewDraft(userEntity.getId());
+        Map<String, List<?>> draftList = postServices.viewDraft(userEntity.getId());
         return ResponseEntity.ok(draftList);
     }
 
