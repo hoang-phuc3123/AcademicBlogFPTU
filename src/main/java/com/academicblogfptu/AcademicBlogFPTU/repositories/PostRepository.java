@@ -49,8 +49,8 @@ public interface PostRepository extends JpaRepository<PostEntity, Integer> {
             "p.parent_id, p.description, p.cover_URL, p.slug " +
             "FROM post p " +
             "JOIN post_details pd ON p.id = pd.post_id " +
-            "WHERE pd.type = 'Approve' " +
-            "ORDER BY (p.num_of_upvote - p.num_of_downvote) desc, p.date_of_post desc " +
+            "WHERE pd.type = 'Approve' and p.tag_id in (2,3,4) " +
+            "ORDER BY (p.num_of_upvote - p.num_of_downVote) desc, p.date_of_post desc " +
             "OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY", nativeQuery = true)
     List<PostEntity> findPostsPaged(int offset, int limit);
 

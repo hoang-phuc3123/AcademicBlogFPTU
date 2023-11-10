@@ -431,8 +431,7 @@ public class PostServices {
         List<PostListDto> latestPost = new ArrayList<>();
 
         postList.sort(Comparator
-                .comparing(PostEntity::getDateOfPost).reversed()
-                .thenComparingInt((PostEntity post) -> post.getNumOfUpvote() - post.getNumOfDownvote()));
+                .comparing(PostEntity::getDateOfPost).reversed());
 
         for (PostEntity post: postList) {
             if(isApprove(post.getId())) {
@@ -674,11 +673,11 @@ public class PostServices {
         return false;
     }
 
-    public  Map<String, List<PostListDto>> viewDraft(int userId) {
+    public  Map<String, List<?>> viewDraft(int userId) {
         List<PostEntity> list = postRepository.findAll();
         List<PostListDto> draftList = new ArrayList<>();
-        List<PostListDto> declineList = new ArrayList<>();
-        Map<String, List<PostListDto>> result = new HashMap<>();
+        List<PostListDeclineDto> declineList = new ArrayList<>();
+        Map<String, List<?>> result = new HashMap<>();
         for (PostEntity post : list) {
 
             if ((isDraft(post.getId()) || isDeclined(post.getId())) && post.getUser().getId() == userId) {
@@ -688,15 +687,19 @@ public class PostServices {
                         .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 TagEntity tag = tagRepository.findById(post.getTag().getId())
                         .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
-
+                PostDetailsEntity postDetails = postDetailsRepository.findByPostId(post.getId())
+                        .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
                 if (!(tag.getTagName().equalsIgnoreCase("Q&A") && isDeclined(post.getId()))){
                     PostListDto postListDto = new PostListDto(post.getId(), user.getId(),userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getDescription(),
                             post.getDateOfPost().format(formatter), getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL() ,post.isRewarded(), post.getSlug());
 
+                    PostListDeclineDto postListDeclineDto = new PostListDeclineDto(post.getId(), user.getId(),userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getDescription(),
+                            post.getDateOfPost().format(formatter), getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL() ,post.isRewarded(), postDetails.getReasonOfDeclination(), post.getSlug());
+
                     if (isDraft(post.getId())) {
                         draftList.add(postListDto);
                     } else if (isDeclined(post.getId())) {
-                        declineList.add(postListDto);
+                        declineList.add(postListDeclineDto);
                     }
                 }
             }
