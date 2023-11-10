@@ -431,8 +431,7 @@ public class PostServices {
         List<PostListDto> latestPost = new ArrayList<>();
 
         postList.sort(Comparator
-                .comparing(PostEntity::getDateOfPost).reversed()
-                .thenComparingInt((PostEntity post) -> post.getNumOfUpvote() - post.getNumOfDownvote()));
+                .comparing(PostEntity::getDateOfPost).reversed());
 
         for (PostEntity post: postList) {
             if(isApprove(post.getId())) {
