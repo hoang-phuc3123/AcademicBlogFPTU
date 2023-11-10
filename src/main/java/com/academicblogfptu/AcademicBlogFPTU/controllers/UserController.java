@@ -3,10 +3,7 @@ package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.RegisterDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.SearchRequestDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.SearchUserDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.*;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.UserDetailsRepository;
 import com.academicblogfptu.AcademicBlogFPTU.services.ProfileServices;
@@ -50,6 +47,13 @@ public class UserController {
         catch (Exception e){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+    }
+
+    @PostMapping("/user/change-user-details")
+    public ResponseEntity<String> editUserDetails(@RequestHeader("Authorization") String headerValue, @RequestBody UserDetailsChangeDto userDetails){
+        userDetails.setUserId(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))).getId());
+        userService.editUserDetails(userDetails);
+        return ResponseEntity.ok("Change successfully!");
     }
 
 
