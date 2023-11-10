@@ -21,14 +21,12 @@ public class RealTimeMuteServices {
         List<UserDetailsEntity> userDetailsList = userDetailsRepository.findAll();
         for (UserDetailsEntity userDetails : userDetailsList) {
             if (userDetails.isMuted()) {
+                long currentTimeMillis = System.currentTimeMillis() / 1000; // Thời gian hiện tại ở định dạng Unix time
                 if (userDetails.getMutetime() != null) {
-                    long currentTimeMillis = System.currentTimeMillis() / 1000; // Thời gian hiện tại ở định dạng Unix time
-                    if (userDetails.getMutetime() != null) {
-                        long muteTimeMillis = userDetails.getMutetime().getTime() / 1000; // Chuyển đổi Timestamp thành Unix time
-                        if (muteTimeMillis < currentTimeMillis) {
-                            userDetails.setMuted(false);
-                            userDetails.setMutetime(null);
-                        }
+                    long muteTimeMillis = userDetails.getMutetime().getTime() / 1000; // Chuyển đổi Timestamp thành Unix time
+                    if (muteTimeMillis < currentTimeMillis) {
+                        userDetails.setMuted(false);
+                        userDetails.setMutetime(null);
                     }
                 }
             }
