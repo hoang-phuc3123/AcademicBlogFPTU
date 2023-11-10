@@ -117,6 +117,7 @@ public class ProfileController {
             }
             Map<String, String> response = new HashMap<>();
             response.put("status", "success");
+            response.put("imageURL" , link);
             userDetail.setCoverURL(link);
             userDetailsRepository.save(userDetail);
             return ResponseEntity.ok(response);
@@ -158,6 +159,7 @@ public class ProfileController {
             }
             Map<String, String> response = new HashMap<>();
             response.put("status", "success");
+            response.put("imageURL" , link);
             userDetail.setProfileURL(link);
             userDetailsRepository.save(userDetail);
             return ResponseEntity.ok(response);
