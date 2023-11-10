@@ -143,6 +143,31 @@ public class UserServices {
         }
     }
 
+    public void editUserDetails(UserDetailsChangeDto userDetailsChangeDto){
+        try{
+            UserDetailsEntity userDetails = userDetailsRepository.findByUserId(userDetailsChangeDto.getUserId());
+            //check if the previous mail is @fpt
+            if(userDetails.getEmail().contains("@fpt.edu.vn")){
+                throw new AppException("Cannot change the @fpt mail",HttpStatus.UNAUTHORIZED);
+            }
+            // check the mail or phone is existed
+            if(userDetailsRepository.findByEmail(userDetailsChangeDto.getEmail()).isPresent()){
+                throw new AppException("Email has already existed",HttpStatus.FOUND);
+            } else if (userDetailsRepository.findByPhone(userDetailsChangeDto.getPhone()).isPresent()) {
+                throw new AppException("Phone has already existed",HttpStatus.FOUND);
+            }
+            // check what information that user want to change
+            if(userDetailsChangeDto.getPhone()!=null){
+                userDetails.setPhone(userDetailsChangeDto.getPhone());
+            }else if(userDetailsChangeDto.getEmail()!=null){
+                userDetails.setEmail(userDetailsChangeDto.getEmail());
+            }
+            userDetailsRepository.save(userDetails);
+        }catch (Exception e){
+            throw new AppException("Unknown User-Details",HttpStatus.NOT_FOUND);
+        }
+    }
+
 
 
 }
