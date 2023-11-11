@@ -15,8 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.nio.CharBuffer;
 
@@ -47,10 +45,10 @@ public class UserServices {
         return new UserDto(user.getId(),user.getUsername(),userDetails.getFullName(),userDetails.isBanned(),userDetails.isMuted(),userDetails.getMutetime(),user.getRole().getRoleName(),userDetails.getProfileURL(), userDetails.getCoverURL() ,"" , "");
     }
 
-    public UserDetailsDto findByEmail(String email) {
+    public GoogleUserDetailsDto findByEmail(String email) {
         UserDetailsEntity user = userDetailsRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException("Unknown email", HttpStatus.UNAUTHORIZED));
-        return new UserDetailsDto(user.getEmail(), user.getFullName(), user.getCoverURL());
+        return new GoogleUserDetailsDto(user.getEmail(), user.getFullName(), user.getCoverURL());
     }
 
     public UserDto login(LoginRequestDto loginDto) {
@@ -91,7 +89,7 @@ public class UserServices {
         }
     }
 
-    public void RegisterUserDetail(UserDetailsDto userDetailsDto){
+    public void RegisterUserDetail(GoogleUserDetailsDto userDetailsDto){
         Optional<UserEntity> optionalUser = userRepository.findByUsername(userDetailsDto.getEmail());
         UserEntity user = optionalUser.get();
         Optional<UserDetailsEntity> optionalUserDetailsEntity = userDetailsRepository.findByUserAccount(user);
@@ -168,6 +166,21 @@ public class UserServices {
         }
     }
 
+    public UserInformationDto getUserInformation(int id){
+        UserInformationDto userInformation = new UserInformationDto();
+        UserEntity user = userRepository.findById(id).orElseThrow(()-> new AppException("Unknown user",HttpStatus.NOT_FOUND));
+        UserDetailsEntity userDetails = userDetailsRepository.findByUserId(id);
+        //add to dto
+        userInformation.setUserId(user.getId());
+        userInformation.setUsername(user.getUsername());
+        userInformation.setFullName(userInformation.getFullName());
+        userInformation.setPhone(userDetails.getPhone());
+        userInformation.setEmail(userDetails.getEmail());
+        userInformation.setCoverUrl(userDetails.getCoverURL());
+        userInformation.setAvatarUrl(userDetails.getProfileURL());
+
+        return userInformation;
+    }
 
 
 }

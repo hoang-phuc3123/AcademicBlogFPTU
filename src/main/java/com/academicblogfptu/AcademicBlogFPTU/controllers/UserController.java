@@ -56,5 +56,9 @@ public class UserController {
         return ResponseEntity.ok("Change successfully!");
     }
 
-
+    @GetMapping("/user/information")
+    public ResponseEntity<UserInformationDto> getUserInformation(@RequestHeader("Authorization") String headerValue){
+        UserInformationDto userInformationDto = userService.getUserInformation(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))).getId());
+        return ResponseEntity.ok(userInformationDto);
+    }
 }
