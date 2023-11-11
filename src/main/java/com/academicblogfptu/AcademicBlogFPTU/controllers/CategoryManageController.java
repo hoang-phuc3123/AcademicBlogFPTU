@@ -32,11 +32,17 @@ public class CategoryManageController {
     }
 
     @GetMapping("/categories")
-    public ResponseEntity<List<CategoryDto>> getAllTags() {
+    public ResponseEntity<List<CategoryDto>> getAllCategories() {
 
             List<CategoryDto> categories = categoryServices.buildCategoryTree();
             return ResponseEntity.ok(categories);
-        }
+    }
+
+    @GetMapping("/subject-categories-and-tags")
+    public ResponseEntity<List<String>> getSubjectCategory() {
+        List<String> categoriesAndTags = categoryServices.getSubjectCategoriesAndTag();
+        return ResponseEntity.ok(categoriesAndTags);
+    }
 
 
     @PostMapping("/admin/edit-category")
