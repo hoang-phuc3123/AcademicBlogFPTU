@@ -127,41 +127,19 @@ public class PostServices {
     public List<CommentDto> getCommentsForPost(int postId) {
         List<CommentDto> comments = new ArrayList<>();
 
-        List<CommentEntity> rootComments = commentRepository.findByPostIdAndParentCommentIsNull(postId);
+        List<CommentEntity> rootComments = commentRepository.findByPostId(postId);
 
         for (CommentEntity rootComment : rootComments) {
             Integer parentCommentId = (rootComment.getParentComment() !=  null) ? rootComment.getParentComment().getId() : null;
             UserDetailsEntity userDetails = userDetailsRepository.findByUserId(rootComment.getUser().getId());
             CommentDto commentDto = new CommentDto(rootComment.getId(), userDetails.getFullName(), userDetails.getProfileURL(), rootComment.getContent(),
                     rootComment.isEdited(), rootComment.getNumOfUpvote(), rootComment.getNumOfDownvote(),
-                    rootComment.getDateOfComment().format(formatter), rootComment.getPost().getId(), parentCommentId, null);
-
-            List<CommentDto> replyComments = new ArrayList<>();
-            getReplyComments(rootComment, replyComments);
-            commentDto.setReplyComments(replyComments);
+                    rootComment.getDateOfComment().format(formatter), rootComment.getPost().getId(), parentCommentId);
 
             comments.add(commentDto);
         }
 
         return comments;
-    }
-
-    private void getReplyComments(CommentEntity parentComment, List<CommentDto> replyComments) {
-        List<CommentEntity> directReplyComments = commentRepository.findByParentComment(parentComment);
-
-        for (CommentEntity replyComment : directReplyComments) {
-            Integer parentCommentId = (replyComment.getParentComment() !=  null) ? replyComment.getParentComment().getId() : 0;
-            UserDetailsEntity userDetails = userDetailsRepository.findByUserId(replyComment.getUser().getId());
-            CommentDto commentDto = new CommentDto(replyComment.getId(), userDetails.getFullName(), userDetails.getProfileURL(), replyComment.getContent(),
-                    replyComment.isEdited(), replyComment.getNumOfUpvote(), replyComment.getNumOfDownvote(),
-                    replyComment.getDateOfComment().format(formatter), replyComment.getPost().getId(), parentCommentId, null);
-
-            List<CommentDto> nestedReplyComments = new ArrayList<>();
-            getReplyComments(replyComment, nestedReplyComments);
-            commentDto.setReplyComments(nestedReplyComments);
-
-            replyComments.add(commentDto);
-        }
     }
 
     public List<CategoryListDto> getCategoriesOfPost(List<CategoryEntity> getRelatedCategories){
@@ -418,7 +396,7 @@ public class PostServices {
                     int numOfDownvote = (post.getNumOfDownvote() != null) ? post.getNumOfDownvote() : 0;
 
                     QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), user.getId() , userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getDescription(),post.getContent(),
-                            post.getDateOfPost().format(formatter),numOfUpvote,numOfDownvote ,getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(), post.isRewarded(), post.getSlug());
+                            post.getDateOfPost().format(formatter),numOfUpvote,numOfDownvote ,getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(), post.isRewarded(), post.getSlug(), commentRepository.countNumOfCommentForPost(post.getId()));
                     QAPostList.add(questionAnswerDto);
                 }
             }
@@ -595,7 +573,7 @@ public class PostServices {
             if (tag.getTagName().equalsIgnoreCase("Q&A")) {
                 QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(),  user.getId(), userDetails.getFullName(), userDetails.getProfileURL(), post.getTitle(), post.getDescription(),
                        post.getContent() ,post.getDateOfPost().format(formatter),post.getNumOfUpvote(), post.getNumOfDownvote(),getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())),
-                        getTagOfPost(tag), post.getCoverURL(), post.isRewarded(), post.getSlug());
+                        getTagOfPost(tag), post.getCoverURL(), post.isRewarded(), post.getSlug(), commentRepository.countNumOfCommentForPost(post.getId()));
                 filterQA.add(questionAnswerDto);
             }
         }
@@ -714,7 +692,7 @@ public class PostServices {
     public List<PostListDto> viewFollowedPost(int userId) {
         List<FollowerEntity> followedAccount = followerRepository.findByFollowedBy(userId);
 
-        List<PostEntity> posts = postRepository.findPostForLast7Days();
+        List<PostEntity> posts = postRepository.findAll();
 
         posts.sort(Comparator
                 .comparingInt((PostEntity post) -> post.getNumOfUpvote() - post.getNumOfDownvote())
@@ -747,7 +725,7 @@ public class PostServices {
     public List<QuestionAnswerDto> viewFollowedQA(int userId) {
         List<FollowerEntity> followedAccount = followerRepository.findByFollowedBy(userId);
 
-        List<PostEntity> posts = postRepository.findPostForLast7Days();
+        List<PostEntity> posts = postRepository.findAll();
 
         posts.sort(Comparator
                 .comparingInt((PostEntity post) -> post.getNumOfUpvote() - post.getNumOfDownvote())
@@ -768,7 +746,8 @@ public class PostServices {
 
                     if (tag.getTagName().equalsIgnoreCase("Q&A")){
                         QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), user.getId(),userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getDescription(), post.getContent(),
-                                post.getDateOfPost().format(formatter), post.getNumOfUpvote(), post.getNumOfDownvote(),getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL() ,post.isRewarded(), post.getSlug());
+                                post.getDateOfPost().format(formatter), post.getNumOfUpvote(), post.getNumOfDownvote()
+                                ,getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL() ,post.isRewarded(), post.getSlug(), commentRepository.countNumOfCommentForPost(post.getId()));
                         followedQA.add(questionAnswerDto);
                     }
                 }
@@ -917,7 +896,7 @@ public class PostServices {
 
                     if (tag.getTagName().equalsIgnoreCase("Q&A")) {
                         QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), user.getId() ,userDetails.getFullName(),userDetails.getProfileURL(),post.getTitle(), post.getDescription() ,post.getContent(),
-                                post.getDateOfPost().format(formatter), post.getNumOfUpvote(), post.getNumOfDownvote() ,getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(), post.isRewarded(), post.getSlug());
+                                post.getDateOfPost().format(formatter), post.getNumOfUpvote(), post.getNumOfDownvote() ,getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(), post.isRewarded(), post.getSlug(), commentRepository.countNumOfCommentForPost(post.getId()));
                         QApendingPostList.add(questionAnswerDto);
                     }
             }
@@ -944,7 +923,7 @@ public class PostServices {
 
                 if (tag.getTagName().equalsIgnoreCase("Q&A")) {
                     QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), user.getId() ,userDetails.getFullName(),userDetails.getProfileURL(),post.getTitle(), post.getDescription() ,post.getContent(),
-                            post.getDateOfPost().format(formatter), post.getNumOfUpvote(), post.getNumOfDownvote() ,getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(), post.isRewarded(), post.getSlug());
+                            post.getDateOfPost().format(formatter), post.getNumOfUpvote(), post.getNumOfDownvote() ,getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(), post.isRewarded(), post.getSlug(), commentRepository.countNumOfCommentForPost(post.getId()));
                     QAapprovedPostList.add(questionAnswerDto);
                 }
             }

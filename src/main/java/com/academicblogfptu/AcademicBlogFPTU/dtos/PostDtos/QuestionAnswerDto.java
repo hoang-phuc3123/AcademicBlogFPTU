@@ -48,4 +48,6 @@ public class QuestionAnswerDto {
     private boolean isRewarded;
 
     private String slug;
+
+    private Integer numberOfComment;
 }

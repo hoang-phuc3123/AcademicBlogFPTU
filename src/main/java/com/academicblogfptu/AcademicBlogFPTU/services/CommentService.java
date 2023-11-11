@@ -75,7 +75,7 @@ public class CommentService {
         commentRepository.save(comment);
         return new CommentDto(comment.getId(), userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
                 comment.isEdited(), comment.getNumOfUpvote(), comment.getNumOfDownvote(),
-                comment.getDateOfComment().format(formatter), comment.getPost().getId(), null, null);
+                comment.getDateOfComment().format(formatter), comment.getPost().getId(), null);
     }
 
     public CommentDto editComment(CommentDto commentDto, UserEntity user){
@@ -93,7 +93,7 @@ public class CommentService {
 
         return new CommentDto(comment.getId(), userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
                 comment.isEdited(), comment.getNumOfUpvote(), comment.getNumOfDownvote(),
-                comment.getDateOfComment().format(formatter), comment.getPost().getId(), parentCommentId, null);
+                comment.getDateOfComment().format(formatter), comment.getPost().getId(), parentCommentId);
     }
 
     public void deleteComment(int commentId) {
@@ -151,7 +151,7 @@ public class CommentService {
         commentRepository.save(comment);
         return new CommentDto(comment.getId(), userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
                 comment.isEdited(), comment.getNumOfUpvote(), comment.getNumOfDownvote(),
-                comment.getDateOfComment().format(formatter), comment.getPost().getId(), parentComment.getId(), null);
+                comment.getDateOfComment().format(formatter), comment.getPost().getId(), parentComment.getId());
     }
 
     public List<ReportReasonEntity> viewReportReason(){
