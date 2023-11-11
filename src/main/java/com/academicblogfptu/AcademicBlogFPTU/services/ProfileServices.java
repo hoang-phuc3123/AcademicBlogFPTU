@@ -47,6 +47,9 @@ public class ProfileServices {
     private PostServices postServices;
 
     @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
     private PendingReportRepository pendingReportRepository;
 
     @Autowired
@@ -178,7 +181,7 @@ public class ProfileServices {
                     int numOfDownvote = (post.getNumOfDownvote() != null) ? post.getNumOfDownvote() : 0;
 
                     QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription() ,post.getContent(),
-                            post.getDateOfPost().format(formatter), numOfUpvote, numOfDownvote, postServices.getCategoriesOfPost(postServices.getRelatedCategories(post.getCategory().getId())), postServices.getTagOfPost(tag), post.getCoverURL(), post.isRewarded(), post.getSlug());
+                            post.getDateOfPost().format(formatter), numOfUpvote, numOfDownvote, postServices.getCategoriesOfPost(postServices.getRelatedCategories(post.getCategory().getId())), postServices.getTagOfPost(tag), post.getCoverURL(), post.isRewarded(), post.getSlug(), commentRepository.countNumOfCommentForPost(post.getId()));
                     QAPostList.add(questionAnswerDto);
                 }
             }

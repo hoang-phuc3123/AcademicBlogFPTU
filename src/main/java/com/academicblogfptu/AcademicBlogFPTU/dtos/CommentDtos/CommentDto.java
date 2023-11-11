@@ -32,5 +32,4 @@ public class CommentDto {
 
     private Integer parent_id;
 
-    private List<CommentDto> replyComments;
 }

@@ -14,4 +14,9 @@ public interface CommentRepository extends JpaRepository<CommentEntity, Integer>
     List<CommentEntity> findByParentComment(CommentEntity parentComment);
 
     List<CommentEntity> findByPostIdAndParentCommentIsNull(Integer postId);
+
+    List<CommentEntity> findByPostId(Integer postId);
+
+    @Query(value = "SELECT count(*) FROM comment WHERE post_id = :postId", nativeQuery = true)
+    int countNumOfCommentForPost(int postId);
 }
