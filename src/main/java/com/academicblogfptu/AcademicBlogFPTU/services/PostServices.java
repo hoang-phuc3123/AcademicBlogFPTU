@@ -4,6 +4,7 @@ import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.CategoryLis
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.TagDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.CommentDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.PostDtos.*;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.SearchMultipleDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.*;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.*;
@@ -947,5 +948,49 @@ public class PostServices {
         }else  {
             throw new AppException("This postId does not belong to Q&A tag", HttpStatus.NOT_FOUND);
         }
+    }
+
+    public SearchMultipleResultDto searchMultiple(SearchMultipleDto searchMultipleDto){
+
+        List<String> listOfTagsAndCategories = searchMultipleDto.getListTagsAndCategories();
+        List<Integer> tagList = new ArrayList<>();
+        List<Integer> categoryList = new ArrayList<>();
+        //filter the tag in the list
+        List<TagEntity> tags = tagRepository.findAll();
+        for (TagEntity tag: tags) {
+            if(listOfTagsAndCategories.contains(tag.getTagName())){
+                listOfTagsAndCategories.remove(tag.getTagName());
+                tagList.add(tag.getId());
+            }
+        }
+        for(String categoryName: listOfTagsAndCategories){
+            CategoryEntity category = categoryRepository.findByCategoryName(categoryName).orElseThrow(()-> new AppException("unknown category",HttpStatus.NOT_FOUND));
+            categoryList.add(category.getId());
+        }
+
+        List<PostEntity> postsRaw = postRepository.findByCategoriesAndTags(categoryList,tagList);
+        List<PostListDto> postList = new ArrayList<>();
+        List<QuestionAnswerDto> qaList = new ArrayList<>();
+
+        for(PostEntity post:postsRaw){
+            UserEntity user = userRepository.findById(post.getUser().getId())
+                    .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+            UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
+                    .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+            TagEntity tag = tagRepository.findById(post.getTag().getId())
+                    .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
+
+            if (tag.getTagName().equalsIgnoreCase("Q&A")){
+                QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), user.getId(),userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getDescription(), post.getContent(),
+                        post.getDateOfPost().format(formatter), post.getNumOfUpvote(), post.getNumOfDownvote()
+                        ,getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL() ,post.isRewarded(), post.getSlug(), commentRepository.countNumOfCommentForPost(post.getId()));
+                qaList.add(questionAnswerDto);
+            }else{
+                PostListDto postListDto = new PostListDto(post.getId(), user.getId(),userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getDescription(),
+                        post.getDateOfPost().format(formatter), getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL() ,post.isRewarded(), post.getSlug());
+                postList.add(postListDto);
+            }
+        }
+        return new SearchMultipleResultDto(postList,qaList);
     }
 }

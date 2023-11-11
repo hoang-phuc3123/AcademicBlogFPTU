@@ -1,6 +1,6 @@
 package com.academicblogfptu.AcademicBlogFPTU.config;
 
-import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDetailsDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.GoogleUserDetailsDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDto;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import com.auth0.jwt.JWT;
@@ -92,7 +92,7 @@ public class UserAuthProvider {
 
         DecodedJWT decoded = verifier.verify(token);
 
-        UserDetailsDto user = userService.findByEmail(decoded.getSubject());
+        GoogleUserDetailsDto user = userService.findByEmail(decoded.getSubject());
 
         return new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
     }

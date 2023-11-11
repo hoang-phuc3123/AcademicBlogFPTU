@@ -3,7 +3,7 @@ package com.academicblogfptu.AcademicBlogFPTU.controllers;
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.GoogleTokenDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.LoginRequestDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDetailsDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.GoogleUserDetailsDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDto;
 import com.academicblogfptu.AcademicBlogFPTU.services.TokenServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
@@ -85,7 +85,7 @@ public class GoogleLoginController {
                 else {
                     picture = null;
                 }
-                UserDetailsDto userDetailsDto = new UserDetailsDto(email, name, picture);
+                GoogleUserDetailsDto userDetailsDto = new GoogleUserDetailsDto(email, name, picture);
                 LoginRequestDto loginDto = new LoginRequestDto(email, generateRandomPassword(10).toCharArray());
                 UserDto userDto = userService.register(loginDto);
                 userService.RegisterUserDetail(userDetailsDto);
