@@ -95,8 +95,6 @@ public class PostServices {
         return result;
     }
 
-
-
     public boolean isApprove(int id) {
         PostDetailsEntity post = postDetailsRepository.findByPostId(id)
                 .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
@@ -334,21 +332,13 @@ public class PostServices {
 
         postRepository.save(newPost);
 
-        PostDetailsEntity postDetails = postDetailsRepository.findByPostId(post.getId())
-                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
-
-        postDetails.setType("Edit");
-        postDetails.setUser(null);
-        postDetails.setDateOfAction(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
-        postDetailsRepository.save(postDetails);
-
         return new PostDto(newPost.getId(), user.getId(),userDetails.getFullName() , userDetails.getProfileURL(),newPost.getTitle(), newPost.getDescription(),newPost.getContent(), newPost.getDateOfPost().format(formatter)
                 , newPost.getNumOfUpvote(), newPost.getNumOfDownvote(), newPost.isRewarded(), newPost.isEdited()
                 , newPost.isAllowComment() ,getCategoriesOfPost(getRelatedCategories(newPost.getCategory().getId())), getTagOfPost(newPost.getTag()), newPost.getCoverURL(), newPost.getSlug(), getCommentsForPost(newPost.getId()));
     }
 
     public List<PostListDto> viewRewardedPost() {
-        List<PostEntity> list = postRepository.findAll();
+        List<PostEntity> list = postRepository.getAllApprovedPost();
 
         list.sort(Comparator
                 .comparingInt((PostEntity post) -> post.getNumOfUpvote() - post.getNumOfDownvote())
@@ -357,7 +347,7 @@ public class PostServices {
         List<PostListDto> rewardedPostList = new ArrayList<>();
         for (PostEntity post : list) {
 
-            if (isApprove(post.getId()) && post.isRewarded()) {
+            if (post.isRewarded()) {
                 UserEntity user = userRepository.findById(post.getUser().getId())
                         .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
@@ -375,7 +365,7 @@ public class PostServices {
     }
 
     public List<QuestionAnswerDto> viewQuestionAndAnswerPost() {
-        List<PostEntity> list = postRepository.findAll();
+        List<PostEntity> list = postRepository.getAllApprovedPost();
         List<QuestionAnswerDto> QAPostList = new ArrayList<>();
 
         list.sort(Comparator
@@ -384,7 +374,6 @@ public class PostServices {
 
         for (PostEntity post : list) {
 
-            if (isApprove(post.getId())) {
                 UserEntity user = userRepository.findById(post.getUser().getId())
                         .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
@@ -400,20 +389,19 @@ public class PostServices {
                             post.getDateOfPost().format(formatter),numOfUpvote,numOfDownvote ,getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(), post.isRewarded(), post.getSlug(), commentRepository.countNumOfCommentForPost(post.getId()));
                     QAPostList.add(questionAnswerDto);
                 }
-            }
         }
         return QAPostList;
     }
 
     public List<PostListDto> viewByLatestPost(){
-        List<PostEntity> postList = postRepository.findAll();
+        List<PostEntity> postList = postRepository.getAllApprovedPost();
         List<PostListDto> latestPost = new ArrayList<>();
 
         postList.sort(Comparator
                 .comparing(PostEntity::getDateOfPost).reversed());
 
         for (PostEntity post: postList) {
-            if(isApprove(post.getId())) {
+
                 UserEntity user = userRepository.findById(post.getUser().getId())
                         .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
@@ -426,7 +414,6 @@ public class PostServices {
                     latestPost.add(postListDto);
                     //latestPost.sort(Comparator.comparing(PostListDto::getDateOfPost).reversed());
                 }
-            }
         }
         return latestPost;
     }
@@ -457,7 +444,7 @@ public class PostServices {
     }
 
     public List<PostListDto> viewShort(){
-        List<PostEntity> postList = postRepository.findAll();
+        List<PostEntity> postList = postRepository.getAllApprovedPost();
         List<PostListDto> shortPost = new ArrayList<>();
 
         postList.sort(Comparator
@@ -465,7 +452,7 @@ public class PostServices {
                 .thenComparing(PostEntity::getDateOfPost).reversed());
 
         for (PostEntity post: postList) {
-            if(isApprove(post.getId()) && post.getLength() <= 300) {
+            if(post.getLength() <= 300) {
                 UserEntity user = userRepository.findById(post.getUser().getId())
                         .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
@@ -588,7 +575,7 @@ public class PostServices {
         List<PostDto> postEditHistoryList = new ArrayList<>();
 
         if (post.getParentPost() == null) {
-            addPostToList(post, postEditHistoryList);
+            return postEditHistoryList;
         } else {
             // Recursively find the parent posts
             findParentPosts(post, postEditHistoryList);
@@ -693,7 +680,7 @@ public class PostServices {
     public List<PostListDto> viewFollowedPost(int userId) {
         List<FollowerEntity> followedAccount = followerRepository.findByFollowedBy(userId);
 
-        List<PostEntity> posts = postRepository.findAll();
+        List<PostEntity> posts = postRepository.getAllApprovedPost();
 
         posts.sort(Comparator
                 .comparingInt((PostEntity post) -> post.getNumOfUpvote() - post.getNumOfDownvote())
@@ -703,7 +690,7 @@ public class PostServices {
 
         for (FollowerEntity following: followedAccount) {
             for (PostEntity post: posts) {
-                if (isApprove(post.getId()) && post.getUser().getId() == following.getUser().getId()){
+                if (post.getUser().getId() == following.getUser().getId()){
 
                     UserEntity user = userRepository.findById(post.getUser().getId())
                             .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
@@ -726,7 +713,7 @@ public class PostServices {
     public List<QuestionAnswerDto> viewFollowedQA(int userId) {
         List<FollowerEntity> followedAccount = followerRepository.findByFollowedBy(userId);
 
-        List<PostEntity> posts = postRepository.findAll();
+        List<PostEntity> posts = postRepository.getAllApprovedPost();
 
         posts.sort(Comparator
                 .comparingInt((PostEntity post) -> post.getNumOfUpvote() - post.getNumOfDownvote())
@@ -736,7 +723,7 @@ public class PostServices {
 
         for (FollowerEntity following: followedAccount) {
             for (PostEntity post: posts) {
-                if (isApprove(post.getId()) && post.getUser().getId() == following.getUser().getId()){
+                if (post.getUser().getId() == following.getUser().getId()){
 
                     UserEntity user = userRepository.findById(post.getUser().getId())
                             .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
@@ -770,14 +757,14 @@ public class PostServices {
     }
 
     public List<PostListDto> viewPendingPost(UserEntity userEntity){
-        List<PostEntity> postList = postRepository.findAll();
+        List<PostEntity> postList = postRepository.getAllPendingPost();
         List<PostListDto> pendingPostList = new ArrayList<>();
 
         UserDetailsEntity userDetailsEntity = userDetailsRepository.findByUserAccount(userEntity)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
 
         for (PostEntity post: postList) {
-            if(isPending(post.getId())) {
+
                 UserEntity user = userRepository.findById(post.getUser().getId())
                         .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
@@ -792,13 +779,12 @@ public class PostServices {
                         pendingPostList.add(postListDto);
                     }
                 }
-            }
         }
         return pendingPostList;
     }
 
     public List<PostListDto> viewApprovedPost(UserEntity userEntity) {
-        List<PostEntity> list = postRepository.findAll();
+        List<PostEntity> list = postRepository.getAllApprovedPost();
         List<PostListDto> approvePostList = new ArrayList<>();
 
         list.sort(Comparator
@@ -809,7 +795,6 @@ public class PostServices {
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
         for (PostEntity post : list) {
 
-            if (isApprove(post.getId())) {
                 UserEntity user = userRepository.findById(post.getUser().getId())
                         .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
@@ -824,7 +809,6 @@ public class PostServices {
                         approvePostList.add(postListDto);
                     }
                 }
-            }
         }
         return approvePostList;
     }
@@ -883,11 +867,11 @@ public class PostServices {
 
     // view Q&A pending list
     public List<QuestionAnswerDto> viewQAPendingPost(){
-        List<PostEntity> postList = postRepository.findAll();
+        List<PostEntity> postList = postRepository.getAllPendingPost();
         List<QuestionAnswerDto> QApendingPostList = new ArrayList<>();
 
         for (PostEntity post: postList) {
-            if(isPending(post.getId())) {
+
                 UserEntity user = userRepository.findById(post.getUser().getId())
                         .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
@@ -900,13 +884,12 @@ public class PostServices {
                                 post.getDateOfPost().format(formatter), post.getNumOfUpvote(), post.getNumOfDownvote() ,getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(), post.isRewarded(), post.getSlug(), commentRepository.countNumOfCommentForPost(post.getId()));
                         QApendingPostList.add(questionAnswerDto);
                     }
-            }
         }
         return QApendingPostList;
     }
 
     public List<QuestionAnswerDto> viewQAApprovedPost(){
-        List<PostEntity> postList = postRepository.findAll();
+        List<PostEntity> postList = postRepository.getAllApprovedPost();
         List<QuestionAnswerDto> QAapprovedPostList = new ArrayList<>();
 
         postList.sort(Comparator
@@ -914,7 +897,7 @@ public class PostServices {
                 .thenComparing(PostEntity::getDateOfPost).reversed());
 
         for (PostEntity post: postList) {
-            if(isApprove(post.getId())) {
+
                 UserEntity user = userRepository.findById(post.getUser().getId())
                         .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
@@ -927,7 +910,6 @@ public class PostServices {
                             post.getDateOfPost().format(formatter), post.getNumOfUpvote(), post.getNumOfDownvote() ,getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(), post.isRewarded(), post.getSlug(), commentRepository.countNumOfCommentForPost(post.getId()));
                     QAapprovedPostList.add(questionAnswerDto);
                 }
-            }
         }
         return QAapprovedPostList;
     }
