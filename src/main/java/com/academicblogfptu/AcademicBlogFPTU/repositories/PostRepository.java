@@ -3,6 +3,7 @@ package com.academicblogfptu.AcademicBlogFPTU.repositories;
 import com.academicblogfptu.AcademicBlogFPTU.entities.PostEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -61,4 +62,10 @@ public interface PostRepository extends JpaRepository<PostEntity, Integer> {
 
     @Query(value = "SELECT COUNT(*) FROM post p JOIN post_details pd ON p.id = pd.post_id WHERE pd.type = 'Approve'", nativeQuery = true)
     int countTotalPost();
+
+    @Query(value = "SELECT DISTINCT p.* FROM post p " +
+            "JOIN post_details pd ON p.id = pd.post_id " +
+            "WHERE (:categoryIds IS NULL OR p.category_id IN (:categoryIds)) AND " +
+            "(:tagIds IS NULL OR p.tag_id IN (:tagIds)) AND pd.type = 'Approve'", nativeQuery = true)
+    List<PostEntity> findByCategoriesAndTags(List<Integer> categoryIds, List<Integer> tagIds);
 }

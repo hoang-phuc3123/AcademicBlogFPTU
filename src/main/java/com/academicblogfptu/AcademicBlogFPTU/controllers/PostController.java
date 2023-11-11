@@ -2,6 +2,7 @@ package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.PostDtos.*;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.SearchMultipleDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.UserRepository;
 import com.academicblogfptu.AcademicBlogFPTU.services.PostServices;
@@ -121,6 +122,13 @@ public class PostController {
         String title = (filter.getTitle() != null) ? filter.getTitle() : "";
         List<QuestionAnswerDto> filterPost = postServices.filterQA(filter.getCategoryId(), filter.getTagId(), title);
         return ResponseEntity.ok(filterPost);
+    }
+
+    @PostMapping("/search/multi-tags-categories")
+    public ResponseEntity<SearchMultipleResultDto> search(@RequestBody SearchMultipleDto searchMultipleDto){
+        SearchMultipleResultDto result = postServices.searchMultiple(searchMultipleDto);
+        return ResponseEntity.ok(result);
+
     }
 
     @PostMapping("drafts/add")

@@ -4,8 +4,10 @@ import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.CategoryDto
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.CategoryListDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.CategoryEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.MajorEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.TagEntity;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.CategoryRepository;
+import com.academicblogfptu.AcademicBlogFPTU.repositories.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,8 @@ import java.util.List;
 public class CategoryServices {
     @Autowired
     private CategoryRepository categoryRepository;
+    @Autowired
+    private TagRepository tagRepository;
 
     public List<CategoryDto> buildCategoryTree(){
         List<CategoryEntity> rootCategories = categoryRepository.findByParentIDIsNull();
@@ -45,6 +49,19 @@ public class CategoryServices {
         categoryDto.setChildCategories(childDtos);
         return categoryDto;
 
+    }
+
+    public List<String> getSubjectCategoriesAndTag(){
+        List<CategoryEntity> categoryEntities = categoryRepository.findByCategoryType("Subject");
+        List<TagEntity> tagEntities = tagRepository.findAll();
+        List<String> categoryAndTag = new ArrayList<>();
+        for (CategoryEntity category: categoryEntities) {
+            categoryAndTag.add(category.getCategoryName());
+        }
+        for(TagEntity tag :tagEntities){
+            categoryAndTag.add(tag.getTagName());
+        }
+        return categoryAndTag;
     }
 
     public void deleteCategoryWithChildren(int categoryId) {
