@@ -139,7 +139,7 @@ public class PostServices {
         for (CommentEntity rootComment : rootComments) {
             Integer parentCommentId = (rootComment.getParentComment() !=  null) ? rootComment.getParentComment().getId() : null;
             UserDetailsEntity userDetails = userDetailsRepository.findByUserId(rootComment.getUser().getId());
-            CommentDto commentDto = new CommentDto(rootComment.getId(), userDetails.getFullName(), userDetails.getProfileURL(), rootComment.getContent(),
+            CommentDto commentDto = new CommentDto(rootComment.getId(), rootComment.getUser().getId() ,userDetails.getFullName(), userDetails.getProfileURL(), rootComment.getContent(),
                     rootComment.isEdited(), rootComment.getNumOfUpvote(), rootComment.getNumOfDownvote(),
                     rootComment.getDateOfComment().format(formatter), rootComment.getPost().getId(), parentCommentId);
 
