@@ -14,6 +14,8 @@ import java.util.List;
 public class CommentDto {
     private int commentId;
 
+    private int userId;
+
     private String accountName;
 
     private String avatarURL;

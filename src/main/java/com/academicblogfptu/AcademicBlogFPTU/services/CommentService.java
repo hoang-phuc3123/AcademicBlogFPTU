@@ -73,7 +73,7 @@ public class CommentService {
         comment.setPost(post);
         comment.setUser(user);
         commentRepository.save(comment);
-        return new CommentDto(comment.getId(), userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
+        return new CommentDto(comment.getId(), user.getId(), userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
                 comment.isEdited(), comment.getNumOfUpvote(), comment.getNumOfDownvote(),
                 comment.getDateOfComment().format(formatter), comment.getPost().getId(), null);
     }
@@ -91,7 +91,7 @@ public class CommentService {
 
         Integer parentCommentId = (comment.getParentComment() !=  null) ? comment.getParentComment().getId() : null;
 
-        return new CommentDto(comment.getId(), userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
+        return new CommentDto(comment.getId(), user.getId(), userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
                 comment.isEdited(), comment.getNumOfUpvote(), comment.getNumOfDownvote(),
                 comment.getDateOfComment().format(formatter), comment.getPost().getId(), parentCommentId);
     }
@@ -149,7 +149,7 @@ public class CommentService {
         comment.setPost(post);
         comment.setUser(user);
         commentRepository.save(comment);
-        return new CommentDto(comment.getId(), userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
+        return new CommentDto(comment.getId(), user.getId(), userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
                 comment.isEdited(), comment.getNumOfUpvote(), comment.getNumOfDownvote(),
                 comment.getDateOfComment().format(formatter), comment.getPost().getId(), parentComment.getId());
     }
