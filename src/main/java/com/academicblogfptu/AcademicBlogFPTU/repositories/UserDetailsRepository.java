@@ -23,6 +23,7 @@ public interface UserDetailsRepository extends JpaRepository<UserDetailsEntity, 
     Optional<UserDetailsEntity> findByUserAccount(UserEntity user);
 
     @Query("SELECT ue.id, ue.username, ue.password, ude.fullName, ude.email, ude.phone, ude.isBanned, ude.isMuted, ude.mutetime, ue.role FROM UserDetailsEntity ude JOIN ude.user ue")
+
     List<Object[]> getAllUsersInfo();
 
     @Query(value = "SELECT u FROM UserDetailsEntity u WHERE CONCAT(u.fullName, '') LIKE %:search%")

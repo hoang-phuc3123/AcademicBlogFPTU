@@ -22,10 +22,12 @@ public class ListUserDto {
     private String fullname;
     private String email;
     private String phone;
+
     @JsonProperty("isBanned")
     private boolean isBanned;
     @JsonProperty("isMuted")
     private boolean isMuted;
     private Timestamp mutetime;
+
     private RoleEntity role;
 }
