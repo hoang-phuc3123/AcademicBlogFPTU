@@ -119,9 +119,17 @@ public class PostServices {
         int numOfUpvote = (post.getNumOfUpvote() != null) ? post.getNumOfUpvote() : 0;
         int numOfDownvote = (post.getNumOfDownvote() != null) ? post.getNumOfDownvote() : 0;
 
-        return new PostDto(post.getId(),user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() , post.getTitle(), post.getDescription() , post.getContent(),
-                post.getDateOfPost().format(formatter), numOfUpvote, numOfDownvote, post.isRewarded(), post.isEdited(), post.isAllowComment(),
-                getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(), post.getSlug(), getCommentsForPost(post.getId()));
+        if (post.getParentPost() != null){
+            PostEntity originPost = postRepository.findBySlug(post.getParentPost().getSlug())
+                    .orElseThrow(() -> new AppException("Post with slug " + slug + " not found", HttpStatus.NOT_FOUND));
+            return new PostDto(post.getId(),user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() , post.getTitle(), post.getDescription() , post.getContent(),
+                    post.getDateOfPost().format(formatter), numOfUpvote, numOfDownvote, post.isRewarded(), post.isEdited(), post.isAllowComment(),
+                    getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(), post.getSlug(), originPost.getSlug() ,getCommentsForPost(post.getId()));
+        }else {
+            return new PostDto(post.getId(),user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() , post.getTitle(), post.getDescription() , post.getContent(),
+                    post.getDateOfPost().format(formatter), numOfUpvote, numOfDownvote, post.isRewarded(), post.isEdited(), post.isAllowComment(),
+                    getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(), post.getSlug(), null ,getCommentsForPost(post.getId()));
+        }
     }
     public List<CommentDto> getCommentsForPost(int postId) {
         List<CommentDto> comments = new ArrayList<>();
@@ -258,7 +266,7 @@ public class PostServices {
         return new PostDto(newPostEntity.getId(), user.getId() ,userDetails.getFullName() , userDetails.getProfileURL(),newPostEntity.getTitle(), newPostEntity.getDescription(), newPostEntity.getContent(), newPostEntity.getDateOfPost().format(formatter)
         , newPostEntity.getNumOfUpvote(), newPostEntity.getNumOfDownvote(), newPostEntity.isRewarded(), newPostEntity.isEdited()
         , newPostEntity.isAllowComment() ,getCategoriesOfPost(getRelatedCategories(newPostEntity.getCategory().getId())), getTagOfPost(newPostEntity.getTag()),
-                newPostEntity.getCoverURL(), newPostEntity.getSlug(), getCommentsForPost(newPostEntity.getId()));
+                newPostEntity.getCoverURL(), newPostEntity.getSlug(), null ,getCommentsForPost(newPostEntity.getId()));
     }
 
     public void postDetail(int postId, String type){
@@ -334,7 +342,7 @@ public class PostServices {
 
         return new PostDto(newPost.getId(), user.getId(),userDetails.getFullName() , userDetails.getProfileURL(),newPost.getTitle(), newPost.getDescription(),newPost.getContent(), newPost.getDateOfPost().format(formatter)
                 , newPost.getNumOfUpvote(), newPost.getNumOfDownvote(), newPost.isRewarded(), newPost.isEdited()
-                , newPost.isAllowComment() ,getCategoriesOfPost(getRelatedCategories(newPost.getCategory().getId())), getTagOfPost(newPost.getTag()), newPost.getCoverURL(), newPost.getSlug(), getCommentsForPost(newPost.getId()));
+                , newPost.isAllowComment() ,getCategoriesOfPost(getRelatedCategories(newPost.getCategory().getId())), getTagOfPost(newPost.getTag()), newPost.getCoverURL(), newPost.getSlug(), post.getSlug() ,getCommentsForPost(newPost.getId()));
     }
 
     public List<PostListDto> viewRewardedPost() {
@@ -603,11 +611,18 @@ public class PostServices {
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
         TagEntity tag = tagRepository.findById(postEntity.getTag().getId())
                 .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
-        postEditHistoryList.add(new PostDto(postEntity.getId(), user.getId(),userDetails.getFullName(), userDetails.getProfileURL(), postEntity.getTitle(), postEntity.getDescription(),
-                postEntity.getContent(), postEntity.getDateOfPost().format(formatter), postEntity.getNumOfUpvote(), postEntity.getNumOfDownvote(),
-                postEntity.isRewarded(), postEntity.isEdited(), postEntity.isAllowComment(), getCategoriesOfPost(getRelatedCategories(postEntity.getCategory().getId())),
-                getTagOfPost(tag), postEntity.getCoverURL(), postEntity.getSlug(), null
-        ));
+
+        if (postEntity.getParentPost() != null){
+            PostEntity originPost = postRepository.findBySlug(postEntity.getParentPost().getSlug())
+                    .orElseThrow(() -> new AppException("Post with slug " + postEntity.getParentPost().getSlug() + " not found", HttpStatus.NOT_FOUND));
+            postEditHistoryList.add(new PostDto(postEntity.getId(),user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() , postEntity.getTitle(), postEntity.getDescription() , postEntity.getContent(),
+                    postEntity.getDateOfPost().format(formatter), postEntity.getNumOfUpvote(), postEntity.getNumOfDownvote(), postEntity.isRewarded(), postEntity.isEdited(), postEntity.isAllowComment(),
+                    getCategoriesOfPost(getRelatedCategories(postEntity.getCategory().getId())), getTagOfPost(tag), postEntity.getCoverURL(), postEntity.getSlug(), originPost.getSlug() ,getCommentsForPost(postEntity.getId())));
+        }else {
+            postEditHistoryList.add(new PostDto(postEntity.getId(),user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() , postEntity.getTitle(), postEntity.getDescription() , postEntity.getContent(),
+                    postEntity.getDateOfPost().format(formatter), postEntity.getNumOfUpvote(), postEntity.getNumOfDownvote(), postEntity.isRewarded(), postEntity.isEdited(), postEntity.isAllowComment(),
+                    getCategoriesOfPost(getRelatedCategories(postEntity.getCategory().getId())), getTagOfPost(tag), postEntity.getCoverURL(), postEntity.getSlug(), null ,getCommentsForPost(postEntity.getId())));
+        }
     }
 
     public void commentToggle(int postId){
