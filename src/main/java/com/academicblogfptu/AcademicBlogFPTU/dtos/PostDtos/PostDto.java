@@ -55,6 +55,8 @@ public class PostDto {
 
     private String slug;
 
+    private String originSlug;
+
     private List<CommentDto> comments;
 }
 
