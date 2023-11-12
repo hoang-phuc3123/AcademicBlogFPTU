@@ -86,7 +86,7 @@ public class UserManageController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<List<ListUserDto>> getAllUsers(@RequestHeader("Authorization") String headerValue) {
+    public ResponseEntity<List<ListUserDto>> getAllUsers( @RequestHeader("Authorization") String headerValue) {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             List<Object[]> userInfos = userDetailsRepository.getAllUsersInfo();
             List<ListUserDto> users = new ArrayList<>();
@@ -95,10 +95,15 @@ public class UserManageController {
                 userDetailsInfo.setId((Integer) userInfo[0]);
                 userDetailsInfo.setUsername(userInfo[1].toString());
                 userDetailsInfo.setPassword(userInfo[2].toString());
-                userDetailsInfo.setFullName(userInfo[3].toString());
+                userDetailsInfo.setFullname(userInfo[3].toString());
                 userDetailsInfo.setEmail(userInfo[4] != null ? userInfo[4].toString() : null); // Check for null
                 userDetailsInfo.setPhone(userInfo[5] != null ? userInfo[5].toString() : null); // Check for null;
-                userDetailsInfo.setRole((RoleEntity) userInfo[6]);
+
+                userDetailsInfo.setBanned((Boolean) userInfo[6]);
+                userDetailsInfo.setMuted((Boolean) userInfo[7]);
+                userDetailsInfo.setMutetime(userInfo[8] != null ? (Timestamp) userInfo[8] : null);
+                userDetailsInfo.setRole((RoleEntity) userInfo[9]);
+
                 users.add(userDetailsInfo);
             }
             return ResponseEntity.ok(users);
