@@ -17,5 +17,7 @@ public class ListUserDto {
     private String fullName;
     private String email;
     private String phone;
+    private Boolean isMuted;
+    private Boolean isBanned;
     private RoleEntity role;
 }
