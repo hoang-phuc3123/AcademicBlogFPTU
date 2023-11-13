@@ -141,6 +141,19 @@ public class PostController {
         return ResponseEntity.ok(newDraft);
     }
 
+    @PostMapping("drafts/send")
+    public ResponseEntity<Boolean> sendDraft(@RequestHeader("Authorization") String headerValue,@RequestBody PostDto postDto){
+        Optional<UserEntity> user = userRepository.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
+        UserEntity userEntity = user.get();
+
+        if (userEntity.getRole().getRoleName().equalsIgnoreCase("lecturer")){
+            postServices.sendDraftLecturer(postDto.getPostId(), userEntity);
+        }else {
+            postServices.sendDraft(postDto.getPostId());
+        }
+        return ResponseEntity.ok(true);
+    }
+
     @GetMapping("drafts/view")
     public ResponseEntity<Map<String, List<?>>> viewDraft(@RequestHeader("Authorization") String headerValue){
         Optional<UserEntity> user = userRepository.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));

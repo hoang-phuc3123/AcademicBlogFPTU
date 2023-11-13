@@ -692,6 +692,27 @@ public class PostServices {
         return result;
     }
 
+    public void sendDraft(int postId){
+        PostDetailsEntity post = postDetailsRepository.findByPostId(postId)
+                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
+
+        post.setType("Request");
+        post.setDateOfAction(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
+        postDetailsRepository.save(post);
+    }
+
+    public void sendDraftLecturer(int postId, UserEntity user){
+
+        PostDetailsEntity postDetails = postDetailsRepository.findByPostId(postId)
+                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
+
+        postDetails.setDateOfAction(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
+        postDetails.setType("Approve");
+        postDetails.setUser(user);
+
+        postDetailsRepository.save(postDetails);
+    }
+
     public List<PostListDto> viewFollowedPost(int userId) {
         List<FollowerEntity> followedAccount = followerRepository.findByFollowedBy(userId);
 
