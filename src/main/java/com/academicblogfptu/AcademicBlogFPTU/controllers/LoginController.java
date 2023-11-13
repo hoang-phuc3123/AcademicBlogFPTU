@@ -32,7 +32,13 @@ public class LoginController {
 
     @PostMapping("/login")
     public ResponseEntity<UserDto> login(@RequestBody LoginRequestDto loginRequestDto) {
-        UserDto userDto = userService.login(loginRequestDto);
+        UserDto userDto = new UserDto();
+        if (loginRequestDto.getUsername().contains("@")) {
+            userDto = userService.loginbyEmail(loginRequestDto);
+        }
+        else {
+            userDto = userService.login(loginRequestDto);
+        }
         String refreshToken = UUID.randomUUID().toString();
         String token = userAuthProvider.createToken(userDto.getUsername(),900000);
         userDto.setToken(token);
