@@ -13,6 +13,7 @@ import java.util.List;
 @Builder
 public class SearchMultipleDto {
 
+    private String title;
     private List<String> listTagsAndCategories;
 
 }
