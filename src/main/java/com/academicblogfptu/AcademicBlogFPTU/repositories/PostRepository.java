@@ -11,6 +11,7 @@ import java.util.Optional;
 public interface PostRepository extends JpaRepository<PostEntity, Integer> {
     Optional<PostEntity> findById(int id);
 
+    PostEntity findByParentPost(PostEntity parentPost);
     Optional<PostEntity> findBySlug(String slug);
     Long countByUserId(int id);
 

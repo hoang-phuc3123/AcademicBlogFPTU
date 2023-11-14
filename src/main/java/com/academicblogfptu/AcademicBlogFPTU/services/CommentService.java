@@ -49,6 +49,9 @@ public class CommentService {
     @Autowired
     private final AdminServices adminServices;
 
+    @Autowired
+    private final BadgeServices badgeServices;
+
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     ZoneId vietnamZone = ZoneId.of("Asia/Ho_Chi_Minh");
@@ -64,6 +67,8 @@ public class CommentService {
 
         UserDetailsEntity userDetails = userDetailsRepository.findByUserId(user.getId());
 
+        List<BadgeEntity> userBadges = badgeServices.findBadgesByUserId(user.getId());
+
         comment.setContent(createCommentDto.getContent());
         comment.setDateOfComment(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
         comment.setNumOfUpvote(0);
@@ -75,7 +80,7 @@ public class CommentService {
         commentRepository.save(comment);
         return new CommentDto(comment.getId(), user.getId(), userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
                 comment.isEdited(), comment.getNumOfUpvote(), comment.getNumOfDownvote(),
-                comment.getDateOfComment().format(formatter), comment.getPost().getId(), null);
+                comment.getDateOfComment().format(formatter), comment.getPost().getId(), null, userBadges);
     }
 
     public CommentDto editComment(CommentDto commentDto, UserEntity user){
@@ -83,6 +88,8 @@ public class CommentService {
                 .orElseThrow(()-> new AppException("Unknown comment",  HttpStatus.NOT_FOUND));
 
         UserDetailsEntity userDetails = userDetailsRepository.findByUserId(user.getId());
+
+        List<BadgeEntity> userBadges = badgeServices.findBadgesByUserId(user.getId());
 
         comment.setContent(commentDto.getContent());
         comment.setEdited(true);
@@ -93,7 +100,7 @@ public class CommentService {
 
         return new CommentDto(comment.getId(), user.getId(), userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
                 comment.isEdited(), comment.getNumOfUpvote(), comment.getNumOfDownvote(),
-                comment.getDateOfComment().format(formatter), comment.getPost().getId(), parentCommentId);
+                comment.getDateOfComment().format(formatter), comment.getPost().getId(), parentCommentId, userBadges);
     }
 
     public void deleteComment(int commentId) {
@@ -140,6 +147,8 @@ public class CommentService {
 
         UserDetailsEntity userDetails = userDetailsRepository.findByUserId(user.getId());
 
+        List<BadgeEntity> userBadges = badgeServices.findBadgesByUserId(user.getId());
+
         comment.setContent(replyCommentDto.getContent());
         comment.setDateOfComment(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
         comment.setNumOfUpvote(0);
@@ -151,7 +160,7 @@ public class CommentService {
         commentRepository.save(comment);
         return new CommentDto(comment.getId(), user.getId(), userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
                 comment.isEdited(), comment.getNumOfUpvote(), comment.getNumOfDownvote(),
-                comment.getDateOfComment().format(formatter), comment.getPost().getId(), parentComment.getId());
+                comment.getDateOfComment().format(formatter), comment.getPost().getId(), parentComment.getId(), userBadges);
     }
 
     public List<ReportReasonEntity> viewReportReason(){
