@@ -48,7 +48,7 @@ public class LoginController {
         String cvt = convertIPv6ToIPv4(ipAddress);
         URL url = null;
         try {
-            url = new URL("https://lvnsoft.store/RequestCount/visit-count.php?ip=" + cvt);
+            url = new URL("https://lvnsoft.store/TotalVisit/visit-count.php?ip=" + cvt);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             int responseCode = connection.getResponseCode();
