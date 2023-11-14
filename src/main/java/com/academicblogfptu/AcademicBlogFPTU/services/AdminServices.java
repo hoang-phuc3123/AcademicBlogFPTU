@@ -166,6 +166,13 @@ public class AdminServices {
         UserEntity user = optionalUser.get();
         UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+
+        List<PendingReportEntity> pendingReportProfile = pendingReportRepository.findByContentIdAndReportType(user.getId(),"Profile");
+
+        if (!pendingReportProfile.isEmpty()){
+            deletePendingReportedProfile(user.getId());
+        }
+
         userDetails.setMuted(true);
         Timestamp timespan = new Timestamp(muteDuration.getTime());
         userDetails.setMutetime(timespan);

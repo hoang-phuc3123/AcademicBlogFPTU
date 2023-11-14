@@ -253,6 +253,13 @@ public class PostServices {
         PostEntity post = postRepository.findById(id)
                 .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
 
+        PostEntity editPost = postRepository.findByParentPost(post);
+
+        if (editPost != null){
+            editPost.setParentPost(null);
+            postRepository.save(editPost);
+        }
+
         if (post.getParentPost() != null) {
             PostEntity parentPost = postRepository.findBySlug(post.getParentPost().getSlug())
                     .orElseThrow(() -> new AppException("Unknown parent post", HttpStatus.NOT_FOUND));
