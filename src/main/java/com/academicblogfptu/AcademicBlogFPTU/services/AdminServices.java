@@ -193,6 +193,7 @@ public class AdminServices {
         UserEntity user = optionalUser.get();
         UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+
         userDetails.setMuted(true);
         Timestamp timespan = new Timestamp(muteDuration.getTime());
         userDetails.setMutetime(timespan);
