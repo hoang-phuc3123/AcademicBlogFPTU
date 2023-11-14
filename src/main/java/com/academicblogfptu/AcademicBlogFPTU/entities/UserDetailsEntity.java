@@ -15,7 +15,10 @@ import java.sql.Timestamp;
 public class UserDetailsEntity {
 
     @Id
-    @Column(name = "email", unique = true)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    @Column(name = "email")
     private String email;
 
     @Column(name = "fullname")
