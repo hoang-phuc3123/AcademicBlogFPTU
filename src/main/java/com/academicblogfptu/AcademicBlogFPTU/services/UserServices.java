@@ -51,6 +51,15 @@ public class UserServices {
         return new GoogleUserDetailsDto(user.getEmail(), user.getFullName(), user.getCoverURL());
     }
 
+    public UserDto loginbyEmail(LoginRequestDto loginRequestDto) {
+        UserDetailsEntity userDetails = userDetailsRepository.findByEmail(loginRequestDto.getUsername())
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+        if (passwordEncoder.matches(CharBuffer.wrap(loginRequestDto.getPassword()), userDetails.getUser().getPassword())) {
+            return new UserDto(userDetails.getUser().getId(),userDetails.getUser().getUsername(), userDetails.getFullName(), userDetails.isBanned(), userDetails.isMuted(),userDetails.getMutetime(), userDetails.getUser().getRole().getRoleName(), userDetails.getProfileURL(), userDetails.getCoverURL(),"" , "");
+        }
+        throw new AppException("Invalid password", HttpStatus.UNAUTHORIZED);
+    }
+
     public UserDto login(LoginRequestDto loginDto) {
         UserEntity user = userRepository.findByUsername(loginDto.getUsername())
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
