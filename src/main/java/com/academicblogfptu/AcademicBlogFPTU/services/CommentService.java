@@ -4,6 +4,7 @@ import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.CommentDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.CreateCommentDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.ReplyCommentDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.ReportCommentDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.MailStructureDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.*;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.*;
@@ -36,6 +37,8 @@ public class CommentService {
 
     @Autowired
     private final UserRepository userRepository;
+    @Autowired
+    private NotifyByMailServices notifyByMailServices;
 
     @Autowired
     private final PendingReportRepository pendingReportRepository;
@@ -78,6 +81,16 @@ public class CommentService {
         comment.setPost(post);
         comment.setUser(user);
         commentRepository.save(comment);
+
+
+        //send mail
+        MailStructureDto mail = new MailStructureDto();
+        mail.setTriggerId(user.getId());
+        mail.setReceiverId(comment.getPost().getUser().getId());
+        mail.setMailType("Comment");
+        mail.setPostLink("https://fblog.site/view/" +comment.getPost().getSlug());
+        notifyByMailServices.sendMail(mail);
+
         return new CommentDto(comment.getId(), user.getId(), userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
                 comment.isEdited(), comment.getNumOfUpvote(), comment.getNumOfDownvote(),
                 comment.getDateOfComment().format(formatter), comment.getPost().getId(), null, userBadges);
@@ -158,6 +171,13 @@ public class CommentService {
         comment.setPost(post);
         comment.setUser(user);
         commentRepository.save(comment);
+        //send mail
+        MailStructureDto mail = new MailStructureDto();
+        mail.setTriggerId(user.getId());
+        mail.setReceiverId(parentComment.getUser().getId());
+        mail.setMailType("Reply-comment");
+        mail.setPostLink("https://fblog.site/view/" +comment.getPost().getSlug());
+        notifyByMailServices.sendMail(mail);
         return new CommentDto(comment.getId(), user.getId(), userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
                 comment.isEdited(), comment.getNumOfUpvote(), comment.getNumOfDownvote(),
                 comment.getDateOfComment().format(formatter), comment.getPost().getId(), parentComment.getId(), userBadges);

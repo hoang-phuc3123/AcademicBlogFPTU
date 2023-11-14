@@ -1,6 +1,7 @@
 package com.academicblogfptu.AcademicBlogFPTU.services;
 
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.ReportedCommentDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.MailStructureDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.RegisterDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.ReportProfileDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.ReportedProfileDto;
@@ -64,6 +65,8 @@ public class AdminServices {
 
     @Autowired
     private final CommentRepository commentRepository;
+    @Autowired
+    private NotifyByMailServices notifyByMailServices;
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -143,6 +146,15 @@ public class AdminServices {
 
         List<PendingReportEntity> pendingReportProfile = pendingReportRepository.findByContentIdAndReportType(user.getId(),"Profile");
 
+        String reasonList = null;
+        List<String> listCheck = null;
+        for (PendingReportEntity report : pendingReportProfile) {
+            if(listCheck.contains(report.getContent())){
+                listCheck.add(report.getContent());
+                reasonList = report.getContent()+"\n";
+            }
+        }
+
         if (!pendingReportProfile.isEmpty()){
             deletePendingReportedProfile(user.getId());
         }
@@ -150,6 +162,14 @@ public class AdminServices {
         userDetails.setBanned(true);
 
         userDetailsRepository.save(userDetails);
+
+        //send mail
+        MailStructureDto mail = new MailStructureDto();
+        mail.setTriggerId(user.getId());
+        mail.setReceiverId(user.getId());
+        mail.setMailType("Was-banned");
+        mail.setPostLink(reasonList);
+        notifyByMailServices.sendMail(mail);
     }
 
     public void unbanUser(UserDto userDto){
@@ -159,6 +179,13 @@ public class AdminServices {
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
         userDetails.setBanned(false);
         userDetailsRepository.save(userDetails);
+
+        MailStructureDto mail = new MailStructureDto();
+        mail.setTriggerId(user.getId());
+        mail.setReceiverId(user.getId());
+        mail.setMailType("unban");
+        mail.setPostLink("https://fblog.site");
+        notifyByMailServices.sendMail(mail);
     }
 
     public void muteUser(UserDto userDto, Timestamp muteDuration) {
@@ -170,6 +197,26 @@ public class AdminServices {
         Timestamp timespan = new Timestamp(muteDuration.getTime());
         userDetails.setMutetime(timespan);
         userDetailsRepository.save(userDetails);
+        List<PendingReportEntity> pendingReportProfile = pendingReportRepository.findByContentIdAndReportType(user.getId(),"Profile");
+
+        String reasonList = null;
+        List<String> listCheck = null;
+        for (PendingReportEntity report : pendingReportProfile) {
+            if(listCheck.contains(report.getContent())){
+                listCheck.add(report.getContent());
+                reasonList = report.getContent()+"\n";
+            }
+        }
+
+        if (!pendingReportProfile.isEmpty()){
+            deletePendingReportedProfile(user.getId());
+        }
+        MailStructureDto mail = new MailStructureDto();
+        mail.setTriggerId(user.getId());
+        mail.setReceiverId(user.getId());
+        mail.setMailType("Was-muted");
+        mail.setPostLink(reasonList);
+        notifyByMailServices.sendMail(mail);
     }
 
     public void unmuteUser(UserDto userDto) {
@@ -180,6 +227,12 @@ public class AdminServices {
         userDetails.setMuted(false);
         userDetails.setMutetime(null);
         userDetailsRepository.save(userDetails);
+        MailStructureDto mail = new MailStructureDto();
+        mail.setTriggerId(user.getId());
+        mail.setReceiverId(user.getId());
+        mail.setMailType("unmute");
+        mail.setPostLink("https://fblog.site");
+        notifyByMailServices.sendMail(mail);
     }
 
     public List<ReportedProfileDto> viewReportProfile(){
