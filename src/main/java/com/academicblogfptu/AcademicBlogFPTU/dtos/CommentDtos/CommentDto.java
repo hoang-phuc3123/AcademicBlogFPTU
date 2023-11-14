@@ -1,5 +1,6 @@
 package com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos;
 
+import com.academicblogfptu.AcademicBlogFPTU.entities.BadgeEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -33,5 +34,7 @@ public class CommentDto {
     private int postId;
 
     private Integer parent_id;
+
+    private List<BadgeEntity> userBadges;
 
 }
