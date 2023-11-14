@@ -3,6 +3,7 @@ package com.academicblogfptu.AcademicBlogFPTU.services;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.CategoryListDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.TagDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.CommentDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.MailStructureDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.PostDtos.*;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.SearchMultipleDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.*;
@@ -58,7 +59,8 @@ public class PostServices {
 
     @Autowired
     private final FollowerServices followerServices;
-
+    @Autowired
+    private NotifyByMailServices notifyByMailServices;
     @Autowired
     private final BadgeServices badgeServices;
 
@@ -924,6 +926,15 @@ public class PostServices {
                 .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
         postEntity.setDateOfPost(postDetails.getDateOfAction());
         postRepository.save(postEntity);
+
+        //sent mail notify
+        MailStructureDto mail = new MailStructureDto();
+        mail.setTriggerId(user.getId());
+        mail.setReceiverId(postEntity.getUser().getId());
+        mail.setMailType("Approve-post");
+        mail.setPostLink("https://fblog.site/view/"+postEntity.getSlug());
+        notifyByMailServices.sendMail(mail);
+
     }
 
     public void declinePost(int postId, String reasonOfDecline, UserEntity user){
@@ -950,6 +961,13 @@ public class PostServices {
         postDetails.setDateOfAction(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
         postDetails.setUser(user);
         postDetailsRepository.save(postDetails);
+        //send mail
+        MailStructureDto mail = new MailStructureDto();
+        mail.setTriggerId(user.getId());
+        mail.setReceiverId(postDetails.getUser().getId());
+        mail.setMailType("Decline-post");
+        mail.setPostLink(postDetails.getReasonOfDeclination());
+        notifyByMailServices.sendMail(mail);
     }
 
     // give reward
@@ -1041,6 +1059,14 @@ public class PostServices {
             post.setDateOfPost(postDetails.getDateOfAction());
             postRepository.save(post);
 
+            //sent mail notify
+            MailStructureDto mail = new MailStructureDto();
+            mail.setTriggerId(user.getId());
+            mail.setReceiverId(postDetails.getUser().getId());
+            mail.setMailType("Approve-Q&A");
+            mail.setPostLink("https://fblog.site/view/"+postDetails.getPost().getSlug());
+            notifyByMailServices.sendMail(mail);
+
         }else  {
             throw new AppException("This postId does not belong to Q&A tag", HttpStatus.NOT_FOUND);
         }
@@ -1072,6 +1098,13 @@ public class PostServices {
             postDetails.setDateOfAction(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
         postDetails.setUser(user);
         postDetailsRepository.save(postDetails);
+            //send mail
+            MailStructureDto mail = new MailStructureDto();
+            mail.setTriggerId(user.getId());
+            mail.setReceiverId(postDetails.getUser().getId());
+            mail.setMailType("Decline-Q&A");
+            mail.setPostLink(postDetails.getReasonOfDeclination());
+            notifyByMailServices.sendMail(mail);
         }else  {
             throw new AppException("This postId does not belong to Q&A tag", HttpStatus.NOT_FOUND);
         }
