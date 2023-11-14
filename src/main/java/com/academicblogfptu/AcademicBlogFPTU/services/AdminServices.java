@@ -3,7 +3,6 @@ package com.academicblogfptu.AcademicBlogFPTU.services;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.ReportedCommentDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.MailStructureDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.RegisterDto;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.ReportProfileDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.ReportedProfileDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.*;
@@ -147,7 +146,7 @@ public class AdminServices {
         List<PendingReportEntity> pendingReportProfile = pendingReportRepository.findByContentIdAndReportType(user.getId(),"Profile");
 
         String reasonList = null;
-        List<String> listCheck = null;
+        List<String> listCheck = new ArrayList<>();
         for (PendingReportEntity report : pendingReportProfile) {
             if (listCheck == null) {
                 listCheck.add(report.getContent());
@@ -204,8 +203,11 @@ public class AdminServices {
         List<PendingReportEntity> pendingReportProfile = pendingReportRepository.findByContentIdAndReportType(user.getId(),"Profile");
 
         String reasonList = null;
-        List<String> listCheck = null;
+        List<String> listCheck = new ArrayList<>();
         for (PendingReportEntity report : pendingReportProfile) {
+            if (listCheck == null) {
+                listCheck.add(report.getContent());
+            }
             if(listCheck.contains(report.getContent())){
                 listCheck.add(report.getContent());
                 reasonList = report.getContent()+"\n";
