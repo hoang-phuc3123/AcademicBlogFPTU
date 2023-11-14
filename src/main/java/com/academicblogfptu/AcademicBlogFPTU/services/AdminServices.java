@@ -149,6 +149,9 @@ public class AdminServices {
         String reasonList = null;
         List<String> listCheck = null;
         for (PendingReportEntity report : pendingReportProfile) {
+            if (listCheck == null) {
+                listCheck.add(report.getContent());
+            }
             if(listCheck.contains(report.getContent())){
                 listCheck.add(report.getContent());
                 reasonList = report.getContent()+"\n";
