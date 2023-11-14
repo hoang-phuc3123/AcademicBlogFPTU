@@ -35,9 +35,13 @@ public class NotifyByMailServices {
 
         UserDetailsEntity triggerDetails = userDetailsRepository.findByUserId(mailStructureDto.getTriggerId());
         UserDetailsEntity receiverDetails = userDetailsRepository.findByUserId(mailStructureDto.getReceiverId());
-        if( triggerDetails == null || receiverDetails == null || receiverDetails.getId() == triggerDetails.getId()){
+        if( triggerDetails == null || receiverDetails == null ){
             throw new AppException("Unknown user", HttpStatus.NOT_FOUND);
-        } else {
+        }
+        else if (receiverDetails.getId() == triggerDetails.getId()) {
+            return null;
+        }
+        else {
             mailStructureDto.setReceiverName(receiverDetails.getFullName());
             mailStructureDto.setReceiverMail(receiverDetails.getEmail());
             mailStructureDto.setTriggerName(triggerDetails.getFullName());
@@ -148,6 +152,9 @@ public class NotifyByMailServices {
 
     public void sendMail(MailStructureDto mailStructureDto){
         MailStructureDto baseMail = setAllFieldsToSendMail(mailStructureDto);
+        if (baseMail == null) {
+            return;
+        }
         SimpleMailMessage mail = new SimpleMailMessage();
         mail.setFrom(fromMail);
 
