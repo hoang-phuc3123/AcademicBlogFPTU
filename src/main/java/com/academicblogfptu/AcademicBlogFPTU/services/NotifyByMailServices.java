@@ -35,9 +35,9 @@ public class NotifyByMailServices {
 
         UserDetailsEntity triggerDetails = userDetailsRepository.findByUserId(mailStructureDto.getTriggerId());
         UserDetailsEntity receiverDetails = userDetailsRepository.findByUserId(mailStructureDto.getReceiverId());
-        if(triggerDetails == null || receiverDetails ==null){
+        if( triggerDetails == null || receiverDetails == null || receiverDetails.getId() == triggerDetails.getId()){
             throw new AppException("Unknown user", HttpStatus.NOT_FOUND);
-        }else{
+        } else {
             mailStructureDto.setReceiverName(receiverDetails.getFullName());
             mailStructureDto.setReceiverMail(receiverDetails.getEmail());
             mailStructureDto.setTriggerName(triggerDetails.getFullName());
@@ -51,12 +51,12 @@ public class NotifyByMailServices {
                                     + mailStructureDto.getPostLink()
                     );
                     break;
-                case "Answer-Q&A":
-                    mailStructureDto.setSubject("Câu hỏi của bạn đã được trả lời");
+                case "Comment":
+                    mailStructureDto.setSubject("Câu hỏi/bài viết của bạn đã được phản hồi");
                     mailStructureDto.setMessage(
-                            "Câu hỏi của bạn dưới đây đã được "
+                            "Câu hỏi/bài viết của bạn dưới đây đã được "
                                     +mailStructureDto.getTriggerName()+" phản hồi!\n\n "
-                                    + "Bài viết:\n\n"
+                                    + "Câu hỏi/bài viết:\n\n"
                                     + mailStructureDto.getPostLink()
                     );
                     break;
@@ -154,7 +154,7 @@ public class NotifyByMailServices {
         mail.setSubject(baseMail.getSubject());
         mail.setText(baseMail.getMessage());
         mail.setTo(baseMail.getReceiverMail());
-        mailSender.send(mail);
+       // mailSender.send(mail);
     }
 
 }
