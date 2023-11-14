@@ -41,46 +41,49 @@ public class UserManageController {
     }
 
     @GetMapping("/dashboard")
-    public ResponseEntity<HashMap<String, Integer>> ViewDashboard(@RequestHeader("Authorization") String headerValue) {
+    public ResponseEntity<HashMap<String, Object>> viewDashboard(@RequestHeader("Authorization") String headerValue) {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
-            List<UserDetailsEntity> userInfos = userDetailsRepository.findAll();
-            List<PostEntity> totalPost = postRepository.findAll();
-            List<ReportedProfileDto> reportedProfileDto = adminService.viewReportProfile();
-            List<ReportedCommentDto> reportCommentList = adminService.viewPendingReportComment();
-            URL url = null;
             try {
-                url = new URL("https://lvnsoft.store/RequestCount/visit-count.php");
+                List<UserDetailsEntity> userInfos = userDetailsRepository.findAll();
+                List<PostEntity> totalPost = postRepository.findAll();
+                List<ReportedProfileDto> reportedProfileDto = adminService.viewReportProfile();
+                List<ReportedCommentDto> reportCommentList = adminService.viewPendingReportComment();
+
+                // Thực hiện HTTP request bằng HttpURLConnection
+                URL url = new URL("https://lvnsoft.store/TotalVisit/visit-count.php");
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("POST");
+
                 int responseCode = connection.getResponseCode();
+
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                     StringBuilder response = new StringBuilder();
                     String line;
+
                     while ((line = reader.readLine()) != null) {
                         response.append(line);
                     }
                     reader.close();
+
                     JsonParser jsonParser = JsonParserFactory.getJsonParser();
                     Map<String, Object> jsonData = jsonParser.parseMap(response.toString());
-                    int totalVisit = (Integer) jsonData.get("count");
-                    HashMap <String, Integer> responseMap = new HashMap<>();
+                    HashMap<String, Object> responseMap = new HashMap<>();
                     responseMap.put("total_user", userInfos.size());
                     responseMap.put("total_post", totalPost.size());
                     responseMap.put("total_reported_profile", reportedProfileDto.size());
                     responseMap.put("total_reported_comment", reportCommentList.size());
-                    responseMap.put("total_visit", totalVisit);
+                    responseMap.put("total_visit", jsonData );
+
                     return ResponseEntity.ok(responseMap);
-                }
-                else {
+                } else {
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
-
-        }
-        else {
+        } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
