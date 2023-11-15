@@ -181,7 +181,7 @@ public class UserServices {
         //add to dto
         userInformation.setUserId(user.getId());
         userInformation.setUsername(user.getUsername());
-        userInformation.setFullName(userInformation.getFullName());
+        userInformation.setFullName(userDetails.getFullName());
         userInformation.setPhone(userDetails.getPhone());
         userInformation.setEmail(userDetails.getEmail());
         userInformation.setCoverUrl(userDetails.getCoverURL());
