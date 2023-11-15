@@ -1132,7 +1132,7 @@ public class PostServices {
             categoryList.add(category.getId());
         }
 
-        List<PostEntity> postsRaw = postRepository.findByCategoriesAndTags(categoryList,tagList);
+        List<PostEntity> postsRaw = postRepository.findByCategoriesAndTagsAndTitle(categoryList,tagList, searchMultipleDto.getTitle());
         List<PostListDto> postList = new ArrayList<>();
         List<QuestionAnswerDto> qaList = new ArrayList<>();
 
