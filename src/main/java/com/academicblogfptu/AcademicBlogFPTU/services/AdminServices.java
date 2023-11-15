@@ -164,7 +164,7 @@ public class AdminServices {
         userDetails.setBanned(true);
 
         userDetailsRepository.save(userDetails);
-
+/*
         //send mail
         MailStructureDto mail = new MailStructureDto();
         mail.setTriggerId(user.getId());
@@ -172,6 +172,8 @@ public class AdminServices {
         mail.setMailType("Was-banned");
         mail.setPostLink(reasonList);
         notifyByMailServices.sendMail(mail);
+
+ */
     }
 
     public void unbanUser(UserDto userDto){
@@ -181,13 +183,15 @@ public class AdminServices {
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
         userDetails.setBanned(false);
         userDetailsRepository.save(userDetails);
-
+/*
         MailStructureDto mail = new MailStructureDto();
         mail.setTriggerId(user.getId());
         mail.setReceiverId(user.getId());
         mail.setMailType("unban");
         mail.setPostLink("https://fblog.site");
         notifyByMailServices.sendMail(mail);
+
+ */
     }
 
     public void muteUser(UserDto userDto, Timestamp muteDuration) {
@@ -217,12 +221,15 @@ public class AdminServices {
         if (!pendingReportProfile.isEmpty()){
             deletePendingReportedProfile(user.getId());
         }
+        /*
         MailStructureDto mail = new MailStructureDto();
         mail.setTriggerId(user.getId());
         mail.setReceiverId(user.getId());
         mail.setMailType("Was-muted");
         mail.setPostLink(reasonList);
         notifyByMailServices.sendMail(mail);
+
+         */
     }
 
     public void unmuteUser(UserDto userDto) {
@@ -233,12 +240,15 @@ public class AdminServices {
         userDetails.setMuted(false);
         userDetails.setMutetime(null);
         userDetailsRepository.save(userDetails);
+        /*
         MailStructureDto mail = new MailStructureDto();
         mail.setTriggerId(user.getId());
         mail.setReceiverId(user.getId());
         mail.setMailType("unmute");
         mail.setPostLink("https://fblog.site");
         notifyByMailServices.sendMail(mail);
+
+         */
     }
 
     public List<ReportedProfileDto> viewReportProfile(){
