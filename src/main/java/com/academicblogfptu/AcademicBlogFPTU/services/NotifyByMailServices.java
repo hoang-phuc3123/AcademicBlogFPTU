@@ -125,7 +125,7 @@ public class NotifyByMailServices {
                     );
                     break;
                 case "Post-decline":
-                    mailStructureDto.setSubject("Bài viết của bạn đã bị từ chối");
+                    mailStructureDto.setSubject("Bài viết của bạn đã bị từ chối!");
                     mailStructureDto.setMessage(
                             "Bài viết của bạn đã bị từ chối vì lý do sau:\n"
                                     + mailStructureDto.getPostLink()
@@ -161,7 +161,7 @@ public class NotifyByMailServices {
         mail.setSubject(baseMail.getSubject());
         mail.setText(baseMail.getMessage());
         mail.setTo(baseMail.getReceiverMail());
-       // mailSender.send(mail);
+        mailSender.send(mail);
     }
 
 }
