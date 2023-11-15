@@ -170,10 +170,9 @@ public class PostController {
     }
 
     @PostMapping("drafts/edit")
-    public ResponseEntity<PostDto> editDraft(@RequestBody EditPostDto editPostDto){
-        PostDto editDraft = postServices.editPost(editPostDto);
-        postServices.postDetail(editDraft.getPostId(), "Draft");
-        return ResponseEntity.ok(editDraft);
+    public ResponseEntity<Boolean> editDraft(@RequestBody EditPostDto editPostDto){
+        postServices.editDraft(editPostDto);
+        return ResponseEntity.ok(true);
     }
 
     @GetMapping("posts/followed")

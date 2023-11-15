@@ -760,6 +760,46 @@ public class PostServices {
         return result;
     }
 
+    public void editDraft(EditPostDto editPostDto){
+        PostEntity draft = postRepository.findById(editPostDto.getPostId())
+                .orElseThrow(()-> new AppException("Unknown post", HttpStatus.NOT_FOUND));
+
+        draft.setTitle(editPostDto.getTitle());
+        if (!editPostDto.getDescription().isEmpty()){
+            draft.setDescription(editPostDto.getDescription());
+        }else {
+            draft.setDescription(null);
+        }
+        draft.setContent(editPostDto.getContent());
+        draft.setDateOfPost(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
+        draft.setRewarded(false);
+        draft.setEdited(true);
+        draft.setLength(editPostDto.getLength());
+        draft.setAllowComment(editPostDto.isAllowComment());
+        UserEntity user = userRepository.findById(draft.getUser().getId())
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+        UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+        draft.setUser(user);
+        draft.setParentPost(null);
+        CategoryEntity category = categoryRepository.findById(editPostDto.getCategoryId())
+                .orElseThrow(() -> new AppException("Unknown category", HttpStatus.NOT_FOUND));
+        draft.setCategory(category);
+        TagEntity tag = tagRepository.findById(editPostDto.getTagId())
+                .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
+        draft.setTag(tag);
+
+        if (!editPostDto.getCoverURL().isEmpty()){
+            draft.setCoverURL(editPostDto.getCoverURL());
+        }else {
+            draft.setCoverURL(null);
+        }
+
+        draft.setSlug(editPostDto.getSlug());
+
+        postRepository.save(draft);
+    }
+
     public void sendDraft(int postId){
 
         PostEntity draft = postRepository.findById(postId)
