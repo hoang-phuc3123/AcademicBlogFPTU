@@ -761,15 +761,30 @@ public class PostServices {
     }
 
     public void sendDraft(int postId){
-        PostDetailsEntity post = postDetailsRepository.findByPostId(postId)
+
+        PostEntity draft = postRepository.findById(postId)
+                .orElseThrow(()-> new AppException("Unknown post", HttpStatus.NOT_FOUND));
+
+        draft.setDateOfPost(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
+
+        postRepository.save(draft);
+
+        PostDetailsEntity postDetails = postDetailsRepository.findByPostId(postId)
                 .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
 
-        post.setType("Request");
-        post.setDateOfAction(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
-        postDetailsRepository.save(post);
+        postDetails.setType("Request");
+        postDetails.setDateOfAction(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
+        postDetailsRepository.save(postDetails);
     }
 
     public void sendDraftLecturer(int postId, UserEntity user){
+
+        PostEntity draft = postRepository.findById(postId)
+                .orElseThrow(()-> new AppException("Unknown post", HttpStatus.NOT_FOUND));
+
+        draft.setDateOfPost(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
+
+        postRepository.save(draft);
 
         PostDetailsEntity postDetails = postDetailsRepository.findByPostId(postId)
                 .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
