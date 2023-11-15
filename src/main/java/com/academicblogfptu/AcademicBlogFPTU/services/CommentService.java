@@ -82,7 +82,7 @@ public class CommentService {
         comment.setUser(user);
         commentRepository.save(comment);
 
-
+        /*
         //send mail
         MailStructureDto mail = new MailStructureDto();
         mail.setTriggerId(user.getId());
@@ -90,6 +90,7 @@ public class CommentService {
         mail.setMailType("Comment");
         mail.setPostLink("https://fblog.site/view/" +comment.getPost().getSlug());
         notifyByMailServices.sendMail(mail);
+        */
 
         return new CommentDto(comment.getId(), user.getId(), userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
                 comment.isEdited(), comment.getNumOfUpvote(), comment.getNumOfDownvote(),
@@ -171,6 +172,7 @@ public class CommentService {
         comment.setPost(post);
         comment.setUser(user);
         commentRepository.save(comment);
+        /*
         //send mail
         MailStructureDto mail = new MailStructureDto();
         mail.setTriggerId(user.getId());
@@ -178,6 +180,8 @@ public class CommentService {
         mail.setMailType("Reply-comment");
         mail.setPostLink("https://fblog.site/view/" +comment.getPost().getSlug());
         notifyByMailServices.sendMail(mail);
+
+         */
         return new CommentDto(comment.getId(), user.getId(), userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
                 comment.isEdited(), comment.getNumOfUpvote(), comment.getNumOfDownvote(),
                 comment.getDateOfComment().format(formatter), comment.getPost().getId(), parentComment.getId(), userBadges);

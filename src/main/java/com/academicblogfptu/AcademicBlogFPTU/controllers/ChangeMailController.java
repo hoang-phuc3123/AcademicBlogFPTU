@@ -92,7 +92,6 @@ public class ChangeMailController {
     @PostMapping("/verify-code-mail")
     public ResponseEntity<HashMap<String, String>> VerifyCode(@RequestBody VerifyCodeDto verifyCodeDto) {
         try {
-            // Tạo URL cho yêu cầu
             URL url = new URL("https://lvnsoft.store/change-mail/verify-code.php");
             // Mở kết nối HTTP
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
