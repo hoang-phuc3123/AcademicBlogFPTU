@@ -730,6 +730,10 @@ public class PostServices {
         List<PostEntity> list = postRepository.findAll();
         List<PostListDto> draftList = new ArrayList<>();
         Map<String, List<?>> result = new HashMap<>();
+
+        list.sort(Comparator
+                .comparing(PostEntity::getDateOfPost).reversed());
+
         for (PostEntity post : list) {
 
             if ((isDraft(post.getId()) && post.getUser().getId() == userId)) {
