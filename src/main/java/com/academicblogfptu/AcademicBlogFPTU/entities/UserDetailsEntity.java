@@ -53,6 +53,6 @@ public class UserDetailsEntity {
     private UserEntity user;
 
     @ManyToOne
-    @JoinColumn(name = "major_id", referencedColumnName = "id")
+    @JoinColumn(name = "major_id", referencedColumnName = "id", nullable = true)
     private MajorEntity major;
 }
