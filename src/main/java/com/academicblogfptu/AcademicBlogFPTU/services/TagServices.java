@@ -29,6 +29,9 @@ public class TagServices {
 
     public TagEntity createTag(TagDto tagDto) {
         TagEntity tagEntity = new TagEntity();
+        if(tagRepository.existsByTagName(tagDto.getTagName())){
+            throw new AppException("Tag existed!",HttpStatus.IM_USED);
+        }
         tagEntity.setTagName(tagDto.getTagName());
         return tagRepository.save(tagEntity);
     }
