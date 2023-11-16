@@ -101,7 +101,10 @@ public class PostManageController {
         if (isLecturer(userServices.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             Optional<PostEntity> postEntity = postRepository.findById(postId.getPostId());
             PostEntity post = postEntity.get();
-            postServices.giveReward(post.getId());
+            Optional<UserEntity> user = userRepository.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
+            UserEntity userEntity = user.get();
+
+            postServices.giveReward(post.getId(), userEntity);
 
             return ResponseEntity.ok(true);
         }
