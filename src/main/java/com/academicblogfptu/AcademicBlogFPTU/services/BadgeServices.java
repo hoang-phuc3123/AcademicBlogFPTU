@@ -34,10 +34,10 @@ public class BadgeServices {
 
     public void setRoleBadge(UserEntity user){
         UserBadgeEntity userBadge = new UserBadgeEntity();
-        if(user.getRole().getRoleName().equalsIgnoreCase("Lecturer")){
+        if(user.getRole().getRoleName().equalsIgnoreCase("lecturer")){
             BadgeEntity badge = badgeRepository.findByBadgeName(user.getRole().getRoleName()).orElseThrow(()-> new AppException("Unknown badge!!", HttpStatus.NOT_FOUND));
             userBadge.setBadge(badge);
-        }else if(user.getRole().getRoleName().equalsIgnoreCase("Mentor")){
+        }else if(user.getRole().getRoleName().equalsIgnoreCase("mentor")){
             BadgeEntity badge = badgeRepository.findByBadgeName(user.getRole().getRoleName()).orElseThrow(()-> new AppException("Unknown badge!!", HttpStatus.NOT_FOUND));
             userBadge.setBadge(badge);
         }
@@ -46,15 +46,14 @@ public class BadgeServices {
     }
 
     public void adjustUserRoleBadge(String roleBefore,UserEntity user){
-
-        if((roleBefore.equalsIgnoreCase("Lecturer") || roleBefore.equalsIgnoreCase("Mentor"))
-                && ((user.getRole().getRoleName().equalsIgnoreCase("Admin") || user.getRole().getRoleName().equalsIgnoreCase("Student"))) ){
+        if((roleBefore.equalsIgnoreCase("lecturer") || roleBefore.equalsIgnoreCase("mentor"))
+                && ((user.getRole().getRoleName().equalsIgnoreCase("admin") || user.getRole().getRoleName().equalsIgnoreCase("student"))) ){
             removeUserRoleBadge(user,roleBefore);
-        }else if((roleBefore.equalsIgnoreCase("Admin") || roleBefore.equalsIgnoreCase("Student"))
-                && ((user.getRole().getRoleName().equalsIgnoreCase("Lecturer") || user.getRole().getRoleName().equalsIgnoreCase("Mentor"))) ){
+        }else if((roleBefore.equalsIgnoreCase("admin") || roleBefore.equalsIgnoreCase("student"))
+                && ((user.getRole().getRoleName().equalsIgnoreCase("lecturer") || user.getRole().getRoleName().equalsIgnoreCase("mentor"))) ){
             setRoleBadge(user);
-        } else if ((roleBefore.equalsIgnoreCase("Lecturer") && user.getRole().getRoleName().equalsIgnoreCase("Mentor"))
-                || (roleBefore.equalsIgnoreCase("Mentor") && user.getRole().getRoleName().equalsIgnoreCase("Lecturer"))) {
+        } else if ((roleBefore.equalsIgnoreCase("lecturer") && user.getRole().getRoleName().equalsIgnoreCase("mentor"))
+                || (roleBefore.equalsIgnoreCase("mentor") && user.getRole().getRoleName().equalsIgnoreCase("lecturer"))) {
             changeUserRoleBadge(user,roleBefore);
         }
     }
