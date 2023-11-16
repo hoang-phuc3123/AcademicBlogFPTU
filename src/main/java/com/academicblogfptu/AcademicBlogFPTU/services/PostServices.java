@@ -99,6 +99,8 @@ public class PostServices {
                 TagEntity tag = tagRepository.findById(post.getTag().getId())
                         .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
 
+                List<PostSkillEntity> postSkill = postSkillRepository.findByPost(post);
+
                 if (!tag.getTagName().equalsIgnoreCase("Q&A")){
                     PostListDto postListDto = new PostListDto(post.getId(), user.getId(),userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getDescription(),
                             post.getDateOfPost().format(formatter), getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL() ,post.isRewarded(), post.getSlug());
@@ -168,7 +170,7 @@ public class PostServices {
             Integer parentCommentId = (rootComment.getParentComment() !=  null) ? rootComment.getParentComment().getId() : null;
             UserDetailsEntity userDetails = userDetailsRepository.findByUserId(rootComment.getUser().getId());
             List<BadgeEntity> userBadges = badgeServices.findBadgesByUserId(rootComment.getUser().getId());
-            CommentDto commentDto = new CommentDto(rootComment.getId(), rootComment.getUser().getId() ,userDetails.getFullName(), userDetails.getProfileURL(), rootComment.getContent(),
+            CommentDto commentDto = new CommentDto(rootComment.getId(), rootComment.getUser().getId(), userDetails.getMajor().getId() ,userDetails.getFullName(), userDetails.getProfileURL(), rootComment.getContent(),
                     rootComment.isEdited(), rootComment.getNumOfUpvote(), rootComment.getNumOfDownvote(),
                     rootComment.getDateOfComment().format(formatter), rootComment.getPost().getId(), parentCommentId, userBadges);
 
@@ -386,27 +388,25 @@ public class PostServices {
                     .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
             newPost.setTag(tag);
 
-            if (!editPostDto.getCoverURL().isEmpty()){
-                editPost.setCoverURL(editPostDto.getCoverURL());
+            if (!editPost.getCoverURL().isEmpty()){
+                newPost.setCoverURL(editPost.getCoverURL());
             }else {
-                editPost.setCoverURL(null);
+                newPost.setCoverURL(null);
             }
 
             newPost.setSlug(editPost.getSlug());
 
             postRepository.save(newPost);
 
-            List<PostSkillEntity> postSkills = postSkillRepository.findByPost(newPost);
-
-            if (postSkills != null) {
-                for (PostSkillEntity postSkill: postSkills) {
-                    postSkillRepository.delete(postSkill);
-                }
+            List<PostSkillEntity> postSkills = postSkillRepository.findByPost(editPost);
+            List<String> postSkillList = new ArrayList<>();
+            for (PostSkillEntity postSkill: postSkills) {
+                postSkillList.add(postSkill.getSkill().getSkillName());
             }
 
             // thêm post Skill mới vào
 
-            for (String postSkill: editPostDto.getPostSkill()) {
+            for (String postSkill: postSkillList) {
                 PostSkillEntity postSkillEntity = new PostSkillEntity();
                 SkillEntity skill = skillRepository.findBySkillName(postSkill)
                         .orElseThrow(()-> new AppException("Unknown skill", HttpStatus.NOT_FOUND));
@@ -1105,6 +1105,7 @@ public class PostServices {
         postDetails.setType("Approve");
         postDetails.setDateOfAction(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
         postDetails.setUser(user);
+        postDetails.setReasonOfDeclination(null);
         postDetailsRepository.save(postDetails);
 
         PostEntity postEntity = postRepository.findById(postId)
@@ -1145,7 +1146,7 @@ public class PostServices {
     }
 
     // give reward
-    public void giveReward(int postId){
+    public void giveReward(int postId, UserEntity user){
         PostEntity post = postRepository.findById(postId)
                 .orElseThrow(()-> new AppException("Unknown post", HttpStatus.NOT_FOUND));
 
@@ -1153,8 +1154,13 @@ public class PostServices {
             throw new AppException("Invalid postId", HttpStatus.NOT_FOUND);
         }
 
-        post.setRewarded(true);
-        postRepository.save(post);
+        PostRewardEntity postReward = new PostRewardEntity();
+        postReward.setPost(post);
+        postReward.setUser(user);
+        postRewardRepository.save(postReward);
+
+        //post.setRewarded(true);
+        //postRepository.save(post);
 
     }
     // remove reward
