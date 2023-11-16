@@ -31,7 +31,13 @@ public class SecurityConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeHttpRequests((requests)->requests
-                        .requestMatchers(HttpMethod.POST,"/users/login" , "/users/google-login" , "/users/send-code" , "/users/verify-code" , "/auth/refresh-token" , "/auth/remove-token").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/users/login" ,
+                                "/users/google-login" ,
+                                "/users/send-code" ,
+                                "/users/verify-code" ,
+                                "/auth/refresh-token" ,
+                                "/auth/remove-token"
+                        ).permitAll()
                         .anyRequest().authenticated());
         return http.build();
     }
