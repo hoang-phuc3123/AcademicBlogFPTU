@@ -64,6 +64,18 @@ public class PostServices {
     @Autowired
     private final BadgeServices badgeServices;
 
+    @Autowired
+    private final SkillRepository skillRepository;
+
+    @Autowired
+    private final PostSkillRepository postSkillRepository;
+
+    @Autowired
+    private final PostRewardRepository postRewardRepository;
+
+    @Autowired
+    private final UserSkillRepository userSkillRepository;
+
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     ZoneId vietnamZone = ZoneId.of("Asia/Ho_Chi_Minh");
@@ -140,10 +152,12 @@ public class PostServices {
         int numOfUpvote = (post.getNumOfUpvote() != null) ? post.getNumOfUpvote() : 0;
         int numOfDownvote = (post.getNumOfDownvote() != null) ? post.getNumOfDownvote() : 0;
 
+        List<PostSkillEntity> postSkills = postSkillRepository.findByPost(post);
+
         String reasonOfDecline = (postDetails.getReasonOfDeclination() != null) ? postDetails.getReasonOfDeclination() : null;
             return new PostDto(post.getId(),user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() , post.getTitle(), post.getDescription() , post.getContent(),
                     post.getDateOfPost().format(formatter), numOfUpvote, numOfDownvote, post.isRewarded(), post.isEdited(), post.isAllowComment(),
-                    getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(), post.getSlug(),getCommentsForPost(post.getId()), reasonOfDecline);
+                    getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(), post.getSlug(),getCommentsForPost(post.getId()), reasonOfDecline, getSkillOfPost(postSkills));
     }
     public List<CommentDto> getCommentsForPost(int postId) {
         List<CommentDto> comments = new ArrayList<>();
@@ -172,6 +186,16 @@ public class PostServices {
         }
         getCategories.sort(Comparator.comparing(CategoryListDto::getCategoryId));
         return getCategories;
+    }
+
+    public List<SkillEntity> getSkillOfPost(List<PostSkillEntity> postSkills){
+        List<SkillEntity> skill = new ArrayList<>();
+        for (PostSkillEntity skills: postSkills) {
+            SkillEntity skillEntity = skillRepository.findById(skills.getSkill().getId())
+                    .orElseThrow(()-> new AppException("Unknown skill", HttpStatus.NOT_FOUND));
+            skill.add(skillEntity);
+        }
+        return skill;
     }
 
     public TagDto getTagOfPost(TagEntity tag){
@@ -281,11 +305,21 @@ public class PostServices {
 
         postRepository.save(newPostEntity);
 
+        for (String postSkill: requestPostDto.getPostSkill()) {
+            PostSkillEntity postSkillEntity = new PostSkillEntity();
+            SkillEntity skill = skillRepository.findBySkillName(postSkill)
+                    .orElseThrow(()-> new AppException("Unknown skill", HttpStatus.NOT_FOUND));
+            postSkillEntity.setPost(newPostEntity);
+            postSkillEntity.setSkill(skill);
+            postSkillRepository.save(postSkillEntity);
+        }
+
+        List<PostSkillEntity> postSkills = postSkillRepository.findByPost(newPostEntity);
 
         return new PostDto(newPostEntity.getId(), user.getId() ,userDetails.getFullName() , userDetails.getProfileURL(),newPostEntity.getTitle(), newPostEntity.getDescription(), newPostEntity.getContent(), newPostEntity.getDateOfPost().format(formatter)
         , newPostEntity.getNumOfUpvote(), newPostEntity.getNumOfDownvote(), newPostEntity.isRewarded(), newPostEntity.isEdited()
         , newPostEntity.isAllowComment() ,getCategoriesOfPost(getRelatedCategories(newPostEntity.getCategory().getId())), getTagOfPost(newPostEntity.getTag()),
-                newPostEntity.getCoverURL(), newPostEntity.getSlug(), getCommentsForPost(newPostEntity.getId()), null);
+                newPostEntity.getCoverURL(), newPostEntity.getSlug(), getCommentsForPost(newPostEntity.getId()), null, getSkillOfPost(postSkills));
     }
 
     public void postDetail(int postId, String type){
@@ -362,6 +396,25 @@ public class PostServices {
 
             postRepository.save(newPost);
 
+            List<PostSkillEntity> postSkills = postSkillRepository.findByPost(newPost);
+
+            if (postSkills != null) {
+                for (PostSkillEntity postSkill: postSkills) {
+                    postSkillRepository.delete(postSkill);
+                }
+            }
+
+            // thêm post Skill mới vào
+
+            for (String postSkill: editPostDto.getPostSkill()) {
+                PostSkillEntity postSkillEntity = new PostSkillEntity();
+                SkillEntity skill = skillRepository.findBySkillName(postSkill)
+                        .orElseThrow(()-> new AppException("Unknown skill", HttpStatus.NOT_FOUND));
+                postSkillEntity.setPost(newPost);
+                postSkillEntity.setSkill(skill);
+                postSkillRepository.save(postSkillEntity);
+            }
+
             postDetail(newPost.getId(), "Edit");
 
             //vừa edit trục tiếp trong database vừa lưu vào bài trc khi edit
@@ -422,9 +475,31 @@ public class PostServices {
 
         postRepository.save(editPost);
 
+        // xóa post skill cũ đi
+        List<PostSkillEntity> postSkills = postSkillRepository.findByPost(editPost);
+
+        if (postSkills != null) {
+            for (PostSkillEntity postSkill: postSkills) {
+                postSkillRepository.delete(postSkill);
+            }
+        }
+
+        // thêm post Skill mới vào
+
+        for (String postSkill: editPostDto.getPostSkill()) {
+            PostSkillEntity postSkillEntity = new PostSkillEntity();
+            SkillEntity skill = skillRepository.findBySkillName(postSkill)
+                    .orElseThrow(()-> new AppException("Unknown skill", HttpStatus.NOT_FOUND));
+            postSkillEntity.setPost(editPost);
+            postSkillEntity.setSkill(skill);
+            postSkillRepository.save(postSkillEntity);
+        }
+
+        List<PostSkillEntity> editPostSkills = postSkillRepository.findByPost(editPost);
+
         return new PostDto(editPost.getId(), user.getId(),userDetails.getFullName() , userDetails.getProfileURL(),editPost.getTitle(), editPost.getDescription(),editPost.getContent(), editPost.getDateOfPost().format(formatter)
                 , editPost.getNumOfUpvote(), editPost.getNumOfDownvote(), editPost.isRewarded(), editPost.isEdited()
-                , editPost.isAllowComment() ,getCategoriesOfPost(getRelatedCategories(editPost.getCategory().getId())), getTagOfPost(editPost.getTag()), editPost.getCoverURL(), editPost.getSlug(),getCommentsForPost(editPost.getId()), null);
+                , editPost.isAllowComment() ,getCategoriesOfPost(getRelatedCategories(editPost.getCategory().getId())), getTagOfPost(editPost.getTag()), editPost.getCoverURL(), editPost.getSlug(),getCommentsForPost(editPost.getId()), null, getSkillOfPost(editPostSkills));
     }
 
     public List<PostListDto> viewRewardedPost() {
@@ -695,9 +770,11 @@ public class PostServices {
 
         String reasonOfDecline = (postDetails.getReasonOfDeclination() != null) ? postDetails.getReasonOfDeclination() : null;
 
+        List<PostSkillEntity> postSkills = postSkillRepository.findByPost(postEntity);
+
         postEditHistoryList.add(new PostDto(postEntity.getId(),user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() , postEntity.getTitle(), postEntity.getDescription() , postEntity.getContent(),
                 postEntity.getDateOfPost().format(formatter), postEntity.getNumOfUpvote(), postEntity.getNumOfDownvote(), postEntity.isRewarded(), postEntity.isEdited(), postEntity.isAllowComment(),
-                getCategoriesOfPost(getRelatedCategories(postEntity.getCategory().getId())), getTagOfPost(tag), postEntity.getCoverURL(), postEntity.getSlug(), getCommentsForPost(postEntity.getId()), reasonOfDecline));
+                getCategoriesOfPost(getRelatedCategories(postEntity.getCategory().getId())), getTagOfPost(tag), postEntity.getCoverURL(), postEntity.getSlug(), getCommentsForPost(postEntity.getId()), reasonOfDecline, getSkillOfPost(postSkills)));
     }
 
     public void commentToggle(int postId){
@@ -816,6 +893,25 @@ public class PostServices {
         draft.setSlug(editPostDto.getSlug());
 
         postRepository.save(draft);
+
+        List<PostSkillEntity> postSkills = postSkillRepository.findByPost(draft);
+
+        if (postSkills != null) {
+            for (PostSkillEntity postSkill: postSkills) {
+                postSkillRepository.delete(postSkill);
+            }
+        }
+
+        // thêm post Skill mới vào
+
+        for (String postSkill: editPostDto.getPostSkill()) {
+            PostSkillEntity postSkillEntity = new PostSkillEntity();
+            SkillEntity skill = skillRepository.findBySkillName(postSkill)
+                    .orElseThrow(()-> new AppException("Unknown skill", HttpStatus.NOT_FOUND));
+            postSkillEntity.setPost(draft);
+            postSkillEntity.setSkill(skill);
+            postSkillRepository.save(postSkillEntity);
+        }
     }
 
     public void sendDraft(int postId){
@@ -953,7 +1049,15 @@ public class PostServices {
                 TagEntity tag = tagRepository.findById(post.getTag().getId())
                         .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
 
-                if (post.getCategory().getMajor().getId() == userDetailsEntity.getMajor().getId()) {
+                List<PostSkillEntity> postSkills = postSkillRepository.findByPost(post);
+
+                List<UserSkillEntity> userSkills = userSkillRepository.findByUser(userEntity);
+
+                boolean hasCommonSkills = postSkills.stream()
+                    .map(PostSkillEntity::getSkill)
+                    .anyMatch(skill -> userSkills.stream().anyMatch(userSkill -> userSkill.getSkill().equals(skill)));
+
+                if (post.getCategory().getMajor().getId() == userDetailsEntity.getMajor().getId() || hasCommonSkills) {
                     if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
                         PostListDto postListDto = new PostListDto(post.getId(), user.getId(),userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription(),
                                 post.getDateOfPost().format(formatter), getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(),post.isRewarded(), post.getSlug());

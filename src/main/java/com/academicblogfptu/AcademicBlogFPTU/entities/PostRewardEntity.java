@@ -6,11 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "post_skill")
+@Table(name = "post_reward")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostSkillEntity {
+public class PostRewardEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -20,6 +20,6 @@ public class PostSkillEntity {
     private PostEntity post;
 
     @ManyToOne
-    @JoinColumn(name = "skill_id")
-    private SkillEntity skill;
+    @JoinColumn(name = "account_id")
+    private UserEntity user;
 }
