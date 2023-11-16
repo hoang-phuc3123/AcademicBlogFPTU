@@ -122,7 +122,10 @@ public class PostServices {
         PostEntity post = postRepository.findBySlug(slug)
                 .orElseThrow(() -> new AppException("Post with slug " + slug + " not found", HttpStatus.NOT_FOUND));
 
-        if (isDelete(post.getId()) || isDeclined(post.getId())){
+        PostDetailsEntity postDetails = postDetailsRepository.findByPostId(post.getId())
+                .orElseThrow(() -> new AppException("Post details not found", HttpStatus.NOT_FOUND));
+
+        if (isDelete(post.getId())){
             throw new AppException("Post not found", HttpStatus.NOT_FOUND);
         }
 
@@ -137,33 +140,10 @@ public class PostServices {
         int numOfUpvote = (post.getNumOfUpvote() != null) ? post.getNumOfUpvote() : 0;
         int numOfDownvote = (post.getNumOfDownvote() != null) ? post.getNumOfDownvote() : 0;
 
-        PostEntity editedPost = postRepository.findByParentPost(post);
-
-        if (post.getParentPost() != null){
-            PostEntity originPost = postRepository.findBySlug(post.getParentPost().getSlug())
-                    .orElseThrow(() -> new AppException("Post with slug " + slug + " not found", HttpStatus.NOT_FOUND));
-
-
-            if (editedPost != null){
-                return new PostDto(post.getId(),user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() , post.getTitle(), post.getDescription() , post.getContent(),
-                        post.getDateOfPost().format(formatter), numOfUpvote, numOfDownvote, post.isRewarded(), post.isEdited(), post.isAllowComment(),
-                        getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(), post.getSlug(), originPost.getSlug(), editedPost.getSlug() ,getCommentsForPost(post.getId()));
-            } else {
-                return new PostDto(post.getId(),user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() , post.getTitle(), post.getDescription() , post.getContent(),
-                        post.getDateOfPost().format(formatter), numOfUpvote, numOfDownvote, post.isRewarded(), post.isEdited(), post.isAllowComment(),
-                        getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(), post.getSlug(), originPost.getSlug(), null ,getCommentsForPost(post.getId()));
-            }
-        }else {
-            if (editedPost != null) {
-                return new PostDto(post.getId(),user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() , post.getTitle(), post.getDescription() , post.getContent(),
-                        post.getDateOfPost().format(formatter), numOfUpvote, numOfDownvote, post.isRewarded(), post.isEdited(), post.isAllowComment(),
-                        getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(), post.getSlug(), null, editedPost.getSlug() ,getCommentsForPost(post.getId()));
-            }else {
-                return new PostDto(post.getId(),user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() , post.getTitle(), post.getDescription() , post.getContent(),
-                        post.getDateOfPost().format(formatter), numOfUpvote, numOfDownvote, post.isRewarded(), post.isEdited(), post.isAllowComment(),
-                        getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(), post.getSlug(), null, null ,getCommentsForPost(post.getId()));
-            }
-        }
+        String reasonOfDecline = (postDetails.getReasonOfDeclination() != null) ? postDetails.getReasonOfDeclination() : null;
+            return new PostDto(post.getId(),user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() , post.getTitle(), post.getDescription() , post.getContent(),
+                    post.getDateOfPost().format(formatter), numOfUpvote, numOfDownvote, post.isRewarded(), post.isEdited(), post.isAllowComment(),
+                    getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(), post.getSlug(),getCommentsForPost(post.getId()), reasonOfDecline);
     }
     public List<CommentDto> getCommentsForPost(int postId) {
         List<CommentDto> comments = new ArrayList<>();
@@ -324,7 +304,7 @@ public class PostServices {
         return new PostDto(newPostEntity.getId(), user.getId() ,userDetails.getFullName() , userDetails.getProfileURL(),newPostEntity.getTitle(), newPostEntity.getDescription(), newPostEntity.getContent(), newPostEntity.getDateOfPost().format(formatter)
         , newPostEntity.getNumOfUpvote(), newPostEntity.getNumOfDownvote(), newPostEntity.isRewarded(), newPostEntity.isEdited()
         , newPostEntity.isAllowComment() ,getCategoriesOfPost(getRelatedCategories(newPostEntity.getCategory().getId())), getTagOfPost(newPostEntity.getTag()),
-                newPostEntity.getCoverURL(), newPostEntity.getSlug(), null, null ,getCommentsForPost(newPostEntity.getId()));
+                newPostEntity.getCoverURL(), newPostEntity.getSlug(), getCommentsForPost(newPostEntity.getId()), null);
     }
 
     public void postDetail(int postId, String type){
@@ -353,54 +333,117 @@ public class PostServices {
     }
 
     public PostDto editPost(EditPostDto editPostDto){
-        PostEntity post = postRepository.findById(editPostDto.getPostId())
+        PostEntity editPost = postRepository.findById(editPostDto.getPostId())
                 .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
-        post.setEdited(true);
-        postRepository.save(post);
+        PostDetailsEntity editPostDetails = postDetailsRepository.findByPostId(editPost.getId())
+                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
 
-        //tạo bài post mới
-        PostEntity newPost = new PostEntity();
+        if (editPostDetails.getType().equalsIgnoreCase("Request")) {
+             return editPendingPost(editPostDto);
+        } else {
+            //tạo bài post mới lưu bài viết cũ vào database để view edit history
+            PostEntity newPost = new PostEntity();
 
-        newPost.setTitle(editPostDto.getTitle());
-        if (!editPostDto.getDescription().isEmpty()){
-            newPost.setDescription(editPostDto.getDescription());
-        }else {
-            newPost.setDescription(null);
+            newPost.setTitle(editPost.getTitle());
+            if (!editPost.getDescription().isEmpty()){
+                newPost.setDescription(editPost.getDescription());
+            }else {
+                newPost.setDescription(null);
+            }
+            newPost.setContent(editPost.getContent());
+            newPost.setDateOfPost(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
+            newPost.setNumOfUpvote(0);
+            newPost.setNumOfDownvote(0);
+            newPost.setRewarded(false);
+            newPost.setEdited(false);
+            newPost.setLength(editPost.getLength());
+            newPost.setAllowComment(editPost.isAllowComment());
+            UserEntity user = userRepository.findById(editPost.getUser().getId())
+                    .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+            UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
+                    .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+            newPost.setUser(user);
+            newPost.setParentPost(editPost);
+            CategoryEntity category = categoryRepository.findById(editPost.getCategory().getId())
+                    .orElseThrow(() -> new AppException("Unknown category", HttpStatus.NOT_FOUND));
+            newPost.setCategory(category);
+            TagEntity tag = tagRepository.findById(editPost.getTag().getId())
+                    .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
+            newPost.setTag(tag);
+
+            if (!editPostDto.getCoverURL().isEmpty()){
+                editPost.setCoverURL(editPostDto.getCoverURL());
+            }else {
+                editPost.setCoverURL(null);
+            }
+
+            newPost.setSlug(editPost.getSlug());
+
+            postRepository.save(newPost);
+
+            postDetail(newPost.getId(), "Edit");
+
+            //vừa edit trục tiếp trong database vừa lưu vào bài trc khi edit
+            PostDto postDto = editPendingPost(editPostDto);
+
+            if (user.getRole().getRoleName().equalsIgnoreCase("Lecturer")){
+                editPostDetails.setDateOfAction(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
+                editPostDetails.setType("Approve");
+                editPostDetails.setUser(user);
+                postDetailsRepository.save(editPostDetails);
+            }else {
+                editPostDetails.setDateOfAction(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
+                editPostDetails.setType("Request");
+                editPostDetails.setUser(null);
+                postDetailsRepository.save(editPostDetails);
+            }
+            return postDto;
         }
-        newPost.setContent(editPostDto.getContent());
-        newPost.setDateOfPost(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
-        newPost.setNumOfUpvote(0);
-        newPost.setNumOfDownvote(0);
-        newPost.setRewarded(false);
-        newPost.setEdited(false);
-        newPost.setLength(editPostDto.getLength());
-        newPost.setAllowComment(editPostDto.isAllowComment());
-        UserEntity user = userRepository.findById(post.getUser().getId())
+    }
+
+    public PostDto editPendingPost(EditPostDto editPostDto){
+
+        PostEntity editPost = postRepository.findById(editPostDto.getPostId())
+                .orElseThrow(()-> new AppException("Unknown post", HttpStatus.NOT_FOUND));
+
+        editPost.setTitle(editPostDto.getTitle());
+        if (!editPostDto.getDescription().isEmpty()){
+            editPost.setDescription(editPostDto.getDescription());
+        }else {
+            editPost.setDescription(null);
+        }
+        editPost.setContent(editPostDto.getContent());
+        editPost.setDateOfPost(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
+        editPost.setRewarded(false);
+        editPost.setEdited(true);
+        editPost.setLength(editPostDto.getLength());
+        editPost.setAllowComment(editPostDto.isAllowComment());
+        UserEntity user = userRepository.findById(editPost.getUser().getId())
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
         UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
-        newPost.setUser(user);
-        newPost.setParentPost(post);
+        editPost.setUser(user);
+        editPost.setParentPost(null);
         CategoryEntity category = categoryRepository.findById(editPostDto.getCategoryId())
                 .orElseThrow(() -> new AppException("Unknown category", HttpStatus.NOT_FOUND));
-        newPost.setCategory(category);
+        editPost.setCategory(category);
         TagEntity tag = tagRepository.findById(editPostDto.getTagId())
                 .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
-        newPost.setTag(tag);
+        editPost.setTag(tag);
 
         if (!editPostDto.getCoverURL().isEmpty()){
-            newPost.setCoverURL(editPostDto.getCoverURL());
+            editPost.setCoverURL(editPostDto.getCoverURL());
         }else {
-            newPost.setCoverURL(null);
+            editPost.setCoverURL(null);
         }
 
-        newPost.setSlug(editPostDto.getSlug());
+        editPost.setSlug(editPostDto.getSlug());
 
-        postRepository.save(newPost);
+        postRepository.save(editPost);
 
-        return new PostDto(newPost.getId(), user.getId(),userDetails.getFullName() , userDetails.getProfileURL(),newPost.getTitle(), newPost.getDescription(),newPost.getContent(), newPost.getDateOfPost().format(formatter)
-                , newPost.getNumOfUpvote(), newPost.getNumOfDownvote(), newPost.isRewarded(), newPost.isEdited()
-                , newPost.isAllowComment() ,getCategoriesOfPost(getRelatedCategories(newPost.getCategory().getId())), getTagOfPost(newPost.getTag()), newPost.getCoverURL(), newPost.getSlug(), post.getSlug(), null ,getCommentsForPost(newPost.getId()));
+        return new PostDto(editPost.getId(), user.getId(),userDetails.getFullName() , userDetails.getProfileURL(),editPost.getTitle(), editPost.getDescription(),editPost.getContent(), editPost.getDateOfPost().format(formatter)
+                , editPost.getNumOfUpvote(), editPost.getNumOfDownvote(), editPost.isRewarded(), editPost.isEdited()
+                , editPost.isAllowComment() ,getCategoriesOfPost(getRelatedCategories(editPost.getCategory().getId())), getTagOfPost(editPost.getTag()), editPost.getCoverURL(), editPost.getSlug(),getCommentsForPost(editPost.getId()), null);
     }
 
     public List<PostListDto> viewRewardedPost() {
@@ -640,24 +683,20 @@ public class PostServices {
                 .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
         List<PostDto> postEditHistoryList = new ArrayList<>();
 
-        if (post.getParentPost() == null) {
-            return postEditHistoryList;
-        } else {
-            // Recursively find the parent posts
-            findParentPosts(post, postEditHistoryList);
-        }
+        findByParentPostId(post, postEditHistoryList);
+
+        postEditHistoryList.sort(Comparator.comparing(PostDto::getDateOfPost).reversed());
+
         return postEditHistoryList;
     }
 
-    private void findParentPosts(PostEntity postEntity, List<PostDto> postEditHistoryList) {
+    private void findByParentPostId(PostEntity postEntity, List<PostDto> postEditHistoryList) {
         // Find and add the parent post (if it exists)
-        PostEntity parentPost = postEntity.getParentPost();
-        if (parentPost != null) {
-            addPostToList(parentPost, postEditHistoryList);
-
-            // Continue the recursion if the parent has a parent
-            if (parentPost.getParentPost() != null) {
-                findParentPosts(parentPost, postEditHistoryList);
+        List<PostEntity> childPosts = postRepository.findPostsByParentPost(postEntity);
+        //PostEntity parentPost = postEntity.getParentPost();
+        for (PostEntity childPost: childPosts) {
+            if (isEdit(childPost.getId())){
+                addPostToList(childPost, postEditHistoryList);
             }
         }
     }
@@ -670,31 +709,14 @@ public class PostServices {
         TagEntity tag = tagRepository.findById(postEntity.getTag().getId())
                 .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
 
-        PostEntity editedPost = postRepository.findByParentPost(postEntity);
+        PostDetailsEntity postDetails = postDetailsRepository.findByPostId(postEntity.getId())
+                        .orElseThrow(()-> new AppException("Unknown post details", HttpStatus.NOT_FOUND));
 
-        if (postEntity.getParentPost() != null){
-            PostEntity originPost = postRepository.findBySlug(postEntity.getParentPost().getSlug())
-                    .orElseThrow(() -> new AppException("Post with slug " + postEntity.getParentPost().getSlug() + " not found", HttpStatus.NOT_FOUND));
-            if (editedPost != null) {
-                postEditHistoryList.add(new PostDto(postEntity.getId(),user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() , postEntity.getTitle(), postEntity.getDescription() , postEntity.getContent(),
-                        postEntity.getDateOfPost().format(formatter), postEntity.getNumOfUpvote(), postEntity.getNumOfDownvote(), postEntity.isRewarded(), postEntity.isEdited(), postEntity.isAllowComment(),
-                        getCategoriesOfPost(getRelatedCategories(postEntity.getCategory().getId())), getTagOfPost(tag), postEntity.getCoverURL(), postEntity.getSlug(), originPost.getSlug(), editedPost.getSlug() ,getCommentsForPost(postEntity.getId())));
-            }else {
-                postEditHistoryList.add(new PostDto(postEntity.getId(),user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() , postEntity.getTitle(), postEntity.getDescription() , postEntity.getContent(),
-                        postEntity.getDateOfPost().format(formatter), postEntity.getNumOfUpvote(), postEntity.getNumOfDownvote(), postEntity.isRewarded(), postEntity.isEdited(), postEntity.isAllowComment(),
-                        getCategoriesOfPost(getRelatedCategories(postEntity.getCategory().getId())), getTagOfPost(tag), postEntity.getCoverURL(), postEntity.getSlug(), originPost.getSlug(), null ,getCommentsForPost(postEntity.getId())));
-            }
-        }else {
-            if (editedPost != null) {
-                postEditHistoryList.add(new PostDto(postEntity.getId(),user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() , postEntity.getTitle(), postEntity.getDescription() , postEntity.getContent(),
-                        postEntity.getDateOfPost().format(formatter), postEntity.getNumOfUpvote(), postEntity.getNumOfDownvote(), postEntity.isRewarded(), postEntity.isEdited(), postEntity.isAllowComment(),
-                        getCategoriesOfPost(getRelatedCategories(postEntity.getCategory().getId())), getTagOfPost(tag), postEntity.getCoverURL(), postEntity.getSlug(), null, editedPost.getSlug() ,getCommentsForPost(postEntity.getId())));
-            }else {
-                postEditHistoryList.add(new PostDto(postEntity.getId(),user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() , postEntity.getTitle(), postEntity.getDescription() , postEntity.getContent(),
-                        postEntity.getDateOfPost().format(formatter), postEntity.getNumOfUpvote(), postEntity.getNumOfDownvote(), postEntity.isRewarded(), postEntity.isEdited(), postEntity.isAllowComment(),
-                        getCategoriesOfPost(getRelatedCategories(postEntity.getCategory().getId())), getTagOfPost(tag), postEntity.getCoverURL(), postEntity.getSlug(), null, null ,getCommentsForPost(postEntity.getId())));
-            }
-        }
+        String reasonOfDecline = (postDetails.getReasonOfDeclination() != null) ? postDetails.getReasonOfDeclination() : null;
+
+        postEditHistoryList.add(new PostDto(postEntity.getId(),user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() , postEntity.getTitle(), postEntity.getDescription() , postEntity.getContent(),
+                postEntity.getDateOfPost().format(formatter), postEntity.getNumOfUpvote(), postEntity.getNumOfDownvote(), postEntity.isRewarded(), postEntity.isEdited(), postEntity.isAllowComment(),
+                getCategoriesOfPost(getRelatedCategories(postEntity.getCategory().getId())), getTagOfPost(tag), postEntity.getCoverURL(), postEntity.getSlug(), getCommentsForPost(postEntity.getId()), reasonOfDecline));
     }
 
     public void commentToggle(int postId){
@@ -706,6 +728,15 @@ public class PostServices {
             post.setAllowComment(true);
         }
         postRepository.save(post);
+    }
+
+    public boolean isEdit(int id){
+        PostDetailsEntity post = postDetailsRepository.findByPostId(id)
+                .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
+        if (post.getType().equalsIgnoreCase("Edit")) {
+            return true;
+        }
+        return false;
     }
 
     public boolean isDraft(int id) {
@@ -729,6 +760,7 @@ public class PostServices {
     public  Map<String, List<?>> viewDraft(int userId) {
         List<PostEntity> list = postRepository.findAll();
         List<PostListDto> draftList = new ArrayList<>();
+        List<PostListDeclineDto> declineList = new ArrayList<>();
         Map<String, List<?>> result = new HashMap<>();
 
         list.sort(Comparator
@@ -736,7 +768,7 @@ public class PostServices {
 
         for (PostEntity post : list) {
 
-            if ((isDraft(post.getId()) && post.getUser().getId() == userId)) {
+            if (((isDraft(post.getId()) || isDeclined(post.getId())) && post.getUser().getId() == userId)) {
                 UserEntity user = userRepository.findById(post.getUser().getId())
                         .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
@@ -752,11 +784,16 @@ public class PostServices {
                     PostListDeclineDto postListDeclineDto = new PostListDeclineDto(post.getId(), user.getId(),userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getDescription(),
                             post.getDateOfPost().format(formatter), getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL() ,post.isRewarded(), postDetails.getReasonOfDeclination(), post.getSlug());
 
-                        draftList.add(postListDto);
+                        if (isDraft(post.getId())){
+                            draftList.add(postListDto);
+                        }else if (isDeclined(post.getId())){
+                            declineList.add(postListDeclineDto);
+                        }
                 }
             }
         }
         result.put("DraftList", draftList);
+        result.put("DeclinePostList", declineList);
         return result;
     }
 
@@ -1001,17 +1038,6 @@ public class PostServices {
         PostEntity post = postRepository.findById(postId)
                 .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
 
-        if (post.getParentPost() != null) {
-            PostEntity parentPost = postRepository.findBySlug(post.getParentPost().getSlug())
-                    .orElseThrow(() -> new AppException("Unknown parent post", HttpStatus.NOT_FOUND));
-
-            parentPost.setEdited(false);
-            postRepository.save(parentPost);
-
-            post.setParentPost(null);
-            postRepository.save(post);
-        }
-
         PostDetailsEntity postDetails = postDetailsRepository.findByPostId(postId)
                 .orElseThrow(() -> new AppException("Unknown post details", HttpStatus.NOT_FOUND));
 
@@ -1136,17 +1162,6 @@ public class PostServices {
 
         PostEntity post = postRepository.findById(postId)
                 .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
-
-        if (post.getParentPost() != null) {
-            PostEntity parentPost = postRepository.findBySlug(post.getParentPost().getSlug())
-                    .orElseThrow(() -> new AppException("Unknown parent post", HttpStatus.NOT_FOUND));
-
-            parentPost.setEdited(false);
-            postRepository.save(parentPost);
-
-            post.setParentPost(null);
-            postRepository.save(post);
-        }
 
         PostDetailsEntity postDetails = postDetailsRepository.findByPostId(postId)
                 .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
