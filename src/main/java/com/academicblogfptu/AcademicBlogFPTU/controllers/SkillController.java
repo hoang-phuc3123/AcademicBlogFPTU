@@ -61,7 +61,7 @@ public class SkillController {
         }
     }
 
-    @PostMapping("/admin/delete-tag")
+    @PostMapping("/admin/delete-skill")
     public ResponseEntity<String> deleteSkill(@RequestHeader("Authorization") String headerValue, @RequestBody SkillEntity skill) {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             try{
