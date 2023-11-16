@@ -1189,6 +1189,7 @@ public class PostServices {
         List<String> listOfTagsAndCategories = searchMultipleDto.getListTagsAndCategories();
         List<Integer> tagList = new ArrayList<>();
         List<Integer> categoryList = new ArrayList<>();
+        List<PostEntity> postsRaw = new ArrayList<>();
         //filter the tag in the list
         List<TagEntity> tags = tagRepository.findAll();
         for (TagEntity tag: tags) {
@@ -1202,11 +1203,20 @@ public class PostServices {
             categoryList.add(category.getId());
         }
 
-        List<PostEntity> postsRaw = postRepository.findByCategoriesAndTagsAndTitle(categoryList,tagList, searchMultipleDto.getTitle());
+        if(categoryList.isEmpty()){
+            postsRaw = postRepository.findByTagsAndTitle(tagList, searchMultipleDto.getTitle());
+
+        }else if(tagList.isEmpty()){
+            postsRaw = postRepository.findByCategoriesAndTitle(categoryList,searchMultipleDto.getTitle());
+
+        }else{
+            postsRaw = postRepository.findByCategoriesAndTagsAndTitle(categoryList,tagList, searchMultipleDto.getTitle());
+        }
+
         List<PostListDto> postList = new ArrayList<>();
         List<QuestionAnswerDto> qaList = new ArrayList<>();
 
-        for(PostEntity post:postsRaw){
+        for(PostEntity post : postsRaw){
             UserEntity user = userRepository.findById(post.getUser().getId())
                     .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
             UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
