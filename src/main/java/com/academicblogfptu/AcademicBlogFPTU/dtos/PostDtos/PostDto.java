@@ -55,10 +55,8 @@ public class PostDto {
 
     private String slug;
 
-    private String originSlug;
-
-    private String editedSlug;
-
     private List<CommentDto> comments;
+
+    private String reasonOfDecline;
 }
 

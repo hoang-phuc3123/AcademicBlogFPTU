@@ -12,6 +12,8 @@ public interface PostRepository extends JpaRepository<PostEntity, Integer> {
     Optional<PostEntity> findById(int id);
 
     PostEntity findByParentPost(PostEntity parentPost);
+
+    List<PostEntity> findPostsByParentPost(PostEntity parentPost);
     Optional<PostEntity> findBySlug(String slug);
     Long countByUserId(int id);
 
@@ -66,16 +68,24 @@ public interface PostRepository extends JpaRepository<PostEntity, Integer> {
 
     @Query(value = "SELECT DISTINCT p.* FROM post p " +
             "JOIN post_details pd ON p.id = pd.post_id " +
-            "WHERE (:categoryIds IS NULL OR p.category_id IN (:categoryIds)) OR " +
-            "(:tagIds IS NULL OR p.tag_id IN (:tagIds)) AND pd.type = 'Approve'", nativeQuery = true)
-    List<PostEntity> findByCategoriesAndTags(List<Integer> categoryIds, List<Integer> tagIds);
-
-    @Query(value = "SELECT DISTINCT p.* FROM post p " +
-            "JOIN post_details pd ON p.id = pd.post_id " +
             "WHERE (:categoryIds IS NULL OR p.category_id IN (:categoryIds)) And " +
             "(:tagIds IS NULL OR p.tag_id IN (:tagIds)) AND pd.type = 'Approve' And " +
             "(:title IS NULL OR p.title LIKE CONCAT('%', :title, '%'))", nativeQuery = true)
     List<PostEntity> findByCategoriesAndTagsAndTitle(List<Integer> categoryIds, List<Integer> tagIds,String title);
+
+    @Query(value = "SELECT DISTINCT p.* FROM post p " +
+            "JOIN post_details pd ON p.id = pd.post_id " +
+            "WHERE " +
+            "(p.tag_id IN (:tagIds)) AND pd.type = 'Approve' And " +
+            "(:title IS NULL OR p.title LIKE CONCAT('%', :title, '%'))", nativeQuery = true)
+    List<PostEntity> findByTagsAndTitle(List<Integer> tagIds,String title);
+
+    @Query(value = "SELECT DISTINCT p.* FROM post p " +
+            "JOIN post_details pd ON p.id = pd.post_id " +
+            "WHERE (p.category_id IN (:categoryIds)) And " +
+            "pd.type = 'Approve' And " +
+            "(:title IS NULL OR p.title LIKE CONCAT('%', :title, '%'))", nativeQuery = true)
+    List<PostEntity> findByCategoriesAndTitle(List<Integer> categoryIds, String title);
 
     @Query(value = "SELECT p.id, p.title, p.content, p.date_of_post, p.num_of_upvote, p.num_of_downvote, " +
             "p.is_rewarded, p.is_edited, p.allow_comment, p.length, p.account_id, p.category_id, p.tag_id, " +

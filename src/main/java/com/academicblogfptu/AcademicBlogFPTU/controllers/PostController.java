@@ -62,16 +62,7 @@ public class PostController {
 
     @PostMapping("posts/edit")
     public ResponseEntity<PostDto> editPost(@RequestHeader("Authorization") String headerValue,@RequestBody EditPostDto editPostDto){
-        Optional<UserEntity> user = userRepository.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
-        UserEntity userEntity = user.get();
-
-        PostDto post = postServices.editPost(editPostDto);
-        if (userEntity.getRole().getRoleName().equalsIgnoreCase("lecturer")){
-            postServices.postDetailLecturer(post.getPostId(), userEntity);
-        }else {
-            postServices.postDetail(post.getPostId(), "Request");
-        }
-        return ResponseEntity.ok(post);
+        return ResponseEntity.ok(postServices.editPost(editPostDto));
     }
 
     @GetMapping("posts/latest")
