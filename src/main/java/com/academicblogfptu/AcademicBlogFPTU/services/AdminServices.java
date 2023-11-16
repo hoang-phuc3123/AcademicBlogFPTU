@@ -60,7 +60,7 @@ public class AdminServices {
     private final FollowerRepository followerRepository;
 
     @Autowired
-    private final PostDetailsRepository postDetailsRepository;
+    private final BadgeServices badgeServices;
 
     @Autowired
     private final CommentRepository commentRepository;
@@ -92,7 +92,11 @@ public class AdminServices {
             newUser.setPassword(passwordEncoder.encode(CharBuffer.wrap(registerDto.getPassword())));
             RoleEntity roleEntity = roleRepository.findByRoleName(registerDto.getRole()).orElse(null);
             newUser.setRole(roleEntity);
+
             userRepository.save(newUser);
+            //Set badge for user
+            badgeServices.setRoleBadge(newUser);
+
             // Tạo UserDto từ tài khoản mới và trả về
             return new UserDto(newUser.getId(), newUser.getUsername(), "" ,false, false, null, newUser.getRole().getRoleName(), "","", "", "");
         }
@@ -126,6 +130,11 @@ public class AdminServices {
         RoleUpdateHistoryEntity roleUpdateHistory = new RoleUpdateHistoryEntity();
         roleUpdateHistory.setRoleBefore(roleBefore);
         roleUpdateHistory.setRoleAfter(user.getRole().getRoleName());
+
+        //Adjust role badge
+        badgeServices.adjustUserRoleBadge(roleBefore,user);
+
+
         LocalDate currentDate = LocalDate.now();
         roleUpdateHistory.setChangeDate(Date.valueOf(currentDate)); // Sử dụng ngày hiện tại
         UserEntity userEntity = userRepository.findById(id).orElse(null) ;
@@ -135,6 +144,16 @@ public class AdminServices {
         roleUpdateHistoryRepository.save(roleUpdateHistory);
         userRepository.save(user);
 
+    }
+
+    public void setMajorUser(int userID, int majorID) {
+        Optional<UserEntity> optionalUser = userRepository.findById(userID);
+        UserEntity user = optionalUser.get();
+        UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+        MajorEntity majorEntity = majorRepository.findById(majorID).orElse(null) ;
+        userDetails.setMajor(majorEntity);
+        userDetailsRepository.save(userDetails);
     }
 
     public void banUser(UserDto userDto){

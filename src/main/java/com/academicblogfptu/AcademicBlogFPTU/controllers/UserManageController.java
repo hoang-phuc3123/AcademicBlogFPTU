@@ -106,6 +106,8 @@ public class UserManageController {
                     userDetailsInfo.setMuted((Boolean) userInfo[7]);
                     userDetailsInfo.setMutetime(userInfo[8] != null ? (Timestamp) userInfo[8] : null);
                     userDetailsInfo.setRole((RoleEntity) userInfo[9]);
+                    Object majorObject = userInfo[10];
+                    userDetailsInfo.setMajor(majorObject != null ? (MajorEntity) majorObject : null);
                     users.add(userDetailsInfo);
                 }
             }
@@ -135,6 +137,19 @@ public class UserManageController {
             adminService.setRoleUser(userDto,userSet.getId());
             HashMap < String, String > responseMap = new HashMap<>();
             responseMap.put("message", "Set role success.");
+            return ResponseEntity.ok(responseMap);
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+    @PostMapping("/set-major")
+    public ResponseEntity<HashMap<String, String>> SetMajor(@RequestHeader("Authorization") String headerValue, @RequestBody SetMajorDto setMajorDto){
+        if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
+            adminService.setMajorUser(setMajorDto.getId(), setMajorDto.getMajorID());
+            HashMap < String, String > responseMap = new HashMap<>();
+            responseMap.put("message", "Set major success.");
             return ResponseEntity.ok(responseMap);
         }
         else {

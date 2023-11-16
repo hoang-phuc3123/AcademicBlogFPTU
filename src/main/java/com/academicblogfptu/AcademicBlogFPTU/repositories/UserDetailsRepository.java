@@ -22,9 +22,10 @@ public interface UserDetailsRepository extends JpaRepository<UserDetailsEntity, 
     @Query("SELECT u FROM UserDetailsEntity u WHERE u.user = :user")
     Optional<UserDetailsEntity> findByUserAccount(UserEntity user);
 
-    @Query("SELECT ue.id, ue.username, ue.password, ude.fullName, ude.email, ude.phone, ude.isBanned, ude.isMuted, ude.mutetime, ue.role FROM UserDetailsEntity ude JOIN ude.user ue")
-
+    @Query("SELECT ue.id, ue.username, ue.password, ude.fullName, ude.email, ude.phone, ude.isBanned, ude.isMuted, ude.mutetime, ue.role, ude.major FROM UserDetailsEntity ude LEFT JOIN ude.user ue LEFT JOIN ude.major")
     List<Object[]> getAllUsersInfo();
+
+
 
     @Query(value = "SELECT u FROM UserDetailsEntity u WHERE CONCAT(u.fullName, '') LIKE %:search%")
     Page<UserDetailsEntity> findUsersPage(String search, Pageable pageable);

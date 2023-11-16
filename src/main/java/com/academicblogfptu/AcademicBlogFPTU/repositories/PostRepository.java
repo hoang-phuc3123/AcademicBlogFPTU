@@ -87,6 +87,14 @@ public interface PostRepository extends JpaRepository<PostEntity, Integer> {
             "(:title IS NULL OR p.title LIKE CONCAT('%', :title, '%'))", nativeQuery = true)
     List<PostEntity> findByCategoriesAndTitle(List<Integer> categoryIds, String title);
 
+    @Query(value = "SELECT DISTINCT p.* FROM post p " +
+            "JOIN post_details pd ON p.id = pd.post_id " +
+            "WHERE " +
+            "pd.type = 'Approve' And " +
+            "(:title IS NULL OR p.title LIKE CONCAT('%', :title, '%'))", nativeQuery = true)
+    List<PostEntity> findByTitle(String title);
+
+
     @Query(value = "SELECT p.id, p.title, p.content, p.date_of_post, p.num_of_upvote, p.num_of_downvote, " +
             "p.is_rewarded, p.is_edited, p.allow_comment, p.length, p.account_id, p.category_id, p.tag_id, " +
             "p.parent_id, p.description, p.cover_URL, p.slug " +

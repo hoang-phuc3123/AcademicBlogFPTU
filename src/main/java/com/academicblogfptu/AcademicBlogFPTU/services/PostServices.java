@@ -1292,7 +1292,10 @@ public class PostServices {
             categoryList.add(category.getId());
         }
 
-        if(categoryList.isEmpty()){
+        if(listOfTagsAndCategories.isEmpty()){
+            postsRaw = postRepository.findByTitle(searchMultipleDto.getTitle());
+        }
+        else if(categoryList.isEmpty()){
             postsRaw = postRepository.findByTagsAndTitle(tagList, searchMultipleDto.getTitle());
 
         }else if(tagList.isEmpty()){
