@@ -12,7 +12,6 @@ public interface UserBadgeRepository extends JpaRepository<UserBadgeEntity,Integ
 
     Optional<UserBadgeEntity> findByUserIdAndBadgeId(int userId, int badgeId);
 
-    Optional<UserBadgeEntity> findByUserIdAndBadgeName(int userId, String badgeName);
 
 
 }

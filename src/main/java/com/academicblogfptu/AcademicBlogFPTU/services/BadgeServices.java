@@ -67,7 +67,8 @@ public class BadgeServices {
 
     public  void changeUserRoleBadge(UserEntity user,String roleBefore){
         BadgeEntity newBadge = badgeRepository.findByBadgeName(user.getRole().getRoleName()).orElseThrow(() -> new AppException("Unknown badge!!!",HttpStatus.NOT_FOUND));
-        UserBadgeEntity badgeBefore = userBadgeRepository.findByUserIdAndBadgeName(user.getId(), roleBefore).orElseThrow(()-> new AppException("Unknown user badge!!",HttpStatus.NOT_FOUND));
+        BadgeEntity oldBadge = badgeRepository.findByBadgeName(roleBefore).orElseThrow(() -> new AppException("Unknown badge!!!",HttpStatus.NOT_FOUND));
+        UserBadgeEntity badgeBefore = userBadgeRepository.findByUserIdAndBadgeId(user.getId(), oldBadge.getId()).orElseThrow(()-> new AppException("Unknown user badge!!",HttpStatus.NOT_FOUND));
         badgeBefore.setBadge(newBadge);
         userBadgeRepository.save(badgeBefore);
     }
