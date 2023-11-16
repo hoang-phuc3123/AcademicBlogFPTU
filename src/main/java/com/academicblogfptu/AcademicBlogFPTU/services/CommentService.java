@@ -92,7 +92,7 @@ public class CommentService {
         notifyByMailServices.sendMail(mail);
         */
 
-        return new CommentDto(comment.getId(), user.getId(), userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
+        return new CommentDto(comment.getId(), user.getId(), userDetails.getMajor().getId(), userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
                 comment.isEdited(), comment.getNumOfUpvote(), comment.getNumOfDownvote(),
                 comment.getDateOfComment().format(formatter), comment.getPost().getId(), null, userBadges);
     }
@@ -112,7 +112,7 @@ public class CommentService {
 
         Integer parentCommentId = (comment.getParentComment() !=  null) ? comment.getParentComment().getId() : null;
 
-        return new CommentDto(comment.getId(), user.getId(), userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
+        return new CommentDto(comment.getId(), user.getId(), userDetails.getMajor().getId() ,userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
                 comment.isEdited(), comment.getNumOfUpvote(), comment.getNumOfDownvote(),
                 comment.getDateOfComment().format(formatter), comment.getPost().getId(), parentCommentId, userBadges);
     }
@@ -182,7 +182,7 @@ public class CommentService {
         notifyByMailServices.sendMail(mail);
 
          */
-        return new CommentDto(comment.getId(), user.getId(), userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
+        return new CommentDto(comment.getId(), user.getId(), userDetails.getMajor().getId(), userDetails.getFullName(), userDetails.getProfileURL(), comment.getContent(),
                 comment.isEdited(), comment.getNumOfUpvote(), comment.getNumOfDownvote(),
                 comment.getDateOfComment().format(formatter), comment.getPost().getId(), parentComment.getId(), userBadges);
     }
