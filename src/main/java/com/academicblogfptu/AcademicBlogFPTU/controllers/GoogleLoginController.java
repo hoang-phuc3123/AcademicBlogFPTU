@@ -102,7 +102,7 @@ public class GoogleLoginController {
                 String cvt = convertIPv6ToIPv4(ipAddress);
                 URL url_ = null;
                 try {
-                    url_ = new URL("https://lvnsoft.store/RequestCount/visit-count.php?ip=" + cvt);
+                    url_ = new URL("https://lvnsoft.store/TotalVisit/visit-count.php?ip=" + cvt);
                     HttpURLConnection connection_ = (HttpURLConnection) url.openConnection();
                     connection_.setRequestMethod("GET");
                     int responseCode_ = connection.getResponseCode();
