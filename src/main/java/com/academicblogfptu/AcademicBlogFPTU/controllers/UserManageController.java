@@ -65,7 +65,6 @@ public class UserManageController {
                         response.append(line);
                     }
                     reader.close();
-
                     JsonParser jsonParser = JsonParserFactory.getJsonParser();
                     Map<String, Object> jsonData = jsonParser.parseMap(response.toString());
                     HashMap<String, Object> responseMap = new HashMap<>();
@@ -128,6 +127,7 @@ public class UserManageController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
+
     @PostMapping("/set-role")
     public ResponseEntity<HashMap<String, String>> SetRole(@RequestHeader("Authorization") String headerValue, @RequestBody SetRoleDto setRoleDto){
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
