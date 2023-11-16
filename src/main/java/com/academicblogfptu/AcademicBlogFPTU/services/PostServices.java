@@ -235,25 +235,6 @@ public class PostServices {
         PostEntity post = postRepository.findById(id)
                 .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
 
-        PostEntity editPost = postRepository.findByParentPost(post);
-
-        if (editPost != null){
-            editPost.setParentPost(null);
-            postRepository.save(editPost);
-        }
-
-        if (post.getParentPost() != null) {
-            PostEntity parentPost = postRepository.findBySlug(post.getParentPost().getSlug())
-                    .orElseThrow(() -> new AppException("Unknown parent post", HttpStatus.NOT_FOUND));
-
-            parentPost.setEdited(false);
-            postRepository.save(parentPost);
-
-            post.setParentPost(null);
-            postRepository.save(post);
-        }
-
-
         PostDetailsEntity postDetails = postDetailsRepository.findByPostId(id)
                 .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
         postDetails.setType("Delete");
@@ -849,8 +830,12 @@ public class PostServices {
         PostDetailsEntity postDetails = postDetailsRepository.findByPostId(postId)
                 .orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
 
+        String reasonOfDecline = (postDetails.getReasonOfDeclination() != null) ? postDetails.getReasonOfDeclination() : null;
+
         postDetails.setType("Request");
+        postDetails.setReasonOfDeclination(reasonOfDecline);
         postDetails.setDateOfAction(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
+        postDetails.setUser(null);
         postDetailsRepository.save(postDetails);
     }
 
