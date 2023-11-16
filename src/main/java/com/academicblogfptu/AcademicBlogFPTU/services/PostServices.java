@@ -1159,9 +1159,11 @@ public class PostServices {
         postReward.setUser(user);
         postRewardRepository.save(postReward);
 
-        //post.setRewarded(true);
-        //postRepository.save(post);
-
+        int countNumOfReward = postRewardRepository.countNumOfReward(postId);
+        if (countNumOfReward >= 2){
+            post.setRewarded(true);
+            postRepository.save(post);
+        }
     }
     // remove reward
     public void removeReward(int postId){

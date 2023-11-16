@@ -116,10 +116,15 @@ public class ProfileServices {
 
     public List<SearchUserDto> getSearchResult(SearchRequestDto searchRequestDto){
 
-        Pageable page = PageRequest.of(searchRequestDto.getPage()-1,searchRequestDto.getUsersOfPage());
-        Page<UserDetailsEntity> pageResult = userDetailsRepository.findUsersPage(searchRequestDto.getSearch(),page);
+        //Pageable page = PageRequest.of(searchRequestDto.getPage()-1,searchRequestDto.getUsersOfPage());
+        //Page<UserDetailsEntity> pageResult = userDetailsRepository.findUsersPage(searchRequestDto.getSearch(),page);
+
+        List<UserDetailsEntity> userDetailsEntities = userDetailsRepository.findUserByFullName(searchRequestDto.getSearch());
+
+
         List<SearchUserDto> searchResults = new ArrayList<>();
-        pageResult.getContent().forEach(userDetailsEntity -> {
+        //pageResult.getContent().forEach(userDetailsEntity -> {
+        for (UserDetailsEntity userDetailsEntity: userDetailsEntities) {
             if( !(userDetailsEntity.getUser().getRole().getRoleName().equals("admin"))){
                 if(!userDetailsEntity.isBanned()){
                     Long numOfFollower = followerRepository.countByUserId(userDetailsEntity.getUser().getId());
@@ -132,7 +137,8 @@ public class ProfileServices {
                     }
                 }
             }
-        });
+        }
+        //});
         return searchResults;
     }
 

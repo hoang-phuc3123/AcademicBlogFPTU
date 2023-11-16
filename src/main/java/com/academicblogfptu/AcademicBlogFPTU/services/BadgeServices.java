@@ -40,6 +40,8 @@ public class BadgeServices {
         }else if(user.getRole().getRoleName().equalsIgnoreCase("mentor")){
             BadgeEntity badge = badgeRepository.findByBadgeName(user.getRole().getRoleName()).orElseThrow(()-> new AppException("Unknown badge!!", HttpStatus.NOT_FOUND));
             userBadge.setBadge(badge);
+        }else{
+            return;
         }
         userBadge.setUser(user);
         userBadgeRepository.save(userBadge);
