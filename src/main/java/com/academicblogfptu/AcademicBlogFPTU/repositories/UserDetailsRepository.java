@@ -26,6 +26,9 @@ public interface UserDetailsRepository extends JpaRepository<UserDetailsEntity, 
     List<Object[]> getAllUsersInfo();
 
 
+    @Query(value = "SELECT u FROM UserDetailsEntity u WHERE CONCAT(u.fullName, '') LIKE %:search%")
+    List<UserDetailsEntity> findUserByFullName(String search);
+
 
     @Query(value = "SELECT u FROM UserDetailsEntity u WHERE CONCAT(u.fullName, '') LIKE %:search%")
     Page<UserDetailsEntity> findUsersPage(String search, Pageable pageable);
