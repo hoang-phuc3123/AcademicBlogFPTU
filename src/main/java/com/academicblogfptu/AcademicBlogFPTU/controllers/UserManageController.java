@@ -144,6 +144,19 @@ public class UserManageController {
         }
     }
 
+    @PostMapping("/set-major")
+    public ResponseEntity<HashMap<String, String>> SetMajor(@RequestHeader("Authorization") String headerValue, @RequestBody SetMajorDto setMajorDto){
+        if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
+            adminService.setMajorUser(setMajorDto.getId(), setMajorDto.getMajorID());
+            HashMap < String, String > responseMap = new HashMap<>();
+            responseMap.put("message", "Set major success.");
+            return ResponseEntity.ok(responseMap);
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
     @PostMapping("/ban-user")
     public ResponseEntity<HashMap<String, String>> BanUser(@RequestHeader("Authorization") String headerValue, @RequestBody IdentificationDto identificationDto){
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {

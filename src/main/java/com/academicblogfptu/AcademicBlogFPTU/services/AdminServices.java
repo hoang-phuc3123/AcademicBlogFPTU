@@ -146,6 +146,16 @@ public class AdminServices {
 
     }
 
+    public void setMajorUser(int userID, int majorID) {
+        Optional<UserEntity> optionalUser = userRepository.findById(userID);
+        UserEntity user = optionalUser.get();
+        UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+        MajorEntity majorEntity = majorRepository.findById(majorID).orElse(null) ;
+        userDetails.setMajor(majorEntity);
+        userDetailsRepository.save(userDetails);
+    }
+
     public void banUser(UserDto userDto){
         Optional<UserEntity> optionalUser = userRepository.findByUsername(userDto.getUsername());
         UserEntity user = optionalUser.get();
