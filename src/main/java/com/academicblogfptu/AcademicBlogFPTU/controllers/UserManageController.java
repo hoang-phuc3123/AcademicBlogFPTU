@@ -106,6 +106,8 @@ public class UserManageController {
                     userDetailsInfo.setMuted((Boolean) userInfo[7]);
                     userDetailsInfo.setMutetime(userInfo[8] != null ? (Timestamp) userInfo[8] : null);
                     userDetailsInfo.setRole((RoleEntity) userInfo[9]);
+                    Object majorObject = userInfo[10];
+                    userDetailsInfo.setMajor(majorObject != null ? (MajorEntity) majorObject : null);
                     users.add(userDetailsInfo);
                 }
             }
