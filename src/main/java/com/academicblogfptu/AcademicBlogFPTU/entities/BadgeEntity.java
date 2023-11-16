@@ -1,13 +1,15 @@
 package com.academicblogfptu.AcademicBlogFPTU.entities;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name="badge")
+@Table(name = "badge")
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class BadgeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
