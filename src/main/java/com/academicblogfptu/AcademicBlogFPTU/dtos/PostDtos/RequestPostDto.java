@@ -1,6 +1,7 @@
 package com.academicblogfptu.AcademicBlogFPTU.dtos.PostDtos;
 
 import com.academicblogfptu.AcademicBlogFPTU.entities.ImageEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.SkillEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,4 +24,5 @@ public class RequestPostDto {
     private String coverURL;
     private String slug;
     private Integer length;
+    private List<String> postSkill;
 }

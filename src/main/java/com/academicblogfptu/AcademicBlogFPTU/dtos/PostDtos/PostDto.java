@@ -4,6 +4,7 @@ import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.CategoryLis
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.TagDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.CommentDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.CategoryEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.SkillEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.TagEntity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -58,5 +59,7 @@ public class PostDto {
     private List<CommentDto> comments;
 
     private String reasonOfDecline;
+
+    private List<SkillEntity> postSkill;
 }
 

@@ -22,4 +22,5 @@ public class EditPostDto {
     private String coverURL;
     private String slug;
     private Integer length;
+    private List<String> postSkill;
 }
