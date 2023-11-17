@@ -53,14 +53,16 @@ public class ProfileController {
     private final CommentService commentService;
 
     @PostMapping("/view")
-    public ResponseEntity<ProfileDto> viewProfile(@RequestBody ProfileDto profileDto){
+    public ResponseEntity<ProfileDto> viewProfile(@RequestHeader("Authorization") String headerValue, @RequestBody ProfileDto profileDto){
         try{
-            ProfileDto profile = profileServices.viewProfile(profileDto.getUserId());
+            ProfileDto profile = profileServices.viewProfile(profileDto.getUserId(),userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))).getId());
             return ResponseEntity.ok(profile);
         }catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
+
+
 
     @PostMapping("/change-password")
     public ResponseEntity<String> changePassword(@RequestHeader("Authorization") String headerValue, @RequestBody ChangePasswordDto changePasswordDto){
