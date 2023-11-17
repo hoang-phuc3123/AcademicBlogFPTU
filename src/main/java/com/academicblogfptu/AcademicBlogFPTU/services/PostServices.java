@@ -12,6 +12,7 @@ import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -133,7 +134,7 @@ public class PostServices {
         return false;
     }
 
-    public PostDto viewPostBySlug(String slug) {
+    public PostDto viewPostBySlug(String slug, UserEntity userEntity) {
 
         PostEntity post = postRepository.findBySlug(slug)
                 .orElseThrow(() -> new AppException("Post with slug " + slug + " not found", HttpStatus.NOT_FOUND));
@@ -149,6 +150,10 @@ public class PostServices {
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
         UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+
+        if ((isDraft(post.getId()) || isDeclined(post.getId())) && !(post.getUser().getId() == userEntity.getId()) ){
+            throw new AppException("You can not see other user's draft or decline post", HttpStatus.NOT_FOUND);
+        }
 
         TagEntity tag = tagRepository.findById(post.getTag().getId())
                 .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
