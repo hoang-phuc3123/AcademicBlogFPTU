@@ -35,8 +35,8 @@ public class PostController {
     }
 
     @PostMapping("users/view-post")
-    public ResponseEntity<Map<String, Object>> viewAPost(@RequestBody PostDto postDto){
-        Map<String, Object> post = postServices.viewPostBySlug(postDto.getSlug());
+    public ResponseEntity<PostDto> viewAPost(@RequestBody PostDto postDto){
+        PostDto post = postServices.viewPostBySlug(postDto.getSlug());
         return ResponseEntity.ok(post);
     }
 
