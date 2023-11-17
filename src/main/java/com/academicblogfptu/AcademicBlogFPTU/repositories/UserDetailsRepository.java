@@ -22,7 +22,7 @@ public interface UserDetailsRepository extends JpaRepository<UserDetailsEntity, 
     @Query("SELECT u FROM UserDetailsEntity u WHERE u.user = :user")
     Optional<UserDetailsEntity> findByUserAccount(UserEntity user);
 
-    @Query("SELECT ue.id, ue.username, ue.password, ude.fullName, ude.email, ude.phone, ude.isBanned, ude.isMuted, ude.mutetime, ue.role, ude.major FROM UserDetailsEntity ude LEFT JOIN ude.user ue LEFT JOIN ude.major")
+    @Query("SELECT ue.id, ue.username, ue.password, ude.fullName, ude.email, ude.phone, ude.isBanned, ude.isMuted, ude.mutetime, ue.role, ude.major, s.id as skillId, s.skillName FROM UserDetailsEntity ude LEFT JOIN ude.user ue LEFT JOIN ude.major LEFT JOIN UserSkillEntity us ON ue.id = us.user.id LEFT JOIN SkillEntity s ON us.skill.id = s.id")
     List<Object[]> getAllUsersInfo();
 
 
