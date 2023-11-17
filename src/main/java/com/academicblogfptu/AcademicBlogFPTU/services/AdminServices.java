@@ -92,12 +92,9 @@ public class AdminServices {
             newUser.setPassword(passwordEncoder.encode(CharBuffer.wrap(registerDto.getPassword())));
             RoleEntity roleEntity = roleRepository.findByRoleName(registerDto.getRole()).orElse(null);
             newUser.setRole(roleEntity);
-
             UserEntity user = userRepository.save(newUser);
-
             //Set badge for user
             badgeServices.setRoleBadge(user);
-
             // Tạo UserDto từ tài khoản mới và trả về
             return new UserDto(newUser.getId(), newUser.getUsername(), "" ,false, false, null, newUser.getRole().getRoleName(), "","", "", "");
         }
