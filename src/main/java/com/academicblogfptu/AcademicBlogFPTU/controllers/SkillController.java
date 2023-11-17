@@ -3,6 +3,7 @@ package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserSkillsDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.SkillEntity;
 import com.academicblogfptu.AcademicBlogFPTU.services.SkillServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
@@ -78,5 +79,28 @@ public class SkillController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
+
+    @PostMapping("/admin/set-skills")
+    public ResponseEntity<String> setUserSkill(@RequestHeader("Authorization") String headerValue, UserSkillsDto userSkillsDto){
+        if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
+            skillServices.setUserSkills(userSkillsDto);
+            return ResponseEntity.ok("Success");
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+    @PostMapping("/admin/remove-user-skill")
+    public ResponseEntity<String> removeUserSkill(@RequestHeader("Authorization") String headerValue, UserSkillsDto userSkillsDto){
+        if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
+            skillServices.removeUserSkill(userSkillsDto);
+            return ResponseEntity.ok("Success");
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
 
 }
