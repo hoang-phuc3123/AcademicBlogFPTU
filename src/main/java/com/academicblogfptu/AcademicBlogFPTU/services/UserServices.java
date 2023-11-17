@@ -1,20 +1,19 @@
 package com.academicblogfptu.AcademicBlogFPTU.services;
 
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.*;
+import com.academicblogfptu.AcademicBlogFPTU.entities.SkillEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.UserDetailsEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.RoleEntity;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
-import com.academicblogfptu.AcademicBlogFPTU.repositories.MajorRepository;
-import com.academicblogfptu.AcademicBlogFPTU.repositories.RoleRepository;
-import com.academicblogfptu.AcademicBlogFPTU.repositories.UserDetailsRepository;
-import com.academicblogfptu.AcademicBlogFPTU.repositories.UserRepository;
+import com.academicblogfptu.AcademicBlogFPTU.repositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.nio.CharBuffer;
 
@@ -31,18 +30,17 @@ public class UserServices {
     @Autowired
     private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private final MajorRepository majorRepository;
 
     @Autowired
     private final UserDetailsRepository userDetailsRepository;
+
 
     public UserDto findByUsername(String Username) {
         UserEntity user = userRepository.findByUsername(Username)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
         UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
-        return new UserDto(user.getId(),user.getUsername(),userDetails.getFullName(),userDetails.isBanned(),userDetails.isMuted(),userDetails.getMutetime(),user.getRole().getRoleName(),userDetails.getProfileURL(), userDetails.getCoverURL() ,"" , "");
+        return new UserDto(user.getId(),user.getUsername(),userDetails.getFullName(),userDetails.isBanned(),userDetails.isMuted(),userDetails.getMutetime(),user.getRole().getRoleName(),userDetails.getProfileURL(), userDetails.getCoverURL(),"" , "");
     }
 
     public GoogleUserDetailsDto findByEmail(String email) {
@@ -66,7 +64,7 @@ public class UserServices {
         UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
         if (passwordEncoder.matches(CharBuffer.wrap(loginDto.getPassword()), user.getPassword())) {
-            return new UserDto(user.getId(),user.getUsername(), userDetails.getFullName(), userDetails.isBanned(), userDetails.isMuted(),userDetails.getMutetime(),user.getRole().getRoleName(), userDetails.getProfileURL(), userDetails.getCoverURL(),"" , "");
+            return new UserDto(user.getId(),user.getUsername(), userDetails.getFullName(), userDetails.isBanned(), userDetails.isMuted(),userDetails.getMutetime(),user.getRole().getRoleName() , userDetails.getProfileURL(), userDetails.getCoverURL() ,"" , "");
         }
         throw new AppException("Invalid password", HttpStatus.UNAUTHORIZED);
     }

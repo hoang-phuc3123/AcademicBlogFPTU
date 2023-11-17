@@ -5,6 +5,10 @@ import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserSkillsDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.SkillEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
+import com.academicblogfptu.AcademicBlogFPTU.repositories.SkillRepository;
+import com.academicblogfptu.AcademicBlogFPTU.repositories.UserRepository;
+import com.academicblogfptu.AcademicBlogFPTU.repositories.UserSkillRepository;
 import com.academicblogfptu.AcademicBlogFPTU.services.SkillServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import lombok.RequiredArgsConstructor;
@@ -13,8 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -22,6 +25,12 @@ public class SkillController {
 
     @Autowired
     private final SkillServices skillServices;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private UserSkillRepository skillRepository;
 
     @Autowired
     private final UserServices userService;
@@ -99,6 +108,26 @@ public class SkillController {
         }
         else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+    @GetMapping("/users/skills")
+    public ResponseEntity<Map<Integer, String>> getUserskill(@RequestHeader("Authorization") String headerValue) {
+        String username = userAuthProvider.getUser(headerValue.replace("Bearer ", ""));
+        Optional<UserEntity> optionalUser = userRepository.findByUsername(username);
+        if (optionalUser.isPresent()) {
+            UserEntity user = optionalUser.get();
+            int userId = user.getId();
+            List<Object[]> userSkills = skillRepository.getUserSkills(userId);
+            Map<Integer, String> skillMap = new HashMap<>();
+            for (Object[] userSkill : userSkills) {
+                Integer skillId = (Integer) userSkill[0];
+                String skillName = userSkill[1].toString();
+                skillMap.put(skillId, skillName);
+            }
+            return ResponseEntity.ok(skillMap);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 

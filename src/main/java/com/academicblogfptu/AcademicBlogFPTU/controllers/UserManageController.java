@@ -112,7 +112,6 @@ public class UserManageController {
                         userDetailsInfo.setRole((RoleEntity) userInfo[9]);
                         Object majorObject = userInfo[10];
                         userDetailsInfo.setMajor(majorObject != null ? (MajorEntity) majorObject : null);
-
                         userMap.put(userId, userDetailsInfo);
                     }
 

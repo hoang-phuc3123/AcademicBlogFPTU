@@ -1,6 +1,7 @@
 package com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos;
 
 import com.academicblogfptu.AcademicBlogFPTU.entities.RoleEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.SkillEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.UserDetailsEntity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -8,13 +9,15 @@ import jdk.jfr.Timespan;
 import lombok.*;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@JsonPropertyOrder({"id", "username", "fullname", "isBanned", "isMuted", "mutetime" ,"roleName", "profileURL", "coverURL" ,"token" , "refreshToken"})
+@JsonPropertyOrder({"id", "username", "fullname", "isBanned", "isMuted", "mutetime" ,"roleName","profileURL", "coverURL" ,"token" , "refreshToken"})
 public class UserDto {
 
     private int id;
