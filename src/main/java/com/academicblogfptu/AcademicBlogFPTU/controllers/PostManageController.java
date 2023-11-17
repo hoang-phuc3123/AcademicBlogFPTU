@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -121,6 +122,19 @@ public class PostManageController {
             postServices.removeReward(post.getId());
 
             return ResponseEntity.ok(true);
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+    @GetMapping("/reward/pending-reward-post")
+    public ResponseEntity<Map<String, List<?>>> viewRewardedPosts(@RequestHeader("Authorization") String headerValue) {
+        if (isLecturer(userServices.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
+            Optional<UserEntity> user = userRepository.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
+            UserEntity userEntity = user.get();
+            Map<String, List<?>> rewardedPost = postServices.getPendingRewardPost(userEntity);
+            return ResponseEntity.ok(rewardedPost);
         }
         else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

@@ -17,8 +17,6 @@ public class CommentDto {
 
     private int userId;
 
-    private int majorId;
-
     private String accountName;
 
     private String avatarURL;
