@@ -81,7 +81,7 @@ public class SkillController {
     }
 
     @PostMapping("/admin/set-skills")
-    public ResponseEntity<String> setUserSkill(@RequestHeader("Authorization") String headerValue, UserSkillsDto userSkillsDto){
+    public ResponseEntity<String> setUserSkill(@RequestHeader("Authorization") String headerValue,@RequestBody UserSkillsDto userSkillsDto){
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             skillServices.setUserSkills(userSkillsDto);
             return ResponseEntity.ok("Success");
@@ -92,7 +92,7 @@ public class SkillController {
     }
 
     @PostMapping("/admin/remove-user-skill")
-    public ResponseEntity<String> removeUserSkill(@RequestHeader("Authorization") String headerValue, UserSkillsDto userSkillsDto){
+    public ResponseEntity<String> removeUserSkill(@RequestHeader("Authorization") String headerValue,@RequestBody UserSkillsDto userSkillsDto){
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             skillServices.removeUserSkill(userSkillsDto);
             return ResponseEntity.ok("Success");
