@@ -1,9 +1,14 @@
 package com.academicblogfptu.AcademicBlogFPTU.services;
 
+import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserSkillsDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.SkillEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.TagEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.UserSkillEntity;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.SkillRepository;
+import com.academicblogfptu.AcademicBlogFPTU.repositories.UserRepository;
+import com.academicblogfptu.AcademicBlogFPTU.repositories.UserSkillRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,7 +20,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SkillServices {
     @Autowired
-    private SkillRepository skillRepository;
+    private final SkillRepository skillRepository;
+    @Autowired
+    private final UserRepository userRepository;
+    @Autowired
+    private final UserSkillRepository userSkillRepository;
 
     public List<SkillEntity> getAll(){
         return skillRepository.findAll();
@@ -41,5 +50,28 @@ public class SkillServices {
         SkillEntity existingSkill = skillRepository.findById(id)
                 .orElseThrow(() -> new AppException("Unknown skill", HttpStatus.NOT_FOUND));
         skillRepository.deleteById(id);
+    }
+
+    public void setUserSkills(UserSkillsDto userSkillsDto) {
+        UserEntity user = userRepository.findById(userSkillsDto.getUserId()).orElseThrow(()-> new AppException("Unknown user",HttpStatus.NOT_FOUND));
+        List<Integer> listSkills = userSkillsDto.getSkillList();
+        for (Integer skillId: listSkills) {
+            SkillEntity skill = skillRepository.findById(skillId).orElseThrow(()-> new AppException("Unknown skill",HttpStatus.NOT_FOUND));
+            if(!userSkillRepository.existsByUserIdAndSkillId(userSkillsDto.getUserId(), skill.getId())){
+                UserSkillEntity userSkill = new UserSkillEntity();
+                userSkill.setUser(user);
+                userSkill.setSkill(skill);
+                userSkillRepository.save(userSkill);
+            }
+        }
+    }
+
+    public void removeUserSkill(UserSkillsDto userSkillsDto){
+        UserSkillEntity userSkill = userSkillRepository.findByUserIdAndSkillId(userSkillsDto.getUserId(),userSkillsDto.getSkillId()).orElseThrow(()-> new AppException("Unknown user",HttpStatus.NOT_FOUND));
+        try{
+            userSkillRepository.delete(userSkill);
+        }catch (Exception e){
+            throw new AppException(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
