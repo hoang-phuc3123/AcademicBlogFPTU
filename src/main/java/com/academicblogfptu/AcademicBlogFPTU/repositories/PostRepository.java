@@ -11,6 +11,8 @@ import java.util.Optional;
 public interface PostRepository extends JpaRepository<PostEntity, Integer> {
     Optional<PostEntity> findById(int id);
 
+    List<PostEntity> findByUserId(int userId);
+
     PostEntity findByParentPost(PostEntity parentPost);
 
     List<PostEntity> findPostsByParentPost(PostEntity parentPost);

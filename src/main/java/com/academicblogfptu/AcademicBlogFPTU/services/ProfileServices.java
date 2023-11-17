@@ -55,18 +55,24 @@ public class ProfileServices {
     @Autowired
     private PendingReportReasonRepository pendingReportReasonRepository;
 
-    public ProfileDto viewProfile(int id) {
+    public ProfileDto viewProfile(int id,int currentUserId) {
 
         ProfileDto profile = new ProfileDto();
 
         UserDetailsEntity userDetails = userDetailsRepository.findByUserId(id);
 
         List<BadgeEntity> badges = badgeServices.findBadgesByUserId(id);
-        List<PostListDto> postList = getAllPost(id);
-        List<QuestionAnswerDto> QAList = getAllQuestionAndAnswerPost(id);
+        List<PostListDto> postList;
+        List<QuestionAnswerDto> QAList;
+        if(id == currentUserId){
+            postList = getAllCurrentUserPost(id);
+            QAList = getAllCurrentUserQuestionAndAnswerPost(id);
+        }else{
+            postList = getAllPost(id);
+            QAList = getAllQuestionAndAnswerPost(id);
+        }
         Long numOfFollower = followerRepository.countByUserId(id);
         Long numOfPost = postRepository.countByUserIdAndType(id, "Approve");
-
         profile.setUserId(id);
         profile.setFullname(userDetails.getFullName());
         profile.setProfileUrl(userDetails.getProfileURL());
@@ -143,15 +149,36 @@ public class ProfileServices {
     }
 
 
-
-
-
-    public List<PostListDto> getAllPost(int id) {
-        List<PostEntity> list = postRepository.findAll();
+    public List<PostListDto> getAllCurrentUserPost(int id) {
+        List<PostEntity> list = postRepository.findByUserId(id);
         List<PostListDto> postList = new ArrayList<>();
         for (PostEntity post : list) {
 
-            if (postServices.isApprove(post.getId()) && post.getUser().getId() == id) {
+            if (postServices.isApprove(post.getId()) || postServices.isPending(post.getId())) {
+                UserEntity user = userRepository.findById(post.getUser().getId())
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+                UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+                TagEntity tag = tagRepository.findById(post.getTag().getId())
+                        .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
+
+                if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
+                    PostListDto postListDto = new PostListDto(post.getId(), user.getId() ,userDetails.getFullName(), userDetails.getProfileURL(), post.getTitle(), post.getDescription(),
+                            post.getDateOfPost().format(formatter), postServices.getCategoriesOfPost(postServices.getRelatedCategories(post.getCategory().getId())), postServices.getTagOfPost(tag), post.getCoverURL(), post.isRewarded(), post.getSlug());
+                    postList.add(postListDto);
+                }
+            }
+        }
+        return postList;
+    }
+
+
+    public List<PostListDto> getAllPost(int id) {
+        List<PostEntity> list = postRepository.findByUserId(id);
+        List<PostListDto> postList = new ArrayList<>();
+        for (PostEntity post : list) {
+
+            if (postServices.isApprove(post.getId())) {
                 UserEntity user = userRepository.findById(post.getUser().getId())
                         .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
@@ -170,11 +197,34 @@ public class ProfileServices {
     }
 
     public List<QuestionAnswerDto> getAllQuestionAndAnswerPost(int id) {
-        List<PostEntity> list = postRepository.findAll();
+        List<PostEntity> list = postRepository.findByUserId(id);
         List<QuestionAnswerDto> QAPostList = new ArrayList<>();
         for (PostEntity post : list) {
+            if (postServices.isApprove(post.getId())) {
+                UserEntity user = userRepository.findById(post.getUser().getId())
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+                UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+                TagEntity tag = tagRepository.findById(post.getTag().getId())
+                        .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
+                if (tag.getTagName().equalsIgnoreCase("Q&A")) {
 
-            if (postServices.isApprove(post.getId()) && post.getUser().getId() == id) {
+                    int numOfUpvote = (post.getNumOfUpvote() != null) ? post.getNumOfUpvote() : 0;
+                    int numOfDownvote = (post.getNumOfDownvote() != null) ? post.getNumOfDownvote() : 0;
+
+                    QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription() ,post.getContent(),
+                            post.getDateOfPost().format(formatter), numOfUpvote, numOfDownvote, postServices.getCategoriesOfPost(postServices.getRelatedCategories(post.getCategory().getId())), postServices.getTagOfPost(tag), post.getCoverURL(), post.isRewarded(), post.getSlug(), commentRepository.countNumOfCommentForPost(post.getId()));
+                    QAPostList.add(questionAnswerDto);
+                }
+            }
+        }
+        return QAPostList;
+    }
+    public List<QuestionAnswerDto> getAllCurrentUserQuestionAndAnswerPost(int id) {
+        List<PostEntity> list = postRepository.findByUserId(id);
+        List<QuestionAnswerDto> QAPostList = new ArrayList<>();
+        for (PostEntity post : list) {
+            if (postServices.isApprove(post.getId())|| postServices.isPending(post.getId())) {
                 UserEntity user = userRepository.findById(post.getUser().getId())
                         .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
                 UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
