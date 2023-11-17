@@ -35,8 +35,11 @@ public class PostController {
     }
 
     @PostMapping("users/view-post")
-    public ResponseEntity<PostDto> viewAPost(@RequestBody PostDto postDto){
-        PostDto post = postServices.viewPostBySlug(postDto.getSlug());
+    public ResponseEntity<PostDto> viewAPost(@RequestHeader("Authorization") String headerValue, @RequestBody PostDto postDto){
+        Optional<UserEntity> user = userRepository.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
+        UserEntity userEntity = user.get();
+
+        PostDto post = postServices.viewPostBySlug(postDto.getSlug(), userEntity);
         return ResponseEntity.ok(post);
     }
 
