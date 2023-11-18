@@ -129,12 +129,29 @@ public class PostManageController {
     }
 
     @GetMapping("/reward/pending-reward-post")
-    public ResponseEntity<Map<String, List<?>>> viewRewardedPosts(@RequestHeader("Authorization") String headerValue) {
+    public ResponseEntity<List<PostListDto>> viewRewardedPosts(@RequestHeader("Authorization") String headerValue) {
         if (isLecturer(userServices.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             Optional<UserEntity> user = userRepository.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
             UserEntity userEntity = user.get();
-            Map<String, List<?>> rewardedPost = postServices.getPendingRewardPost(userEntity);
+            List<PostListDto> rewardedPost = postServices.getPendingRewardPost(userEntity);
             return ResponseEntity.ok(rewardedPost);
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+    @PostMapping("/reward/dismiss")
+    public ResponseEntity<Boolean> dismissReward(@RequestHeader("Authorization") String headerValue, @RequestBody PostDto postId) {
+        if (isLecturer(userServices.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
+            Optional<PostEntity> postEntity = postRepository.findById(postId.getPostId());
+            PostEntity post = postEntity.get();
+            Optional<UserEntity> user = userRepository.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
+            UserEntity userEntity = user.get();
+
+            postServices.dismissReward(post.getId(), userEntity);
+
+            return ResponseEntity.ok(true);
         }
         else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
