@@ -78,7 +78,6 @@ public class LoginController {
         return "Unknown";
     }
 
-
     public static String convertIPv6ToIPv4(String ipv6Address) {
         try {
             InetAddress inet6Address = InetAddress.getByName(ipv6Address);
@@ -92,7 +91,6 @@ public class LoginController {
                 return ipv6Address;
             }
         } catch (UnknownHostException e) {
-            e.printStackTrace();
             return null;
         }
     }
