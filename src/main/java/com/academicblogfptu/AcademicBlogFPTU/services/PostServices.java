@@ -214,12 +214,14 @@ public class PostServices {
     public List<RewarderDto> getRewarderForPost(List<PostRewardEntity> postRewards){
         List<RewarderDto> rewarder = new ArrayList<>();
         for (PostRewardEntity postRewardEntity: postRewards) {
-            List<BadgeEntity> userBadges = badgeServices.findBadgesByUserId(postRewardEntity.getUser().getId());
-            UserEntity user = userRepository.findById(postRewardEntity.getUser().getId())
-                    .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
-            UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
-                    .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
-            rewarder.add(new RewarderDto(user.getId(), userDetails.getProfileURL(), userDetails.getFullName(), userBadges));
+            if (postRewardEntity.getStatus().equalsIgnoreCase("Accepted")){
+                List<BadgeEntity> userBadges = badgeServices.findBadgesByUserId(postRewardEntity.getUser().getId());
+                UserEntity user = userRepository.findById(postRewardEntity.getUser().getId())
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+                UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
+                        .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+                rewarder.add(new RewarderDto(user.getId(), userDetails.getProfileURL(), userDetails.getFullName(), userBadges));
+            }
         }
         rewarder.sort(Comparator.comparing(RewarderDto::getUserId));
         return rewarder;
@@ -1283,7 +1285,7 @@ public class PostServices {
 
         int countNumOfReward = postRewardRepository.countNumOfReward(postId);
         if (countNumOfReward >= 2){
-            List<PostRewardEntity> postRewardList = postRewardRepository.findByPost(post);
+            List<PostRewardEntity> postRewardList = postRewardRepository.findByPostAndStatus(post, "Pending");
             for (PostRewardEntity postRewardEntity : postRewardList) {
                 postRewardEntity.setStatus("Accepted");
                 postRewardRepository.save(postRewardEntity);

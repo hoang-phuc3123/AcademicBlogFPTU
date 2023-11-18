@@ -18,4 +18,6 @@ public interface PostRewardRepository extends JpaRepository<PostRewardEntity, In
 
     @Query(value = "SELECT post_id FROM post_reward where account_id = :accountId AND status = :status ", nativeQuery = true)
     List<Integer> findPostIdByUserIdAndStatus(int accountId, String status);
+
+    List<PostRewardEntity> findByPostAndStatus(PostEntity post, String status);
 }
