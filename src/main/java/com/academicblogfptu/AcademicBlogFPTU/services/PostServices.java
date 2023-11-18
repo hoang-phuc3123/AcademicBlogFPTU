@@ -884,7 +884,7 @@ public class PostServices {
         return result;
     }
 
-    public void editDraft(EditPostDto editPostDto){
+    public PostDto editDraft(EditPostDto editPostDto){
         PostEntity draft = postRepository.findById(editPostDto.getPostId())
                 .orElseThrow(()-> new AppException("Unknown post", HttpStatus.NOT_FOUND));
 
@@ -941,6 +941,14 @@ public class PostServices {
             postSkillEntity.setSkill(skill);
             postSkillRepository.save(postSkillEntity);
         }
+
+        List<PostSkillEntity> editDraftSkill = postSkillRepository.findByPost(draft);
+
+        List<PostRewardEntity> draftReward = postRewardRepository.findByPost(draft);
+
+        return new PostDto(draft.getId(), user.getId(),userDetails.getFullName() , userDetails.getProfileURL(),draft.getTitle(), draft.getDescription(),draft.getContent(), draft.getDateOfPost().format(formatter)
+                , draft.getNumOfUpvote(), draft.getNumOfDownvote(), draft.isRewarded(), draft.isEdited()
+                , draft.isAllowComment() ,getCategoriesOfPost(getRelatedCategories(draft.getCategory().getId())), getTagOfPost(draft.getTag()), draft.getCoverURL(), draft.getSlug(),getCommentsForPost(draft.getId()), null, getSkillOfPost(editDraftSkill), getRewarderForPost(draftReward));
     }
 
     public void sendDraft(int postId){
@@ -1062,9 +1070,12 @@ public class PostServices {
         return false;
     }
 
-    public List<PostListDto> viewPendingPost(UserEntity userEntity){
+    public Map<String, List<PostListDto>> viewPendingPost(UserEntity userEntity){
         List<PostEntity> postList = postRepository.getAllPendingPost();
+
+        Map<String, List<PostListDto>> result = new HashMap<>();
         List<PostListDto> pendingPostList = new ArrayList<>();
+        List<PostListDto> pendingPostListWithReward = new ArrayList<>();
 
         UserDetailsEntity userDetailsEntity = userDetailsRepository.findByUserAccount(userEntity)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
@@ -1091,25 +1102,36 @@ public class PostServices {
 
                 List<UserSkillEntity> userSkills = userSkillRepository.findByUser(userEntity);
 
-                boolean hasCommonSkills = postSkills.stream()
+              boolean hasCommonSkills = postSkills.stream()
                     .map(PostSkillEntity::getSkill)
-                    .anyMatch(skill -> userSkills.stream().anyMatch(userSkill -> userSkill.getSkill().equals(skill)));
+                    .allMatch(skill -> userSkills.stream().anyMatch(userSkill -> userSkill.getSkill().equals(skill)));
 
                 if (dismissPostIds.contains(post.getId())) {
                     continue;
                 }
 
-                if (post.getCategory().getMajor().getId() == userDetailsEntity.getMajor().getId() || hasCommonSkills
-                        || (rewardedPostIds.contains(post.getId()) || acceptedPostIds.contains(post.getId()))) {
+                if (hasCommonSkills && !rewardedPostIds.contains(post.getId()) && !acceptedPostIds.contains(post.getId())) {
                     if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
                         PostListDto postListDto = new PostListDto(post.getId(), user.getId(),userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription(),
                                 post.getDateOfPost().format(formatter), getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(),post.isRewarded(), post.getSlug());
                         pendingPostList.add(postListDto);
                     }
                 }
+
+                if ((rewardedPostIds.contains(post.getId()) || acceptedPostIds.contains(post.getId()))) {
+                    if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
+                        PostListDto postListDto = new PostListDto(post.getId(), user.getId(),userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription(),
+                                post.getDateOfPost().format(formatter), getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(),post.isRewarded(), post.getSlug());
+                        pendingPostListWithReward.add(postListDto);
+                    }
+                }
         }
         pendingPostList.sort(Comparator.comparing(PostListDto::getDateOfPost).reversed());
-        return pendingPostList;
+
+        result.put("PendingPost", pendingPostList);
+        result.put("PendingRewardedPost", pendingPostListWithReward);
+
+        return result;
     }
 
     public List<PostListDto> viewApprovedPost(UserEntity userEntity) {
@@ -1230,9 +1252,9 @@ public class PostServices {
 
                     boolean hasCommonSkills = postSkills.stream()
                             .map(PostSkillEntity::getSkill)
-                            .anyMatch(skill -> userSkills.stream().anyMatch(userSkill -> userSkill.getSkill().equals(skill)));
+                            .allMatch(skill -> userSkills.stream().anyMatch(userSkill -> userSkill.getSkill().equals(skill)));
 
-                    if (post.getCategory().getMajor().getId() == userDetailsEntity.getMajor().getId() || hasCommonSkills){
+                    if (hasCommonSkills){
                         if (!tag.getTagName().equalsIgnoreCase("Q&A")){
                             rewardedPostList.add(new PostListDto(post.getId(), user.getId(),userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getDescription(),
                                     post.getDateOfPost().format(formatter), getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL() ,post.isRewarded(), post.getSlug()));
@@ -1372,7 +1394,6 @@ public class PostServices {
         }else  {
             throw new AppException("This postId does not belong to Q&A tag", HttpStatus.NOT_FOUND);
         }
-
     }
 
     public void declineQAPost(int postId, String reasonOfDecline, UserEntity user){
