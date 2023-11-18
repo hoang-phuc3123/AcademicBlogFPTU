@@ -34,7 +34,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,"/users/login" ,
                                 "/users/google-login" ,
                                 "/users/send-code" ,
-                                "/users/verify-code" ,
+                                "/users/verify-code",
                                 "/auth/refresh-token" ,
                                 "/auth/remove-token"
                         ).permitAll()
