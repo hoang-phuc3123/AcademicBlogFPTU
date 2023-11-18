@@ -32,6 +32,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 }
                 try{
                     SecurityContextHolder.getContext().setAuthentication(userAuthProvider.validateToken(elements[1]));
+                    String username = userAuthProvider.getUser(elements[1]);
+                    if (userAuthProvider.isBanned(username)) {
+                        response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+                        response.getWriter().write("The user has been banned.");
+                        response.getWriter().flush();
+                        response.getWriter().close();
+                        return;
+                    }
                 } catch (RuntimeException e){
                     try {
                         SecurityContextHolder.getContext().setAuthentication(userAuthProvider.validateTokenEmail(elements[1]));

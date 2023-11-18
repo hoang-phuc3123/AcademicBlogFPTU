@@ -2,6 +2,8 @@ package com.academicblogfptu.AcademicBlogFPTU.config;
 
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.GoogleUserDetailsDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDto;
+import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
+import com.academicblogfptu.AcademicBlogFPTU.repositories.UserDetailsRepository;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Component;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Component
@@ -25,6 +28,7 @@ public class UserAuthProvider {
     private String secretKey;
 
     private final UserServices userService;
+    private final UserDetailsRepository userDetailsRepository;
 
     @PostConstruct
     protected void init() {
@@ -66,6 +70,11 @@ public class UserAuthProvider {
         DecodedJWT decoded = verifier.verify(token);
 
         return decoded.getSubject();
+    }
+
+    public boolean isBanned(String username) {
+        UserDto userDto = userService.findByUsername(username);
+        return userDto.isBanned();
     }
 
     public String getUserRefresh(String token) {

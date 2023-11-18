@@ -115,7 +115,6 @@ public class SkillController {
     public ResponseEntity<List<String>> getUserskill(@RequestHeader("Authorization") String headerValue) {
         String username = userAuthProvider.getUser(headerValue.replace("Bearer ", ""));
         Optional<UserEntity> optionalUser = userRepository.findByUsername(username);
-
         if (optionalUser.isPresent()) {
             UserEntity user = optionalUser.get();
             int userId = user.getId();
@@ -126,7 +125,6 @@ public class SkillController {
                 String skillName = userSkill[1].toString();
                 skillList.add(skillName);
             }
-
             return ResponseEntity.ok(skillList);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
