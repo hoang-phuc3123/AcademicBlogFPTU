@@ -207,7 +207,7 @@ public class ProfileServices {
                 }
             }
         }
-        result.put("ApprovePost", approvePostList);
+        result.put("ApprovedPost", approvePostList);
         return result;
     }
 
@@ -235,7 +235,7 @@ public class ProfileServices {
                 }
             }
         }
-        result.put("ApproveQA", approveQAPostList);
+        result.put("ApprovedQA", approveQAPostList);
         return result;
     }
     public Map<String, List<QuestionAnswerDto>> getAllCurrentUserQuestionAndAnswerPost(int id) {
@@ -268,7 +268,7 @@ public class ProfileServices {
                 }
             }
         }
-        result.put("ApproveQA", approveQAPostList);
+        result.put("ApprovedQA", approveQAPostList);
         result.put("PendingQA", pendingQAPostList);
         return result;
     }
