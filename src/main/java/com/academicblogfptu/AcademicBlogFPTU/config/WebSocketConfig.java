@@ -44,7 +44,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         config.addAllowedOrigin("*");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
-        config.setAllowCredentials(false);
+        config.setAllowCredentials(true);
 
         source.registerCorsConfiguration("/ws/**", config);
 
