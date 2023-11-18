@@ -2,10 +2,12 @@ package com.academicblogfptu.AcademicBlogFPTU.services;
 
 import com.academicblogfptu.AcademicBlogFPTU.entities.BadgeEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.UserBadgeEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.UserDetailsEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.BadgeRepository;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.UserBadgeRepository;
+import com.academicblogfptu.AcademicBlogFPTU.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +24,8 @@ public class BadgeServices {
     private UserBadgeRepository userBadgeRepository;
     @Autowired
     private BadgeRepository badgeRepository;
+    @Autowired
+    private UserRepository userRepository;
 
 
     public List<BadgeEntity> findBadgesByUserId(Integer userId) {
@@ -73,6 +77,20 @@ public class BadgeServices {
         badgeBefore.setBadge(newBadge);
         userBadgeRepository.save(badgeBefore);
     }
+
+    public void setMajorBadge(UserDetailsEntity userDetails){
+        UserBadgeEntity userBadge = new UserBadgeEntity();
+        BadgeEntity badge = badgeRepository.findByBadgeName(userDetails.getMajor().getMajorName()).orElseThrow(()-> new AppException("Unknown badge!!", HttpStatus.NOT_FOUND));
+        UserEntity user = userRepository.findById(userDetails.getUser().getId()).orElseThrow(()-> new AppException("Unknown user!!", HttpStatus.NOT_FOUND));
+        userBadge.setBadge(badge);
+        userBadge.setUser(user);
+    }
+
+    public void changeMajorBadge(UserDetailsEntity userDetails){
+
+    }
+
+
 
 
 

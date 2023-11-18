@@ -2,18 +2,17 @@ package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
-import com.academicblogfptu.AcademicBlogFPTU.dtos.NotificationDto;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.NotificationDtos.Notification;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.NotificationDtos.NotificationDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.NotificationEntity;
-import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.services.NotificationServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
 
@@ -27,6 +26,7 @@ public class NotificationController {
     private final UserServices userService;
     @Autowired
     private final UserAuthProvider userAuthProvider;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @GetMapping("/view")
     public ResponseEntity<List<NotificationDto>> getAllNotifications(@RequestHeader("Authorization") String headerValue){
@@ -35,9 +35,6 @@ public class NotificationController {
                         userAuthProvider.getUser(
                                 headerValue.replace("Bearer ", "")
                         )).getId());
-        if (notifications.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
         return ResponseEntity.ok(notifications);
     }
 
@@ -57,6 +54,7 @@ public class NotificationController {
        notificationDto.setTriggerUser(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))).getId());
        try{
            notificationServices.sendNotification(notificationDto);
+           messagingTemplate.convertAndSendToUser(String.valueOf(notificationDto.getUserId()), "/specific/notifications", new Notification("Bạn có thông báo mới !!!"));
        }catch(Exception e){
            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
        }

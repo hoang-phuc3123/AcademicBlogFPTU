@@ -114,8 +114,9 @@ public class AdminServices {
         newUserDetails.setCoverURL(null);
         newUserDetails.setUserStory(null);
         newUserDetails.setUser(user);
-        MajorEntity majorEntity = majorRepository.findById(userDetailsDto.getMajorID()).orElse(null) ;
+        MajorEntity majorEntity = majorRepository.findById(userDetailsDto.getMajorID()).orElseThrow(()-> new AppException("unknown major",HttpStatus.NOT_FOUND));
         newUserDetails.setMajor(majorEntity);
+        badgeServices.setMajorBadge(newUserDetails);
         userDetailsRepository.save(newUserDetails);
     }
 
@@ -149,6 +150,7 @@ public class AdminServices {
         UserEntity user = optionalUser.get();
         UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
+        //MajorEntity
         MajorEntity majorEntity = majorRepository.findById(majorID).orElse(null) ;
         userDetails.setMajor(majorEntity);
         userDetailsRepository.save(userDetails);
