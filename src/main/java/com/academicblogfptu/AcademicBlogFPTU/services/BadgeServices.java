@@ -85,10 +85,18 @@ public class BadgeServices {
 
     public void changeMajorBadge(UserDetailsEntity userDetails, MajorEntity majorEntityBefore){
 
-        UserBadgeEntity userBadge = userBadgeRepository.findByUserIdAndBadgeId(userDetails.getUser().getId(),majorEntityBefore.getId()).orElseThrow(()-> new AppException("Unknown badge!!", HttpStatus.NOT_FOUND));
-        BadgeEntity newBadge = badgeRepository.findByBadgeName(userDetails.getMajor().getMajorName()).orElseThrow(()-> new AppException("Unknown badge",HttpStatus.NOT_FOUND));
-        userBadge.setBadge(newBadge);
-        userBadgeRepository.save(userBadge);
+        if(userBadgeRepository.existsByUserIdAndBadgeId(userDetails.getUser().getId(),majorEntityBefore.getId())){
+            UserBadgeEntity userBadge = userBadgeRepository.findByUserIdAndBadgeId(userDetails.getUser().getId(),majorEntityBefore.getId()).orElseThrow(()-> new AppException("Unknown badge!!", HttpStatus.NOT_FOUND));
+            BadgeEntity newBadge = badgeRepository.findByBadgeName(userDetails.getMajor().getMajorName()).orElseThrow(()-> new AppException("Unknown badge",HttpStatus.NOT_FOUND));
+            userBadge.setBadge(newBadge);
+            userBadgeRepository.save(userBadge);
+        }else{
+            UserBadgeEntity userBadge = new UserBadgeEntity();
+            BadgeEntity newBadge = badgeRepository.findByBadgeName(userDetails.getMajor().getMajorName()).orElseThrow(()-> new AppException("Unknown badge",HttpStatus.NOT_FOUND));
+            userBadge.setBadge(newBadge);
+            userBadge.setUser(userDetails.getUser());
+            userBadgeRepository.save(userBadge);
+        }
     }
 
 
