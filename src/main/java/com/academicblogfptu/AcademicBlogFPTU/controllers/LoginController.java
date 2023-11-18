@@ -67,17 +67,14 @@ public class LoginController {
     private String getClientIpAddress() {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
         HttpServletRequest request = attributes.getRequest();
-        // First, try to get the IP address from the X-Forwarded-For header
         String xForwardedForHeader = request.getHeader("X-Forwarded-For");
         if (xForwardedForHeader != null && !xForwardedForHeader.isEmpty()) {
             return xForwardedForHeader.split(",")[0].trim();
         }
-        // If X-Forwarded-For header is not present, get the IP address from the request directly
         String remoteAddr = request.getRemoteAddr();
         if (remoteAddr != null && !remoteAddr.isEmpty()) {
             return remoteAddr;
         }
-        // If both methods fail, return "Unknown"
         return "Unknown";
     }
 
@@ -92,10 +89,10 @@ public class LoginController {
                 InetAddress ipv4Address = InetAddress.getByAddress(ipv4Bytes);
                 return ipv4Address.getHostAddress();
             } else {
-                return ipv6Address; // Not an IPv6 address
+                return ipv6Address;
             }
         } catch (UnknownHostException e) {
-            e.printStackTrace(); // Handle the exception based on your needs
+            e.printStackTrace();
             return null;
         }
     }
