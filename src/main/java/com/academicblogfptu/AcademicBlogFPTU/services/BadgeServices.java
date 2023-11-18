@@ -1,9 +1,6 @@
 package com.academicblogfptu.AcademicBlogFPTU.services;
 
-import com.academicblogfptu.AcademicBlogFPTU.entities.BadgeEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.UserBadgeEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.UserDetailsEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.*;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.BadgeRepository;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.UserBadgeRepository;
@@ -86,8 +83,12 @@ public class BadgeServices {
         userBadge.setUser(user);
     }
 
-    public void changeMajorBadge(UserDetailsEntity userDetails){
+    public void changeMajorBadge(UserDetailsEntity userDetails, MajorEntity majorEntityBefore){
 
+        UserBadgeEntity userBadge = userBadgeRepository.findByUserIdAndBadgeId(userDetails.getUser().getId(),majorEntityBefore.getId()).orElseThrow(()-> new AppException("Unknown badge!!", HttpStatus.NOT_FOUND));
+        BadgeEntity newBadge = badgeRepository.findByBadgeName(userDetails.getMajor().getMajorName()).orElseThrow(()-> new AppException("Unknown badge",HttpStatus.NOT_FOUND));
+        userBadge.setBadge(newBadge);
+        userBadgeRepository.save(userBadge);
     }
 
 
