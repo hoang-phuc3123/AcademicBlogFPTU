@@ -884,7 +884,7 @@ public class PostServices {
         return result;
     }
 
-    public void editDraft(EditPostDto editPostDto){
+    public PostDto editDraft(EditPostDto editPostDto){
         PostEntity draft = postRepository.findById(editPostDto.getPostId())
                 .orElseThrow(()-> new AppException("Unknown post", HttpStatus.NOT_FOUND));
 
@@ -941,6 +941,14 @@ public class PostServices {
             postSkillEntity.setSkill(skill);
             postSkillRepository.save(postSkillEntity);
         }
+
+        List<PostSkillEntity> editDraftSkill = postSkillRepository.findByPost(draft);
+
+        List<PostRewardEntity> draftReward = postRewardRepository.findByPost(draft);
+
+        return new PostDto(draft.getId(), user.getId(),userDetails.getFullName() , userDetails.getProfileURL(),draft.getTitle(), draft.getDescription(),draft.getContent(), draft.getDateOfPost().format(formatter)
+                , draft.getNumOfUpvote(), draft.getNumOfDownvote(), draft.isRewarded(), draft.isEdited()
+                , draft.isAllowComment() ,getCategoriesOfPost(getRelatedCategories(draft.getCategory().getId())), getTagOfPost(draft.getTag()), draft.getCoverURL(), draft.getSlug(),getCommentsForPost(draft.getId()), null, getSkillOfPost(editDraftSkill), getRewarderForPost(draftReward));
     }
 
     public void sendDraft(int postId){
