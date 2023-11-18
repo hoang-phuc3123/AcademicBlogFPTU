@@ -150,9 +150,10 @@ public class AdminServices {
         UserEntity user = optionalUser.get();
         UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
-        //MajorEntity
+        MajorEntity majorBefore = userDetails.getMajor();
         MajorEntity majorEntity = majorRepository.findById(majorID).orElse(null) ;
         userDetails.setMajor(majorEntity);
+        badgeServices.changeMajorBadge(userDetails,majorBefore);
         userDetailsRepository.save(userDetails);
     }
 
