@@ -112,20 +112,22 @@ public class SkillController {
     }
 
     @GetMapping("/users/skills")
-    public ResponseEntity<Map<Integer, String>> getUserskill(@RequestHeader("Authorization") String headerValue) {
+    public ResponseEntity<List<String>> getUserskill(@RequestHeader("Authorization") String headerValue) {
         String username = userAuthProvider.getUser(headerValue.replace("Bearer ", ""));
         Optional<UserEntity> optionalUser = userRepository.findByUsername(username);
+
         if (optionalUser.isPresent()) {
             UserEntity user = optionalUser.get();
             int userId = user.getId();
             List<Object[]> userSkills = skillRepository.getUserSkills(userId);
-            Map<Integer, String> skillMap = new HashMap<>();
+
+            List<String> skillList = new ArrayList<>();
             for (Object[] userSkill : userSkills) {
-                Integer skillId = (Integer) userSkill[0];
                 String skillName = userSkill[1].toString();
-                skillMap.put(skillId, skillName);
+                skillList.add(skillName);
             }
-            return ResponseEntity.ok(skillMap);
+
+            return ResponseEntity.ok(skillList);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
