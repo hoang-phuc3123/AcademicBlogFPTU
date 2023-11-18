@@ -65,7 +65,6 @@ public class UserManageController {
                         response.append(line);
                     }
                     reader.close();
-
                     JsonParser jsonParser = JsonParserFactory.getJsonParser();
                     Map<String, Object> jsonData = jsonParser.parseMap(response.toString());
                     HashMap<String, Object> responseMap = new HashMap<>();
@@ -89,33 +88,58 @@ public class UserManageController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<List<ListUserDto>> getAllUsers( @RequestHeader("Authorization") String headerValue) {
+    public ResponseEntity<List<ListUserDto>> getAllUsers(@RequestHeader("Authorization") String headerValue) {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             List<Object[]> userInfos = userDetailsRepository.getAllUsersInfo();
-            List<ListUserDto> users = new ArrayList<>();
+            Map<Integer, ListUserDto> userMap = new HashMap<>();
+
             for (Object[] userInfo : userInfos) {
                 if (!isAdmin(userService.findByUsername(userInfo[1].toString()))) {
-                    ListUserDto userDetailsInfo = new ListUserDto();
-                    userDetailsInfo.setId((Integer) userInfo[0]);
-                    userDetailsInfo.setUsername(userInfo[1].toString());
-                    userDetailsInfo.setPassword(userInfo[2].toString());
-                    userDetailsInfo.setFullname(userInfo[3].toString());
-                    userDetailsInfo.setEmail(userInfo[4] != null ? userInfo[4].toString() : null); // Check for null
-                    userDetailsInfo.setPhone(userInfo[5] != null ? userInfo[5].toString() : null); // Check for null;
-                    userDetailsInfo.setBanned((Boolean) userInfo[6]);
-                    userDetailsInfo.setMuted((Boolean) userInfo[7]);
-                    userDetailsInfo.setMutetime(userInfo[8] != null ? (Timestamp) userInfo[8] : null);
-                    userDetailsInfo.setRole((RoleEntity) userInfo[9]);
-                    Object majorObject = userInfo[10];
-                    userDetailsInfo.setMajor(majorObject != null ? (MajorEntity) majorObject : null);
-                    users.add(userDetailsInfo);
+                    Integer userId = (Integer) userInfo[0];
+                    ListUserDto userDetailsInfo = userMap.get(userId);
+
+                    if (userDetailsInfo == null) {
+                        userDetailsInfo = new ListUserDto();
+                        userDetailsInfo.setId(userId);
+                        userDetailsInfo.setUsername(userInfo[1].toString());
+                        userDetailsInfo.setPassword(userInfo[2].toString());
+                        userDetailsInfo.setFullname(userInfo[3].toString());
+                        userDetailsInfo.setEmail(userInfo[4] != null ? userInfo[4].toString() : null);
+                        userDetailsInfo.setPhone(userInfo[5] != null ? userInfo[5].toString() : null);
+                        userDetailsInfo.setBanned((Boolean) userInfo[6]);
+                        userDetailsInfo.setMuted((Boolean) userInfo[7]);
+                        userDetailsInfo.setMutetime(userInfo[8] != null ? (Timestamp) userInfo[8] : null);
+                        userDetailsInfo.setRole((RoleEntity) userInfo[9]);
+                        Object majorObject = userInfo[10];
+                        userDetailsInfo.setMajor(majorObject != null ? (MajorEntity) majorObject : null);
+
+                        userMap.put(userId, userDetailsInfo);
+                    }
+
+                    Integer skillId = userInfo[11] != null ? (Integer) userInfo[11] : null;
+                    String skillName = userInfo[12] != null ? userInfo[12].toString() : null;
+
+                    // Trong vòng lặp
+                    if (skillId != null) {
+                        SkillEntity skill = new SkillEntity();
+                        skill.setId(skillId.intValue());
+                        skill.setSkillName(skillName);
+                        userDetailsInfo.getSkills().add(skill); // Thêm skill vào danh sách
+                    }
+
                 }
             }
+
+            List<ListUserDto> users = new ArrayList<>(userMap.values());
             return ResponseEntity.ok(users);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
+
+
+
+
 
     @PostMapping("/register")
     public ResponseEntity<UserDto> RegisterAccount(@RequestHeader("Authorization") String headerValue, @RequestBody RegisterDto registerDto) {
@@ -128,6 +152,7 @@ public class UserManageController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
+
     @PostMapping("/set-role")
     public ResponseEntity<HashMap<String, String>> SetRole(@RequestHeader("Authorization") String headerValue, @RequestBody SetRoleDto setRoleDto){
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
