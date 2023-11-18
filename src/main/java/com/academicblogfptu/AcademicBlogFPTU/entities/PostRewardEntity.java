@@ -22,4 +22,6 @@ public class PostRewardEntity {
     @ManyToOne
     @JoinColumn(name = "account_id")
     private UserEntity user;
+
+    private String status;
 }
