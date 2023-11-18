@@ -1,4 +1,4 @@
-package com.academicblogfptu.AcademicBlogFPTU.dtos;
+package com.academicblogfptu.AcademicBlogFPTU.dtos.NotificationDtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

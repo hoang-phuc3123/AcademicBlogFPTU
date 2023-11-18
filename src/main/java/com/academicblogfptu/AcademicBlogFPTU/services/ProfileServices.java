@@ -22,7 +22,9 @@ import org.springframework.data.domain.Sort;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -62,8 +64,8 @@ public class ProfileServices {
         UserDetailsEntity userDetails = userDetailsRepository.findByUserId(id);
 
         List<BadgeEntity> badges = badgeServices.findBadgesByUserId(id);
-        List<PostListDto> postList;
-        List<QuestionAnswerDto> QAList;
+        Map<String, List<PostListDto>> postList;
+        Map<String, List<QuestionAnswerDto>> QAList;
         if(id == currentUserId){
             postList = getAllCurrentUserPost(id);
             QAList = getAllCurrentUserQuestionAndAnswerPost(id);
@@ -149,9 +151,11 @@ public class ProfileServices {
     }
 
 
-    public List<PostListDto> getAllCurrentUserPost(int id) {
+    public Map<String, List<PostListDto>> getAllCurrentUserPost(int id) {
         List<PostEntity> list = postRepository.findByUserId(id);
-        List<PostListDto> postList = new ArrayList<>();
+        List<PostListDto> approvePostList = new ArrayList<>();
+        List<PostListDto> pendingPostList = new ArrayList<>();
+        Map<String, List<PostListDto>> result = new HashMap<>();
         for (PostEntity post : list) {
 
             if (postServices.isApprove(post.getId()) || postServices.isPending(post.getId())) {
@@ -163,19 +167,29 @@ public class ProfileServices {
                         .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
 
                 if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
+
                     PostListDto postListDto = new PostListDto(post.getId(), user.getId() ,userDetails.getFullName(), userDetails.getProfileURL(), post.getTitle(), post.getDescription(),
                             post.getDateOfPost().format(formatter), postServices.getCategoriesOfPost(postServices.getRelatedCategories(post.getCategory().getId())), postServices.getTagOfPost(tag), post.getCoverURL(), post.isRewarded(), post.getSlug());
-                    postList.add(postListDto);
+
+                    if (postServices.isApprove(post.getId())){
+                        approvePostList.add(postListDto);
+                    }else if (postServices.isPending(post.getId())){
+                        pendingPostList.add(postListDto);
+                    }
                 }
             }
         }
-        return postList;
+        result.put("ApprovedPost", approvePostList);
+        result.put("PendingPost", pendingPostList);
+
+        return result;
     }
 
 
-    public List<PostListDto> getAllPost(int id) {
+    public Map<String, List<PostListDto>> getAllPost(int id) {
         List<PostEntity> list = postRepository.findByUserId(id);
-        List<PostListDto> postList = new ArrayList<>();
+        List<PostListDto> approvePostList = new ArrayList<>();
+        Map<String, List<PostListDto>> result = new HashMap<>();
         for (PostEntity post : list) {
 
             if (postServices.isApprove(post.getId())) {
@@ -189,16 +203,19 @@ public class ProfileServices {
                 if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
                     PostListDto postListDto = new PostListDto(post.getId(), user.getId() ,userDetails.getFullName(), userDetails.getProfileURL(), post.getTitle(), post.getDescription(),
                             post.getDateOfPost().format(formatter), postServices.getCategoriesOfPost(postServices.getRelatedCategories(post.getCategory().getId())), postServices.getTagOfPost(tag), post.getCoverURL(), post.isRewarded(), post.getSlug());
-                    postList.add(postListDto);
+                    approvePostList.add(postListDto);
                 }
             }
         }
-        return postList;
+        result.put("ApprovePost", approvePostList);
+        return result;
     }
 
-    public List<QuestionAnswerDto> getAllQuestionAndAnswerPost(int id) {
+    public Map<String, List<QuestionAnswerDto>> getAllQuestionAndAnswerPost(int id) {
         List<PostEntity> list = postRepository.findByUserId(id);
-        List<QuestionAnswerDto> QAPostList = new ArrayList<>();
+        List<QuestionAnswerDto> approveQAPostList = new ArrayList<>();
+        Map<String, List<QuestionAnswerDto>> result = new HashMap<>();
+
         for (PostEntity post : list) {
             if (postServices.isApprove(post.getId())) {
                 UserEntity user = userRepository.findById(post.getUser().getId())
@@ -214,15 +231,19 @@ public class ProfileServices {
 
                     QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription() ,post.getContent(),
                             post.getDateOfPost().format(formatter), numOfUpvote, numOfDownvote, postServices.getCategoriesOfPost(postServices.getRelatedCategories(post.getCategory().getId())), postServices.getTagOfPost(tag), post.getCoverURL(), post.isRewarded(), post.getSlug(), commentRepository.countNumOfCommentForPost(post.getId()));
-                    QAPostList.add(questionAnswerDto);
+                    approveQAPostList.add(questionAnswerDto);
                 }
             }
         }
-        return QAPostList;
+        result.put("ApproveQA", approveQAPostList);
+        return result;
     }
-    public List<QuestionAnswerDto> getAllCurrentUserQuestionAndAnswerPost(int id) {
+    public Map<String, List<QuestionAnswerDto>> getAllCurrentUserQuestionAndAnswerPost(int id) {
         List<PostEntity> list = postRepository.findByUserId(id);
-        List<QuestionAnswerDto> QAPostList = new ArrayList<>();
+        List<QuestionAnswerDto> approveQAPostList = new ArrayList<>();
+        List<QuestionAnswerDto> pendingQAPostList = new ArrayList<>();
+        Map<String, List<QuestionAnswerDto>> result = new HashMap<>();
+
         for (PostEntity post : list) {
             if (postServices.isApprove(post.getId())|| postServices.isPending(post.getId())) {
                 UserEntity user = userRepository.findById(post.getUser().getId())
@@ -238,11 +259,18 @@ public class ProfileServices {
 
                     QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription() ,post.getContent(),
                             post.getDateOfPost().format(formatter), numOfUpvote, numOfDownvote, postServices.getCategoriesOfPost(postServices.getRelatedCategories(post.getCategory().getId())), postServices.getTagOfPost(tag), post.getCoverURL(), post.isRewarded(), post.getSlug(), commentRepository.countNumOfCommentForPost(post.getId()));
-                    QAPostList.add(questionAnswerDto);
+
+                    if (postServices.isApprove(post.getId())){
+                        approveQAPostList.add(questionAnswerDto);
+                    }else if (postServices.isPending(post.getId())){
+                        pendingQAPostList.add(questionAnswerDto);
+                    }
                 }
             }
         }
-        return QAPostList;
+        result.put("ApproveQA", approveQAPostList);
+        result.put("PendingQA", pendingQAPostList);
+        return result;
     }
 
     public List<BadgeEntity> getAllBadge(int id) {

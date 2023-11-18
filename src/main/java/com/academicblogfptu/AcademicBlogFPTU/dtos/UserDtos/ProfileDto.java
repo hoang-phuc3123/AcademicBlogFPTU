@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -24,8 +25,8 @@ public class ProfileDto {
     private List<BadgeEntity> badges;
     private Long numOfFollower;
     private Long numOfPost;
-    private List<PostListDto> postList;
-    private List<QuestionAnswerDto> qaList;
+    private Map<String, List<PostListDto>> postList;
+    private Map<String, List<QuestionAnswerDto>> qaList;
 
 
 }
