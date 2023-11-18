@@ -45,11 +45,11 @@ public class PostManageController {
     }
 
     @GetMapping("/posts/pending")
-    public ResponseEntity<List<PostListDto>> viewPendingPost(@RequestHeader("Authorization") String headerValue) {
+    public ResponseEntity<Map<String, List<PostListDto>>> viewPendingPost(@RequestHeader("Authorization") String headerValue) {
         if (isLecturer(userServices.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             Optional<UserEntity> user = userRepository.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
             UserEntity userEntity = user.get();
-            List<PostListDto> pendingPost = postServices.viewPendingPost(userEntity);
+            Map<String, List<PostListDto>> pendingPost = postServices.viewPendingPost(userEntity);
             return ResponseEntity.ok(pendingPost);
         }
         else {
