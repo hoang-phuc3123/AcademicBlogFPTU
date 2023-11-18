@@ -15,7 +15,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 @Configuration
 @RequiredArgsConstructor
 @EnableWebSecurity
-public class SecurityConfig {
+public class SecurityConfig   {
 
     private final UserAuthenticationEntryPoint userAuthenticationEntryPoint;
     private final UserAuthProvider userAuthProvider;
@@ -30,15 +30,17 @@ public class SecurityConfig {
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .authorizeHttpRequests((requests)->requests
+                .authorizeHttpRequests((requests)-> requests
                         .requestMatchers(HttpMethod.POST,"/users/login" ,
                                 "/users/google-login" ,
                                 "/users/send-code" ,
                                 "/users/verify-code",
-                                "/auth/refresh-token" ,
+                                "/auth/refresh-token",
                                 "/auth/remove-token"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.GET,"/ws/**").permitAll()
                         .anyRequest().authenticated());
+
         return http.build();
     }
 }
