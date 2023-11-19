@@ -477,7 +477,6 @@ public class PostServices {
         }
         editPost.setContent(editPostDto.getContent());
         editPost.setDateOfPost(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
-        editPost.setRewarded(false);
         editPost.setEdited(true);
         editPost.setLength(editPostDto.getLength());
         editPost.setAllowComment(editPostDto.isAllowComment());
@@ -898,7 +897,6 @@ public class PostServices {
         }
         draft.setContent(editPostDto.getContent());
         draft.setDateOfPost(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
-        draft.setRewarded(false);
         draft.setEdited(true);
         draft.setLength(editPostDto.getLength());
         draft.setAllowComment(editPostDto.isAllowComment());
