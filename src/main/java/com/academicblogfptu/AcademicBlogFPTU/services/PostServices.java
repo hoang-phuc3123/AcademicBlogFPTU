@@ -214,7 +214,7 @@ public class PostServices {
     public List<RewarderDto> getRewarderForPost(List<PostRewardEntity> postRewards){
         List<RewarderDto> rewarder = new ArrayList<>();
         for (PostRewardEntity postRewardEntity: postRewards) {
-            if (postRewardEntity.getStatus().equalsIgnoreCase("Accepted")){
+            if (postRewardEntity.getStatus().equalsIgnoreCase("Accepted") || postRewardEntity.getStatus().equalsIgnoreCase("Pending")){
                 List<BadgeEntity> userBadges = badgeServices.findBadgesByUserId(postRewardEntity.getUser().getId());
                 UserEntity user = userRepository.findById(postRewardEntity.getUser().getId())
                         .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
