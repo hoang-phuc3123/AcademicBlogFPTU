@@ -1,10 +1,7 @@
 package com.academicblogfptu.AcademicBlogFPTU.services;
 
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.*;
-import com.academicblogfptu.AcademicBlogFPTU.entities.SkillEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.UserDetailsEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.RoleEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.*;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.*;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +27,8 @@ public class UserServices {
     @Autowired
     private final PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private final MajorRepository majorRepository;
 
     @Autowired
     private final UserDetailsRepository userDetailsRepository;
@@ -112,8 +111,8 @@ public class UserServices {
             newUserDetails.setWeightOfReport(0);
             newUserDetails.setProfileURL(userDetailsDto.getProfileUrl());
             newUserDetails.setUser(user);
-            //MajorEntity majorEntity = majorRepository.findByMajorName("Kỹ Thuật Phần Mềm").orElse(null) ;
-            newUserDetails.setMajor(null);
+            MajorEntity majorEntity = majorRepository.findByMajorName("Kỹ Thuật Phần Mềm").orElse(null) ;
+            newUserDetails.setMajor(majorEntity);
             userDetailsRepository.save(newUserDetails);
         }
     }
