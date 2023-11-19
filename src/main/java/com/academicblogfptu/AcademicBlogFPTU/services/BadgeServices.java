@@ -85,7 +85,8 @@ public class BadgeServices {
 
     public void changeMajorBadge(UserDetailsEntity userDetails, MajorEntity majorEntityBefore){
 
-        if(userBadgeRepository.existsByUserIdAndBadgeId(userDetails.getUser().getId(),majorEntityBefore.getId())){
+        BadgeEntity badgeBefore = badgeRepository.findByBadgeName(majorEntityBefore.getMajorName()).orElseThrow(()-> new AppException("Unknown badge!!", HttpStatus.NOT_FOUND));
+        if(userBadgeRepository.existsByUserIdAndBadgeId(userDetails.getUser().getId(),badgeBefore.getId())){
             UserBadgeEntity userBadge = userBadgeRepository.findByUserIdAndBadgeId(userDetails.getUser().getId(),majorEntityBefore.getId()).orElseThrow(()-> new AppException("Unknown badge!!", HttpStatus.NOT_FOUND));
             BadgeEntity newBadge = badgeRepository.findByBadgeName(userDetails.getMajor().getMajorName()).orElseThrow(()-> new AppException("Unknown badge",HttpStatus.NOT_FOUND));
             userBadge.setBadge(newBadge);
