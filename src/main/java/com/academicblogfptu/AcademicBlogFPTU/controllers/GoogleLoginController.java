@@ -7,6 +7,7 @@ import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.GoogleUserDetailsDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDto;
 import com.academicblogfptu.AcademicBlogFPTU.services.TokenServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -141,13 +142,16 @@ public class GoogleLoginController {
 
     private String getClientIpAddress() {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-        String xForwardedForHeader = attributes.getRequest().getHeader("X-Forwarded-For");
-
+        HttpServletRequest request = attributes.getRequest();
+        String xForwardedForHeader = request.getHeader("X-Forwarded-For");
         if (xForwardedForHeader != null && !xForwardedForHeader.isEmpty()) {
             return xForwardedForHeader.split(",")[0].trim();
-        } else {
-            return "Unknown";
         }
+        String remoteAddr = request.getRemoteAddr();
+        if (remoteAddr != null && !remoteAddr.isEmpty()) {
+            return remoteAddr;
+        }
+        return "Unknown";
     }
 
     public static String convertIPv6ToIPv4(String ipv6Address) {
