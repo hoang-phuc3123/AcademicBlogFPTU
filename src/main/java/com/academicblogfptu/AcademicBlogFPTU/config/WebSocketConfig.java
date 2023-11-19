@@ -2,6 +2,7 @@ package com.academicblogfptu.AcademicBlogFPTU.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
@@ -13,19 +14,20 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import java.util.Arrays;
+
 
 @Configuration
 @EnableWebSocket
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
-    public void registerStompEndpoints(StompEndpointRegistry registry){
-        registry.addEndpoint("/ws");
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws").setAllowedOrigins("*").withSockJS();
     }
 
     @Override
-    public void configureMessageBroker(MessageBrokerRegistry config){
+    public void configureMessageBroker(MessageBrokerRegistry config) {
         config.enableSimpleBroker("/specific");
         config.setApplicationDestinationPrefixes("/app");
     }
@@ -40,7 +42,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
 
-        // Allow all origins, headers, and methods for simplicity. Customize as needed.
+        // Specify allowed origins, headers, and methods
         config.addAllowedOrigin("*");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
@@ -50,5 +52,4 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
         return new CorsFilter(source);
     }
-
 }
