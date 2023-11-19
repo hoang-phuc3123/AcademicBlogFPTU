@@ -1257,7 +1257,7 @@ public class PostServices {
                             .map(PostSkillEntity::getSkill)
                             .allMatch(skill -> userSkills.stream().anyMatch(userSkill -> userSkill.getSkill().equals(skill)));
 
-                    if (hasCommonSkills){
+                    if (hasCommonSkills && post.getUser().getId() != userEntity.getId()){
                         if (!tag.getTagName().equalsIgnoreCase("Q&A")){
                             rewardedPostList.add(new PostListDto(post.getId(), user.getId(),userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getDescription(),
                                     post.getDateOfPost().format(formatter), getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL() ,post.isRewarded(), post.getSlug()));
@@ -1278,21 +1278,29 @@ public class PostServices {
             throw new AppException("Invalid postId", HttpStatus.NOT_FOUND);
         }
 
-        PostRewardEntity postReward = new PostRewardEntity();
-        postReward.setPost(post);
-        postReward.setUser(user);
-        postReward.setStatus("Pending");
-        postRewardRepository.save(postReward);
+        if (post.isRewarded()){
+            PostRewardEntity postReward = new PostRewardEntity();
+            postReward.setPost(post);
+            postReward.setUser(user);
+            postReward.setStatus("Accepted");
+            postRewardRepository.save(postReward);
+        }else {
+            PostRewardEntity postReward = new PostRewardEntity();
+            postReward.setPost(post);
+            postReward.setUser(user);
+            postReward.setStatus("Pending");
+            postRewardRepository.save(postReward);
 
-        int countNumOfReward = postRewardRepository.countNumOfReward(postId);
-        if (countNumOfReward >= 2){
-            List<PostRewardEntity> postRewardList = postRewardRepository.findByPostAndStatus(post, "Pending");
-            for (PostRewardEntity postRewardEntity : postRewardList) {
-                postRewardEntity.setStatus("Accepted");
-                postRewardRepository.save(postRewardEntity);
+            int countNumOfReward = postRewardRepository.countNumOfReward(postId);
+            if (countNumOfReward >= 2){
+                List<PostRewardEntity> postRewardList = postRewardRepository.findByPostAndStatus(post, "Pending");
+                for (PostRewardEntity postRewardEntity : postRewardList) {
+                    postRewardEntity.setStatus("Accepted");
+                    postRewardRepository.save(postRewardEntity);
+                }
+                post.setRewarded(true);
+                postRepository.save(post);
             }
-            post.setRewarded(true);
-            postRepository.save(post);
         }
     }
     // remove reward
