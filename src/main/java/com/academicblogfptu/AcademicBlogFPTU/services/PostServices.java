@@ -1083,15 +1083,18 @@ public class PostServices {
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
 
         List<Integer> rewardedPostIds = postRewardRepository.findPostIdByUserIdAndStatus(userEntity.getId(), "Pending");
-        //System.out.println("Rewarded Post IDs: " + rewardedPostIds);
+//        System.out.println("Rewarded Post IDs: " + rewardedPostIds);
 
         List<Integer> acceptedPostIds = postRewardRepository.findPostIdByUserIdAndStatus(userEntity.getId(), "Accepted");
-        //System.out.println("Dismissed Post IDs: " + dismissedPostIds);
+//        System.out.println("Accepted Post IDs: " + acceptedPostIds);
 
         List<Integer> dismissPostIds = postRewardRepository.findPostIdByUserIdAndStatus(userEntity.getId(), "Dismiss");
-        //System.out.println("Rewarded Post IDs: " + rewardedPostIds);
+        //System.out.println("Dismiss Post IDs: " + dismissPostIds);
+
 
         for (PostEntity post: postList) {
+
+                List<Integer> rewardPostEntity = postRewardRepository.findByPostId(post.getId());
 
                 UserEntity user = userRepository.findById(post.getUser().getId())
                         .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
@@ -1112,7 +1115,7 @@ public class PostServices {
                     continue;
                 }
 
-                if (hasCommonSkills && !rewardedPostIds.contains(post.getId()) && !acceptedPostIds.contains(post.getId())) {
+                if (hasCommonSkills && !rewardedPostIds.contains(post.getId()) && !acceptedPostIds.contains(post.getId()) && !rewardPostEntity.contains(post.getId())) {
                     if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
                         PostListDto postListDto = new PostListDto(post.getId(), user.getId(),userDetails.getFullName(), userDetails.getProfileURL() ,post.getTitle(), post.getDescription(),
                                 post.getDateOfPost().format(formatter), getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(),post.isRewarded(), post.getSlug());
