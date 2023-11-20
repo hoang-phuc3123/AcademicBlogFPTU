@@ -69,7 +69,7 @@ public class UserManageController {
                     Map<String, Object> jsonData = jsonParser.parseMap(response.toString());
                     HashMap<String, Object> responseMap = new HashMap<>();
                     responseMap.put("total_user", userInfos.size());
-                    responseMap.put("total_post", postRepository.getAllApprovedPost());
+                    responseMap.put("total_post", totalPost.size());
                     responseMap.put("total_reported_profile", reportedProfileDto.size());
                     responseMap.put("total_reported_comment", reportCommentList.size());
                     responseMap.put("total_visit", jsonData );
