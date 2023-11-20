@@ -1,6 +1,7 @@
 package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 
+import com.academicblogfptu.AcademicBlogFPTU.config.MyHandler;
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.NotificationDtos.Notification;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.NotificationDtos.NotificationDto;
@@ -26,7 +27,8 @@ public class NotificationController {
     private final UserServices userService;
     @Autowired
     private final UserAuthProvider userAuthProvider;
-    private final SimpMessagingTemplate messagingTemplate;
+
+    private MyHandler notifyHandler;
 
     @GetMapping("/view")
     public ResponseEntity<List<NotificationDto>> getAllNotifications(@RequestHeader("Authorization") String headerValue){
@@ -54,7 +56,7 @@ public class NotificationController {
        notificationDto.setTriggerUser(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))).getId());
        try{
            notificationServices.sendNotification(notificationDto);
-           messagingTemplate.convertAndSendToUser(String.valueOf(notificationDto.getUserId()), "/specific/notifications", new Notification("Bạn có thông báo mới !!!"));
+           notifyHandler.sendNotification(notificationDto.getUserId(),"Bạn có thông báo mới!!!");
        }catch(Exception e){
            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
        }
