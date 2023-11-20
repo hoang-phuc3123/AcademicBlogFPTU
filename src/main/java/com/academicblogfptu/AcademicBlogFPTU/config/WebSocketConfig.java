@@ -5,10 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.web.socket.config.annotation.EnableWebSocket;
-import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
-import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
-import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.config.annotation.*;
 
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -19,18 +17,18 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSocket
-@EnableWebSocketMessageBroker
-public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-    @Override
-    public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws").setAllowedOrigins("*").withSockJS();
-    }
 
-    @Override
-    public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/specific");
-        config.setApplicationDestinationPrefixes("/app");
-    }
+public class WebSocketConfig implements WebSocketConfigurer {
+//    @Override
+//    public void registerStompEndpoints(StompEndpointRegistry registry) {
+//        registry.addEndpoint("/ws").setAllowedOrigins("*").withSockJS();
+//    }
+//
+//    @Override
+//    public void configureMessageBroker(MessageBrokerRegistry config) {
+//        config.enableSimpleBroker("/specific");
+//        config.setApplicationDestinationPrefixes("/app");
+//    }
 
     @Bean
     public SimpMessagingTemplate messagingTemplate() {
@@ -51,5 +49,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         source.registerCorsConfiguration("/ws/**", config);
 
         return new CorsFilter(source);
+    }
+
+    @Override
+    public void registerWebSocketHandlers(WebSocketHandlerRegistry webSocketHandlerRegistry) {
+        webSocketHandlerRegistry.addHandler(myHandler(), "/ws");
+    }
+    @Bean
+    public WebSocketHandler myHandler() {
+        return new MyHandler();
     }
 }
