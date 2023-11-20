@@ -1,6 +1,5 @@
 package com.academicblogfptu.AcademicBlogFPTU.config;
 
-
 import com.academicblogfptu.AcademicBlogFPTU.dtos.ErrorDto;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import org.springframework.http.ResponseEntity;

@@ -2,7 +2,6 @@ package com.academicblogfptu.AcademicBlogFPTU.config;
 
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.GoogleUserDetailsDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDto;
-import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.UserDetailsRepository;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import com.auth0.jwt.JWT;
@@ -15,11 +14,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Component
