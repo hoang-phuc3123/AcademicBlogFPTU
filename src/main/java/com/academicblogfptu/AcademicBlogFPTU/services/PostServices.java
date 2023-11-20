@@ -1332,7 +1332,7 @@ public class PostServices {
     }
 
     // view Q&A pending list
-    public List<QuestionAnswerDto> viewQAPendingPost(){
+    public List<QuestionAnswerDto> viewQAPendingPost(UserEntity userEntity){
         List<PostEntity> postList = postRepository.getAllPendingPost();
         List<QuestionAnswerDto> QApendingPostList = new ArrayList<>();
 
@@ -1345,11 +1345,13 @@ public class PostServices {
                 TagEntity tag = tagRepository.findById(post.getTag().getId())
                         .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
 
-                    if (tag.getTagName().equalsIgnoreCase("Q&A")) {
-                        QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), user.getId() ,userDetails.getFullName(),userDetails.getProfileURL(),post.getTitle(), post.getDescription() ,post.getContent(),
-                                post.getDateOfPost().format(formatter), post.getNumOfUpvote(), post.getNumOfDownvote() ,getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(), post.isRewarded(), post.getSlug(), commentRepository.countNumOfCommentForPost(post.getId()));
-                        QApendingPostList.add(questionAnswerDto);
-                    }
+                   if (post.getUser().getId() != userEntity.getId()){
+                       if (tag.getTagName().equalsIgnoreCase("Q&A")) {
+                           QuestionAnswerDto questionAnswerDto = new QuestionAnswerDto(post.getId(), user.getId() ,userDetails.getFullName(),userDetails.getProfileURL(),post.getTitle(), post.getDescription() ,post.getContent(),
+                                   post.getDateOfPost().format(formatter), post.getNumOfUpvote(), post.getNumOfDownvote() ,getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(), post.isRewarded(), post.getSlug(), commentRepository.countNumOfCommentForPost(post.getId()));
+                           QApendingPostList.add(questionAnswerDto);
+                       }
+                   }
         }
         return QApendingPostList;
     }

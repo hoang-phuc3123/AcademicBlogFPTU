@@ -42,7 +42,10 @@ public class QAManageController {
     @GetMapping("/q-a/view")
     public ResponseEntity<List<QuestionAnswerDto>> viewQAPending(@RequestHeader("Authorization") String headerValue) {
         if (isMentor(userServices.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
-            List<QuestionAnswerDto> qaPendingPostList = postServices.viewQAPendingPost();
+            Optional<UserEntity> user = userRepository.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", "")));
+            UserEntity userEntity = user.get();
+
+            List<QuestionAnswerDto> qaPendingPostList = postServices.viewQAPendingPost(userEntity);
             return ResponseEntity.ok(qaPendingPostList);
         }
         else {
