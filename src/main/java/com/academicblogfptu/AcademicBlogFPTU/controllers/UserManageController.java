@@ -4,6 +4,7 @@ import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.ReportedCommentDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.*;
 import com.academicblogfptu.AcademicBlogFPTU.entities.*;
+import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.PostRepository;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.UserDetailsRepository;
 import com.academicblogfptu.AcademicBlogFPTU.services.AdminServices;
@@ -144,6 +145,7 @@ public class UserManageController {
     @PostMapping("/register")
     public ResponseEntity<UserDto> RegisterAccount(@RequestHeader("Authorization") String headerValue, @RequestBody RegisterDto registerDto) {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
+            if (adminService.isEmailExist(registerDto.getEmail())) throw new AppException("Mail exist" , HttpStatus.UNAUTHORIZED);
             UserDto userDto = adminService.register(registerDto);
             adminService.RegisterUserDetail(registerDto);
             userDto.setFullname(registerDto.getFullname());

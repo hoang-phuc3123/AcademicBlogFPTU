@@ -77,6 +77,11 @@ public class AdminServices {
         return new UserDto(user.getId(),user.getUsername(),userDetails.getFullName(),userDetails.isBanned(),userDetails.isMuted(),userDetails.getMutetime(),user.getRole().getRoleName(), userDetails.getProfileURL(),userDetails.getCoverURL(), "" , "");
     }
 
+    public boolean isEmailExist(String email) {
+        Optional<UserDetailsEntity> userDetails = userDetailsRepository.findByEmail(email);
+        return userDetails.isPresent();
+    }
+
     public UserDto register(RegisterDto registerDto) {
         Optional<UserEntity> optionalUser = userRepository.findByUsername(registerDto.getUsername());
         if (optionalUser.isPresent()) {
