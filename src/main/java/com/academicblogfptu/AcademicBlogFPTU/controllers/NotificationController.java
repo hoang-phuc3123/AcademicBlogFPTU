@@ -54,8 +54,8 @@ public class NotificationController {
    public ResponseEntity<String> sendNotification(@RequestHeader("Authorization") String headerValue, @RequestBody NotificationDto notificationDto){
        notificationDto.setTriggerUser(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))).getId());
 
-       notificationServices.sendNotification(notificationDto);
-       notificationServices.sendNotificationRealtime(notificationDto.getUserId(),"Bạn có thông báo mới!!!");
+       NotificationDto newNotify = notificationServices.sendNotification(notificationDto);
+       notificationServices.sendNotificationRealtime(notificationDto.getUserId(),newNotify);
        return ResponseEntity.ok("Send notification success!");
 
    }

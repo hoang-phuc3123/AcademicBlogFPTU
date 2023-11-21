@@ -8,6 +8,7 @@ import com.academicblogfptu.AcademicBlogFPTU.entities.PostEntity;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.*;
 import lombok.RequiredArgsConstructor;
+import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
@@ -43,7 +44,7 @@ public class NotificationServices {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 
-    public void sendNotification(NotificationDto notificationDto){
+    public NotificationDto sendNotification(NotificationDto notificationDto){
         NotificationEntity notification = new NotificationEntity();
 
         notification.setContent(notificationDto.getContent());
@@ -64,7 +65,9 @@ public class NotificationServices {
             notification.setRelatedURL(comment.getPost().getSlug());
 
         }
-        notificationRepository.save(notification);
+        NotificationEntity newNotify = notificationRepository.save(notification);
+        NotificationDto newNotifyDto = mapToDto(newNotify);
+        return newNotifyDto;
 
     }
 
@@ -93,7 +96,6 @@ public class NotificationServices {
     private NotificationDto mapToDto(NotificationEntity notificationEntity){
 
 
-
         NotificationDto notification = new NotificationDto();
         notification.setNotificationId(notificationEntity.getId());
         notification.setContent(notificationEntity.getContent());
@@ -105,15 +107,16 @@ public class NotificationServices {
         notification.setUserId(notificationEntity.getUser().getId());
         notification.setTriggerUser(notificationEntity.getTriggerUser());
         notification.setFullNameOfTriggerUser(userDetailsRepository.findByUserId(notificationEntity.getTriggerUser()).getFullName());
+        notification.setAvatarOfTriggerUser(userDetailsRepository.findByUserId(notificationEntity.getTriggerUser()).getProfileURL());
 
         return notification;
     }
 
 
 
-    public void sendNotificationRealtime(Integer userId, String message) {
+    public void sendNotificationRealtime(Integer userId, NotificationDto notificationDto) {
         MyHandler myHandler = (MyHandler) myWebSocketHandler;
-        myHandler.sendNotification(userId, message);
+        myHandler.sendNotification(userId, notificationDto);
     }
 
 
