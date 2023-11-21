@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.socket.WebSocketHandler;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -32,8 +33,8 @@ public class NotificationServices {
     @Autowired
     private CommentRepository commentRepository;
 
-    @Autowired
-    private final MyHandler myHandler;
+    private final WebSocketHandler myWebSocketHandler;
+
 
 
 
@@ -108,10 +109,10 @@ public class NotificationServices {
         return notification;
     }
 
-    private final ApplicationContext applicationContext;
 
 
     public void sendNotificationRealtime(Integer userId, String message) {
+        MyHandler myHandler = (MyHandler) myWebSocketHandler;
         myHandler.sendNotification(userId, message);
     }
 
