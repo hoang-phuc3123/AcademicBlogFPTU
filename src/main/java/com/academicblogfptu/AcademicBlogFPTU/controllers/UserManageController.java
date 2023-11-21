@@ -160,9 +160,6 @@ public class UserManageController {
     }
 
 
-
-
-
     @PostMapping("/register")
     public ResponseEntity<UserDto> RegisterAccount(@RequestHeader("Authorization") String headerValue, @RequestBody RegisterDto registerDto) {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
@@ -171,6 +168,15 @@ public class UserManageController {
             adminService.RegisterUserDetail(registerDto);
             userDto.setFullname(registerDto.getFullname());
             notifyByMailServices.sendRegisterMail(registerDto.getEmail(),registerDto.getUsername(),registerDto.getPassword());
+            ActivitiesLogDto activitiesLogDto = new ActivitiesLogDto();
+            activitiesLogDto.setAction("Register account with ID: " + userDto.getId());
+            long currentTimeMillis = System.currentTimeMillis();
+            Timestamp expirationTimestamp = new Timestamp(currentTimeMillis);
+            activitiesLogDto.setActionTime(expirationTimestamp);
+            String username = userAuthProvider.getUser(headerValue.replace("Bearer ", ""));
+            UserDto adminDto = userService.findByUsername(username);
+            activitiesLogDto.setUserID(adminDto.getId());
+            adminService.saveActivity(activitiesLogDto);
             return ResponseEntity.ok(userDto);
         }
         else {
@@ -235,6 +241,15 @@ public class UserManageController {
             adminService.unbanUser(adminService.findById(identificationDto.getId()));
             HashMap <String, String> responseMap = new HashMap<>();
             responseMap.put("message", "Unban success.");
+            ActivitiesLogDto activitiesLogDto = new ActivitiesLogDto();
+            activitiesLogDto.setAction("Unban user with ID: " +  identificationDto.getId());
+            long currentTimeMillis = System.currentTimeMillis();
+            Timestamp expirationTimestamp = new Timestamp(currentTimeMillis);
+            activitiesLogDto.setActionTime(expirationTimestamp);
+            String username = userAuthProvider.getUser(headerValue.replace("Bearer ", ""));
+            UserDto userDto = userService.findByUsername(username);
+            activitiesLogDto.setUserID(userDto.getId());
+            adminService.saveActivity(activitiesLogDto);
             return ResponseEntity.ok(responseMap);
         }
         else {
