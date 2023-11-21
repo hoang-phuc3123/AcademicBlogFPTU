@@ -1,5 +1,6 @@
 package com.academicblogfptu.AcademicBlogFPTU.services;
 
+import com.academicblogfptu.AcademicBlogFPTU.config.MyHandler;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.NotificationDtos.NotificationDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.CommentEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.NotificationEntity;
@@ -8,6 +9,7 @@ import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +31,11 @@ public class NotificationServices {
 
     @Autowired
     private CommentRepository commentRepository;
+
+    @Autowired
+    private final MyHandler myHandler;
+
+
 
     @Autowired
     private PostRepository postRepository;
@@ -101,6 +108,12 @@ public class NotificationServices {
         return notification;
     }
 
+    private final ApplicationContext applicationContext;
+
+
+    public void sendNotificationRealtime(Integer userId, String message) {
+        myHandler.sendNotification(userId, message);
+    }
 
 
 }

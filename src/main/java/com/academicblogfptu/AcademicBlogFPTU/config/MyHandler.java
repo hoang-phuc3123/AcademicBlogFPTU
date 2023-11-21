@@ -2,13 +2,18 @@ package com.academicblogfptu.AcademicBlogFPTU.config;
 
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
@@ -17,10 +22,10 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
-@Getter
 @Slf4j
-
+@Service
 @RequiredArgsConstructor
 public class MyHandler extends TextWebSocketHandler {
 
@@ -29,7 +34,8 @@ public class MyHandler extends TextWebSocketHandler {
     @Autowired
     private UserServices userService;
 
-    Map<Integer, WebSocketSession> userSessions = new HashMap<>();
+    private final Map<Integer, WebSocketSession> userSessions = new ConcurrentHashMap<>();
+
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
@@ -46,6 +52,7 @@ public class MyHandler extends TextWebSocketHandler {
 
         // Store the session
         userSessions.put(userId, session);
+        System.out.println(userSessions);
     }
 
     @Override

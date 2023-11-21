@@ -17,18 +17,7 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSocket
-
 public class WebSocketConfig implements WebSocketConfigurer {
-//    @Override
-//    public void registerStompEndpoints(StompEndpointRegistry registry) {
-//        registry.addEndpoint("/ws").setAllowedOrigins("*").withSockJS();
-//    }
-//
-//    @Override
-//    public void configureMessageBroker(MessageBrokerRegistry config) {
-//        config.enableSimpleBroker("/specific");
-//        config.setApplicationDestinationPrefixes("/app");
-//    }
 
     @Bean
     public SimpMessagingTemplate messagingTemplate() {
@@ -53,10 +42,10 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry webSocketHandlerRegistry) {
-        webSocketHandlerRegistry.addHandler(myHandler(), "/ws").setAllowedOrigins("*");;
+        webSocketHandlerRegistry.addHandler(myWebSocketHandler(), "/ws").setAllowedOrigins("*");;
     }
-    @Bean
-    public WebSocketHandler myHandler() {
+    //@Bean
+    public WebSocketHandler myWebSocketHandler() {
         return new MyHandler();
     }
 }
