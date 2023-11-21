@@ -13,7 +13,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class NotificationDto {
+public class
+NotificationDto {
 
     private int notificationId;
     private String content;
@@ -23,6 +24,7 @@ public class NotificationDto {
     private String type;
     private int triggerUser;
     private String fullNameOfTriggerUser;
+    private String avatarOfTriggerUser;
     private String relatedUrl;
     private int userId;
 }
