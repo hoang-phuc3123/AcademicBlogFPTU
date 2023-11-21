@@ -7,6 +7,7 @@ import com.academicblogfptu.AcademicBlogFPTU.entities.*;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.PostRepository;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.UserDetailsRepository;
 import com.academicblogfptu.AcademicBlogFPTU.services.AdminServices;
+import com.academicblogfptu.AcademicBlogFPTU.services.NotifyByMailServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.json.JsonParser;
@@ -35,7 +36,7 @@ public class UserManageController {
     private final UserAuthProvider userAuthProvider;
     private final UserDetailsRepository userDetailsRepository;
     private final PostRepository postRepository;
-
+    private final NotifyByMailServices notifyByMailServices;
     public boolean isAdmin(UserDto userDto) {
         return userDto.getRoleName().equals("admin");
     }
@@ -145,6 +146,8 @@ public class UserManageController {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             UserDto userDto = adminService.register(registerDto);
             adminService.RegisterUserDetail(registerDto);
+            userDto.setFullname(registerDto.getFullname());
+            notifyByMailServices.sendRegisterMail(registerDto.getEmail(),registerDto.getUsername(),registerDto.getPassword());
             return ResponseEntity.ok(userDto);
         }
         else {
