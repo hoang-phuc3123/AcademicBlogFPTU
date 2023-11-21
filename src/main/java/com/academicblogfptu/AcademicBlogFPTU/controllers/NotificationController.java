@@ -39,7 +39,7 @@ public class NotificationController {
         return ResponseEntity.ok(notifications);
     }
 
-    @GetMapping("/read")
+    @PostMapping("/read")
     public ResponseEntity<String> readNotifications(@RequestHeader("Authorization") String headerValue, @RequestBody NotificationDto notificationDto){
         NotificationEntity notification = notificationServices.getNotification(notificationDto.getNotificationId());
         if(notification.getUser().getId()
