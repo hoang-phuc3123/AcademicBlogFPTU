@@ -52,7 +52,7 @@ public class NotificationController {
    @PostMapping("/send")
    public ResponseEntity<String> sendNotification(@RequestHeader("Authorization") String headerValue, @RequestBody NotificationDto notificationDto){
        notificationDto.setTriggerUser(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))).getId());
-
+       MyHandler notifyHandler = new MyHandler();
        notificationServices.sendNotification(notificationDto);
        notifyHandler.sendNotification(notificationDto.getUserId(),"Bạn có thông báo mới!!!");
        return ResponseEntity.ok("Send notification success!");
