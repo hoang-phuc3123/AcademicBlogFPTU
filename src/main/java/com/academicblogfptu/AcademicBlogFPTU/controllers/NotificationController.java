@@ -52,14 +52,11 @@ public class NotificationController {
    @PostMapping("/send")
    public ResponseEntity<String> sendNotification(@RequestHeader("Authorization") String headerValue, @RequestBody NotificationDto notificationDto){
        notificationDto.setTriggerUser(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))).getId());
-       try{
-           notificationServices.sendNotification(notificationDto);
-           MyHandler notifyHandler = new MyHandler();
-           notifyHandler.sendNotification(notificationDto.getUserId(),"Bạn có thông báo mới!!!");
-       }catch(Exception e){
-           return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-       }
-        return ResponseEntity.ok("Send notification success!");
+
+       notificationServices.sendNotification(notificationDto);
+       notifyHandler.sendNotification(notificationDto.getUserId(),"Bạn có thông báo mới!!!");
+       return ResponseEntity.ok("Send notification success!");
+
    }
 
 

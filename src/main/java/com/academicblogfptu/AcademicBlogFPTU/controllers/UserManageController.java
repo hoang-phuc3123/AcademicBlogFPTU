@@ -45,7 +45,7 @@ public class UserManageController {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             try {
                 List<UserDetailsEntity> userInfos = userDetailsRepository.findAll();
-                List<PostEntity> totalPost = postRepository.findAll();
+                List<PostEntity> totalPost = postRepository.getAllApprovedPost();
                 List<ReportedProfileDto> reportedProfileDto = adminService.viewReportProfile();
                 List<ReportedCommentDto> reportCommentList = adminService.viewPendingReportComment();
 

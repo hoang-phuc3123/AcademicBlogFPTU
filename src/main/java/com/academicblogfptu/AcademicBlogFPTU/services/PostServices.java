@@ -385,7 +385,7 @@ public class PostServices {
         if (editPostDetails.getType().equalsIgnoreCase("Request")) {
             editPostDetails.setDateOfAction(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
             postDetailsRepository.save(editPostDetails);
-            return editPendingPost(editPostDto);
+            return editDraft(editPostDto);
         } else {
             //tạo bài post mới lưu bài viết cũ vào database để view edit history
             PostEntity newPost = new PostEntity();
@@ -897,7 +897,6 @@ public class PostServices {
         }
         draft.setContent(editPostDto.getContent());
         draft.setDateOfPost(LocalDateTime.of(java.time.LocalDate.now(), java.time.LocalTime.now()));
-        draft.setEdited(true);
         draft.setLength(editPostDto.getLength());
         draft.setAllowComment(editPostDto.isAllowComment());
         UserEntity user = userRepository.findById(draft.getUser().getId())
