@@ -60,7 +60,7 @@ public class MyHandler extends TextWebSocketHandler {
             try {
                 session.sendMessage(new TextMessage(message));
             } catch (IOException e) {
-                throw new AppException("Send realtime notify error (user not online)", HttpStatus.NOT_FOUND);
+                throw new AppException("Send realtime notify error", HttpStatus.NOT_FOUND);
             }
         }
     }

@@ -28,8 +28,6 @@ public class NotificationController {
     @Autowired
     private final UserAuthProvider userAuthProvider;
 
-    private MyHandler notifyHandler;
-
     @GetMapping("/view")
     public ResponseEntity<List<NotificationDto>> getAllNotifications(@RequestHeader("Authorization") String headerValue){
         List<NotificationDto> notifications = notificationServices.getAllNotification(
@@ -54,9 +52,11 @@ public class NotificationController {
    @PostMapping("/send")
    public ResponseEntity<String> sendNotification(@RequestHeader("Authorization") String headerValue, @RequestBody NotificationDto notificationDto){
        notificationDto.setTriggerUser(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))).getId());
+
        notificationServices.sendNotification(notificationDto);
        notifyHandler.sendNotification(notificationDto.getUserId(),"Bạn có thông báo mới!!!");
        return ResponseEntity.ok("Send notification success!");
+
    }
 
 
