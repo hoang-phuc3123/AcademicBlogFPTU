@@ -1,7 +1,9 @@
 package com.academicblogfptu.AcademicBlogFPTU.config;
 
+import com.academicblogfptu.AcademicBlogFPTU.dtos.NotificationDtos.NotificationDto;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -51,7 +53,6 @@ public class MyHandler extends TextWebSocketHandler {
 
         // Store the session
         userSessions.put(userId, session);
-        System.out.println(userSessions);
     }
 
     @Override
@@ -60,11 +61,16 @@ public class MyHandler extends TextWebSocketHandler {
         userSessions.values().remove(session);
     }
 
-    public void sendNotification(Integer userId, String message) {
+    public void sendNotification(Integer userId, NotificationDto notificationDto) {
         WebSocketSession session = userSessions.get(userId);
         if (session != null && session.isOpen()) {
             try {
-                session.sendMessage(new TextMessage(message));
+                    // Create a new ObjectMapper instance
+                ObjectMapper mapper = new ObjectMapper();
+                    // Convert the NotificationEntity object to a JSON string
+                String jsonMessage = mapper.writeValueAsString(notificationDto);
+                    // Send the JSON string
+                session.sendMessage(new TextMessage(jsonMessage));
             } catch (IOException e) {
                 throw new AppException("Send realtime notify error", HttpStatus.NOT_FOUND);
             }
