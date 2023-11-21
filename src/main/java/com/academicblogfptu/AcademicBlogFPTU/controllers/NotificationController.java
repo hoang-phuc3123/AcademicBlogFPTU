@@ -28,7 +28,7 @@ public class NotificationController {
     @Autowired
     private final UserAuthProvider userAuthProvider;
 
-    private MyHandler notifyHandler;
+    private MyHandler notifyHandler = new MyHandler();
 
     @GetMapping("/view")
     public ResponseEntity<List<NotificationDto>> getAllNotifications(@RequestHeader("Authorization") String headerValue){
@@ -56,6 +56,7 @@ public class NotificationController {
        notificationDto.setTriggerUser(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))).getId());
        try{
            notificationServices.sendNotification(notificationDto);
+           notifyHandler = new MyHandler();
            notifyHandler.sendNotification(notificationDto.getUserId(),"Bạn có thông báo mới!!!");
        }catch(Exception e){
            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
