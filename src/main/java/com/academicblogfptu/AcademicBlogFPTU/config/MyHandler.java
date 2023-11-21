@@ -25,7 +25,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-@Service
 @RequiredArgsConstructor
 public class MyHandler extends TextWebSocketHandler {
 
