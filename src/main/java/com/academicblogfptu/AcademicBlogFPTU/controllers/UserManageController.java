@@ -1,10 +1,12 @@
 package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.AdminDtos.ActivitiesLogDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.ReportedCommentDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.*;
 import com.academicblogfptu.AcademicBlogFPTU.entities.*;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
+import com.academicblogfptu.AcademicBlogFPTU.repositories.ActivitiesLogRepository;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.PostRepository;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.UserDetailsRepository;
 import com.academicblogfptu.AcademicBlogFPTU.services.AdminServices;
@@ -26,6 +28,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -38,8 +41,27 @@ public class UserManageController {
     private final UserDetailsRepository userDetailsRepository;
     private final PostRepository postRepository;
     private final NotifyByMailServices notifyByMailServices;
+    private final ActivitiesLogRepository activitiesLogRepository;
     public boolean isAdmin(UserDto userDto) {
         return userDto.getRoleName().equals("admin");
+    }
+
+    @GetMapping("activities-log")
+    public ResponseEntity<List<Map<String, Object>>> viewActivitiesLog(@RequestHeader("Authorization") String headerValue) {
+        if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
+            List<Object[]> actionsAndFullName = activitiesLogRepository.findAllActionsAndFullNames();
+            List<Map<String, Object>> responseList = actionsAndFullName.stream().map(entry -> {
+                Map<String, Object> responseMap = new LinkedHashMap<>();
+                responseMap.put("id", entry[0]);
+                responseMap.put("actionTime", entry[1]);
+                responseMap.put("action", entry[2]);
+                responseMap.put("actor", entry[3]);
+                return responseMap;
+            }).collect(Collectors.toList());
+            return ResponseEntity.ok(responseList);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     @GetMapping("/dashboard")
@@ -55,7 +77,6 @@ public class UserManageController {
                 URL url = new URL("https://lvnsoft.store/TotalVisit/visit-count.php");
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("POST");
-
                 int responseCode = connection.getResponseCode();
 
                 if (responseCode == HttpURLConnection.HTTP_OK) {
@@ -192,6 +213,15 @@ public class UserManageController {
             adminService.banUser(adminService.findById(identificationDto.getId()));
             HashMap <String, String> responseMap = new HashMap<>();
             responseMap.put("message", "Ban success.");
+            ActivitiesLogDto activitiesLogDto = new ActivitiesLogDto();
+            activitiesLogDto.setAction("Ban user with ID: " +  identificationDto.getId());
+            long currentTimeMillis = System.currentTimeMillis();
+            Timestamp expirationTimestamp = new Timestamp(currentTimeMillis);
+            activitiesLogDto.setActionTime(expirationTimestamp);
+            String username = userAuthProvider.getUser(headerValue.replace("Bearer ", ""));
+            UserDto userDto = userService.findByUsername(username);
+            activitiesLogDto.setUserID(userDto.getId());
+            adminService.saveActivity(activitiesLogDto);
             return ResponseEntity.ok(responseMap);
         }
         else {
