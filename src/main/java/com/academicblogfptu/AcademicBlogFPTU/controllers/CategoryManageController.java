@@ -2,11 +2,17 @@ package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.AdminDtos.ActivitiesLogDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.CategoryDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.CategoryRequestDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.CategoryListDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.CategoryEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.SkillEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.TagEntity;
+import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
+import com.academicblogfptu.AcademicBlogFPTU.repositories.CategoryRepository;
+import com.academicblogfptu.AcademicBlogFPTU.services.AdminServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.CategoryServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @RestController
@@ -26,6 +33,10 @@ public class CategoryManageController {
     private final UserServices userService;
     @Autowired
     private final UserAuthProvider userAuthProvider;
+    @Autowired
+    private final AdminServices adminService;
+    @Autowired
+    private final CategoryRepository categoryRepository;
 
     public boolean isAdmin(UserDto userDto) {
         return userDto.getRoleName().equals("admin");
@@ -49,6 +60,20 @@ public class CategoryManageController {
     public ResponseEntity<CategoryEntity> updateTag(@RequestHeader("Authorization") String headerValue, @RequestBody CategoryDto updatedCategory) {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             CategoryEntity _updatedCategory = new CategoryEntity();
+
+            CategoryEntity oldCategory = categoryRepository.findById(updatedCategory.getId())
+                    .orElseThrow(()->new AppException("Unknown category", HttpStatus.NOT_FOUND));
+            // lưu vào activities_log
+            ActivitiesLogDto activitiesLogDto = new ActivitiesLogDto();
+            activitiesLogDto.setAction("Chỉnh sửa danh mục "+oldCategory.getCategoryName() +" thành "+updatedCategory.getCategoryName());
+            long currentTimeMillis = System.currentTimeMillis();
+            Timestamp expirationTimestamp = new Timestamp(currentTimeMillis);
+            activitiesLogDto.setActionTime(expirationTimestamp);
+            String username = userAuthProvider.getUser(headerValue.replace("Bearer ", ""));
+            UserDto adminDto = userService.findByUsername(username);
+            activitiesLogDto.setUserID(adminDto.getId());
+            adminService.saveActivity(activitiesLogDto);
+
             _updatedCategory = categoryServices.updateCategory(updatedCategory);
             return ResponseEntity.ok(_updatedCategory);
         }
@@ -77,6 +102,16 @@ public class CategoryManageController {
 
                 CategoryEntity subjectCategory = categoryServices.createOrRetrieveCategoryWithParent(categoryRequestDto.getSubject(), "Subject", semesterCategory.getId(),categoryRequestDto.getMajorId());
 
+                ActivitiesLogDto activitiesLogDto = new ActivitiesLogDto();
+                activitiesLogDto.setAction("Thêm mới danh mục: "+subjectCategory.getCategoryName());
+                long currentTimeMillis = System.currentTimeMillis();
+                Timestamp expirationTimestamp = new Timestamp(currentTimeMillis);
+                activitiesLogDto.setActionTime(expirationTimestamp);
+                String username = userAuthProvider.getUser(headerValue.replace("Bearer ", ""));
+                UserDto adminDto = userService.findByUsername(username);
+                activitiesLogDto.setUserID(adminDto.getId());
+                adminService.saveActivity(activitiesLogDto);
+
                 return ResponseEntity.ok("Create successfully");
             } catch (Exception e) {
                 return new ResponseEntity<>("Failed to create categories: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -92,7 +127,19 @@ public class CategoryManageController {
     public ResponseEntity<String> deleteCategory(@RequestHeader("Authorization") String headerValue, @RequestBody CategoryDto categoryDto) {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             try {
+                CategoryEntity deleteCategory = categoryRepository.findById(categoryDto.getId())
+                        .orElseThrow(()->new AppException("Unknown category", HttpStatus.NOT_FOUND));
                 categoryServices.deleteCategoryWithChildren(categoryDto.getId());
+                // lưu vào activities_log
+                ActivitiesLogDto activitiesLogDto = new ActivitiesLogDto();
+                activitiesLogDto.setAction("Xóa danh mục: "+deleteCategory.getCategoryName());
+                long currentTimeMillis = System.currentTimeMillis();
+                Timestamp expirationTimestamp = new Timestamp(currentTimeMillis);
+                activitiesLogDto.setActionTime(expirationTimestamp);
+                String username = userAuthProvider.getUser(headerValue.replace("Bearer ", ""));
+                UserDto adminDto = userService.findByUsername(username);
+                activitiesLogDto.setUserID(adminDto.getId());
+                adminService.saveActivity(activitiesLogDto);
                 return new ResponseEntity<>("Category and its children deleted successfully", HttpStatus.OK);
             } catch (Exception e) {
                 if(e.getMessage().equals("could not execute statement; SQL [n/a]; constraint [null]")){
