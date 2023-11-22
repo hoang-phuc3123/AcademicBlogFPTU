@@ -20,6 +20,7 @@ public class ActivitiesLogEntity {
     @Column(name = "action_time" , nullable = false)
     private Timestamp actionTime;
 
+    @Lob
     @Column(name = "action" , nullable = false)
     private String action;
 
