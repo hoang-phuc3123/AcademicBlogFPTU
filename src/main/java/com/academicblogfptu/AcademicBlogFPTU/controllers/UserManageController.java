@@ -193,6 +193,15 @@ public class UserManageController {
             adminService.setRoleUser(userDto,userSet.getId());
             HashMap < String, String > responseMap = new HashMap<>();
             responseMap.put("message", "Set role success.");
+            ActivitiesLogDto activitiesLogDto = new ActivitiesLogDto();
+            activitiesLogDto.setAction("Đã thay đổi role của " + userDto.getFullname() + " thành " + userDto.getRoleName());
+            long currentTimeMillis = System.currentTimeMillis();
+            Timestamp expirationTimestamp = new Timestamp(currentTimeMillis);
+            activitiesLogDto.setActionTime(expirationTimestamp);
+            String username = userAuthProvider.getUser(headerValue.replace("Bearer ", ""));
+            UserDto adminDto = userService.findByUsername(username);
+            activitiesLogDto.setUserID(adminDto.getId());
+            adminService.saveActivity(activitiesLogDto);
             return ResponseEntity.ok(responseMap);
         }
         else {
@@ -221,7 +230,7 @@ public class UserManageController {
             responseMap.put("message", "Ban success.");
             UserDto getName = adminService.findById(identificationDto.getId());
             ActivitiesLogDto activitiesLogDto = new ActivitiesLogDto();
-            activitiesLogDto.setAction("Cấm tài khoản: " +  getName.getFullname());
+            activitiesLogDto.setAction("Cấm tài khoản " +  getName.getFullname());
             long currentTimeMillis = System.currentTimeMillis();
             Timestamp expirationTimestamp = new Timestamp(currentTimeMillis);
             activitiesLogDto.setActionTime(expirationTimestamp);
@@ -244,7 +253,7 @@ public class UserManageController {
             responseMap.put("message", "Unban success.");
             UserDto getName = adminService.findById(identificationDto.getId());
             ActivitiesLogDto activitiesLogDto = new ActivitiesLogDto();
-            activitiesLogDto.setAction("Gỡ cấm tài khoản: " +  getName.getFullname());
+            activitiesLogDto.setAction("Gỡ cấm tài khoản " +  getName.getFullname());
             long currentTimeMillis = System.currentTimeMillis();
             Timestamp expirationTimestamp = new Timestamp(currentTimeMillis);
             activitiesLogDto.setActionTime(expirationTimestamp);
