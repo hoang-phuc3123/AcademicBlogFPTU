@@ -1,15 +1,19 @@
 package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.AdminDtos.ActivitiesLogDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.MajorDtos.MajorDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.MajorDtos.SelectMajorDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.MajorEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.SkillEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.UserDetailsEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
+import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.MajorRepository;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.UserDetailsRepository;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.UserRepository;
+import com.academicblogfptu.AcademicBlogFPTU.services.AdminServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.MajorServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,6 +47,9 @@ public class MajorController {
     @Autowired
     private final UserAuthProvider userAuthProvider;
 
+    @Autowired
+    private final AdminServices adminService;
+
     public boolean isAdmin(UserDto userDto) {
         return userDto.getRoleName().equals("admin");
     }
@@ -60,6 +68,17 @@ public class MajorController {
     public ResponseEntity<MajorEntity> createMajor(@RequestHeader("Authorization") String headerValue, @RequestBody MajorDto major) {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             MajorEntity newmajor = majorServices.createMajor(major);
+            // lưu vào activities_log
+            ActivitiesLogDto activitiesLogDto = new ActivitiesLogDto();
+            activitiesLogDto.setAction("Thêm mới major: "+major.getMajorName());
+            long currentTimeMillis = System.currentTimeMillis();
+            Timestamp expirationTimestamp = new Timestamp(currentTimeMillis);
+            activitiesLogDto.setActionTime(expirationTimestamp);
+            String username = userAuthProvider.getUser(headerValue.replace("Bearer ", ""));
+            UserDto adminDto = userService.findByUsername(username);
+            activitiesLogDto.setUserID(adminDto.getId());
+            adminService.saveActivity(activitiesLogDto);
+
             return ResponseEntity.ok(newmajor);
         }
         else {
@@ -74,6 +93,20 @@ public class MajorController {
     public ResponseEntity<MajorEntity> updateMajor(@RequestHeader("Authorization") String headerValue, @RequestBody MajorDto updatedmajor) {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             MajorEntity _updatedmajor = new MajorEntity();
+
+            MajorEntity oldMajor = majorRepository.findById(updatedmajor.getId())
+                    .orElseThrow(()->new AppException("Unknown major", HttpStatus.NOT_FOUND));
+            // lưu vào activities_log
+            ActivitiesLogDto activitiesLogDto = new ActivitiesLogDto();
+            activitiesLogDto.setAction("Chỉnh sửa major "+oldMajor.getMajorName() +" thành "+updatedmajor.getMajorName());
+            long currentTimeMillis = System.currentTimeMillis();
+            Timestamp expirationTimestamp = new Timestamp(currentTimeMillis);
+            activitiesLogDto.setActionTime(expirationTimestamp);
+            String username = userAuthProvider.getUser(headerValue.replace("Bearer ", ""));
+            UserDto adminDto = userService.findByUsername(username);
+            activitiesLogDto.setUserID(adminDto.getId());
+            adminService.saveActivity(activitiesLogDto);
+
             _updatedmajor = majorServices.updateMajor(updatedmajor);
             return ResponseEntity.ok(_updatedmajor);
         }
@@ -86,7 +119,19 @@ public class MajorController {
     public ResponseEntity<String> deleteMajor(@RequestHeader("Authorization") String headerValue, @RequestBody MajorDto deletedmajor) {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             try{
+                MajorEntity deleteMajor = majorRepository.findById(deletedmajor.getId())
+                        .orElseThrow(()->new AppException("Unknown major", HttpStatus.NOT_FOUND));
                 majorServices.deleteMajor(deletedmajor.getId());
+                // lưu vào activities_log
+                ActivitiesLogDto activitiesLogDto = new ActivitiesLogDto();
+                activitiesLogDto.setAction("Xóa major: " +deleteMajor.getMajorName());
+                long currentTimeMillis = System.currentTimeMillis();
+                Timestamp expirationTimestamp = new Timestamp(currentTimeMillis);
+                activitiesLogDto.setActionTime(expirationTimestamp);
+                String username = userAuthProvider.getUser(headerValue.replace("Bearer ", ""));
+                UserDto adminDto = userService.findByUsername(username);
+                activitiesLogDto.setUserID(adminDto.getId());
+                adminService.saveActivity(activitiesLogDto);
             } catch (Exception e){
                 if(e.getMessage().equals("could not execute statement; SQL [n/a]; constraint [null]")){
                     return new ResponseEntity<>("This major has at least 1 usage",HttpStatus.CONFLICT);
