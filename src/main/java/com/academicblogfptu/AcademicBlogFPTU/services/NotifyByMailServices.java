@@ -150,6 +150,15 @@ public class NotifyByMailServices {
     }
 
 
+    public void sendRegisterMail(String email, String username, String password) {
+        SimpleMailMessage mail = new SimpleMailMessage();
+        mail.setFrom(fromMail);
+        mail.setSubject("Đăng kí tài khoản thành công");
+        mail.setText("Tài khoản của bạn đã được đăng kí thành công tại FBlog. Đây là thông tin đăng nhập:\nTên tài khoản: " + username + "\nMật khẩu: " + password + "\nVui lòng không chia sẻ thông tin tài khoản cho bất kì ai.");
+        mail.setTo(email);
+        mailSender.send(mail);
+    }
+
     public void sendMail(MailStructureDto mailStructureDto){
         MailStructureDto baseMail = setAllFieldsToSendMail(mailStructureDto);
         if (baseMail == null) {
@@ -157,7 +166,6 @@ public class NotifyByMailServices {
         }
         SimpleMailMessage mail = new SimpleMailMessage();
         mail.setFrom(fromMail);
-
         mail.setSubject(baseMail.getSubject());
         mail.setText(baseMail.getMessage());
         mail.setTo(baseMail.getReceiverMail());

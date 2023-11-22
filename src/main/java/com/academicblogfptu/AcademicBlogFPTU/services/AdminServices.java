@@ -1,5 +1,6 @@
 package com.academicblogfptu.AcademicBlogFPTU.services;
 
+import com.academicblogfptu.AcademicBlogFPTU.dtos.AdminDtos.ActivitiesLogDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.ReportedCommentDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.MailStructureDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.RegisterDto;
@@ -67,6 +68,9 @@ public class AdminServices {
     @Autowired
     private NotifyByMailServices notifyByMailServices;
 
+    @Autowired
+    private final ActivitiesLogRepository activitiesLogRepository;
+
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public UserDto findById(int id) {
@@ -75,6 +79,20 @@ public class AdminServices {
         UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
         return new UserDto(user.getId(),user.getUsername(),userDetails.getFullName(),userDetails.isBanned(),userDetails.isMuted(),userDetails.getMutetime(),user.getRole().getRoleName(), userDetails.getProfileURL(),userDetails.getCoverURL(), "" , "");
+    }
+
+    public boolean isEmailExist(String email) {
+        Optional<UserDetailsEntity> userDetails = userDetailsRepository.findByEmail(email);
+        return userDetails.isPresent();
+    }
+
+    public void saveActivity(ActivitiesLogDto activitiesLogDto) {
+        ActivitiesLogEntity activitiesLogEntity = new ActivitiesLogEntity();
+        activitiesLogEntity.setActionTime(activitiesLogDto.getActionTime());
+        activitiesLogEntity.setAction(activitiesLogDto.getAction());
+        Optional<UserEntity> userEntity = userRepository.findById(activitiesLogDto.getUserID());
+        activitiesLogEntity.setUser(userEntity.get());
+        activitiesLogRepository.save(activitiesLogEntity);
     }
 
     public UserDto register(RegisterDto registerDto) {
