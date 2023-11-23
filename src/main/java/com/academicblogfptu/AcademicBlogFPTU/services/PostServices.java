@@ -1155,22 +1155,13 @@ public class PostServices {
                 TagEntity tag = tagRepository.findById(post.getTag().getId())
                         .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
 
-                List<PostSkillEntity> postSkills = postSkillRepository.findByPost(post);
-
-                List<UserSkillEntity> userSkills = userSkillRepository.findByUser(userEntity);
-
-                boolean hasCommonSkills = postSkills.stream()
-                    .map(PostSkillEntity::getSkill)
-                    .anyMatch(skill -> userSkills.stream().anyMatch(userSkill -> userSkill.getSkill().equals(skill)));
-
-                if (post.getCategory().getMajor().getId() == userDetailsEntity.getMajor().getId() || hasCommonSkills) {
                     if (!tag.getTagName().equalsIgnoreCase("Q&A")){
                         PostListDto postListDto = new PostListDto(post.getId(),user.getId(),userDetails.getFullName(), userDetails.getProfileURL(),post.getTitle(), post.getDescription(),
                                 post.getDateOfPost().format(formatter), getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL() ,post.isRewarded(), post.getSlug());
                         approvePostList.add(postListDto);
                     }
-                }
         }
+        //System.out.println(approvePostList.size());
         return approvePostList;
     }
 
