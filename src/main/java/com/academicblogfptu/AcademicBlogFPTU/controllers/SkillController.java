@@ -156,8 +156,10 @@ public class SkillController {
                 skills.add(skill.getSkillName());
             }
 
+            String skillsString = String.join(", ", skills);
+
             ActivitiesLogDto activitiesLogDto = new ActivitiesLogDto();
-            activitiesLogDto.setAction("Thêm kỹ năng: " +skills+ " cho tài khoản "+userDetails.getFullName());
+            activitiesLogDto.setAction("Thêm kỹ năng: " +skillsString+ " cho tài khoản "+userDetails.getFullName());
             long currentTimeMillis = System.currentTimeMillis();
             Timestamp expirationTimestamp = new Timestamp(currentTimeMillis);
             activitiesLogDto.setActionTime(expirationTimestamp);
