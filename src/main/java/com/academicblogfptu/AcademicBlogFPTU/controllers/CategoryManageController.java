@@ -14,6 +14,7 @@ import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.CategoryRepository;
 import com.academicblogfptu.AcademicBlogFPTU.services.AdminServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.CategoryServices;
+import com.academicblogfptu.AcademicBlogFPTU.services.PostServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @RestController
@@ -37,6 +40,8 @@ public class CategoryManageController {
     private final AdminServices adminService;
     @Autowired
     private final CategoryRepository categoryRepository;
+    @Autowired
+    private final PostServices postService;
 
     public boolean isAdmin(UserDto userDto) {
         return userDto.getRoleName().equals("admin");
@@ -102,8 +107,18 @@ public class CategoryManageController {
 
                 CategoryEntity subjectCategory = categoryServices.createOrRetrieveCategoryWithParent(categoryRequestDto.getSubject(), "Subject", semesterCategory.getId(),categoryRequestDto.getMajorId());
 
+                List<CategoryEntity> categoryEntityList = postService.getRelatedCategories(subjectCategory.getId());
+                categoryEntityList.sort(Comparator.comparing(CategoryEntity::getId));
+
+                List<String> newCategories = new ArrayList<>();
+                for (CategoryEntity cate: categoryEntityList) {
+                    newCategories.add(cate.getCategoryName());
+                }
+
+                String categories = String.join(", ", newCategories);
+
                 ActivitiesLogDto activitiesLogDto = new ActivitiesLogDto();
-                activitiesLogDto.setAction("Thêm mới danh mục: "+subjectCategory.getCategoryName());
+                activitiesLogDto.setAction("Thêm mới danh mục: "+categories);
                 long currentTimeMillis = System.currentTimeMillis();
                 Timestamp expirationTimestamp = new Timestamp(currentTimeMillis);
                 activitiesLogDto.setActionTime(expirationTimestamp);
