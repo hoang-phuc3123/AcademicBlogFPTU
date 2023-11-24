@@ -70,8 +70,8 @@ public interface PostRepository extends JpaRepository<PostEntity, Integer> {
 
     @Query(value = "SELECT DISTINCT p.* FROM post p " +
             "JOIN post_details pd ON p.id = pd.post_id " +
-            "WHERE (:categoryIds IS NULL OR p.category_id IN (:categoryIds)) And " +
-            "(:tagIds IS NULL OR p.tag_id IN (:tagIds)) AND pd.type = 'Approve' And " +
+            "WHERE (p.category_id IN (:categoryIds)) And " +
+            "(p.tag_id IN (:tagIds)) AND pd.type = 'Approve' And " +
             "(:title IS NULL OR p.title LIKE CONCAT('%', :title, '%'))", nativeQuery = true)
     List<PostEntity> findByCategoriesAndTagsAndTitle(List<Integer> categoryIds, List<Integer> tagIds,String title);
 
