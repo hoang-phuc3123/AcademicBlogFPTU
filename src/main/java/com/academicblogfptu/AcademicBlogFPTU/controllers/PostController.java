@@ -111,6 +111,12 @@ public class PostController {
         return ResponseEntity.ok(filterPost);
     }
 
+    @PostMapping("posts/filter-skill")
+    public ResponseEntity<List<PostListDto>> viewFilteredPostBySkill(@RequestBody FilterPostDto filter){
+        List<PostListDto> filterPost = postServices.filterPostsBySkill(filter.getSkill());
+        return ResponseEntity.ok(filterPost);
+    }
+
     @PostMapping("q-a/filter")
     public ResponseEntity<List<QuestionAnswerDto>> viewFilteredQA(@RequestBody FilterPostDto filter){
         String title = (filter.getTitle() != null) ? filter.getTitle() : "";

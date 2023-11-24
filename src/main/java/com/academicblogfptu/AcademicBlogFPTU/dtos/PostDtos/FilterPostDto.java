@@ -16,4 +16,5 @@ public class FilterPostDto {
 
     private String title;
 
+    private String skill;
 }

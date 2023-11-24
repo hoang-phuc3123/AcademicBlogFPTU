@@ -713,6 +713,40 @@ public class PostServices {
         return filterPost;
     }
 
+    public List<PostListDto> filterPostsBySkill(String skill) {
+        List<PostEntity> postList;
+        List<PostListDto> filterPost = new ArrayList<>();
+
+        SkillEntity skillEntity = skillRepository.findBySkillName(skill)
+                        .orElseThrow(()-> new AppException("Unknown skill", HttpStatus.NOT_FOUND));
+        
+        postList = postRepository.findPostBySkill(skillEntity.getId());
+
+        postList.sort(Comparator
+                .comparingInt((PostEntity post) -> post.getNumOfUpvote() - post.getNumOfDownvote())
+                .thenComparing(PostEntity::getDateOfPost).reversed());
+
+        for (PostEntity post : postList) {
+            UserEntity user = userRepository.findById(post.getUser().getId())
+                    .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+
+            UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
+                    .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+
+            TagEntity tag = tagRepository.findById(post.getTag().getId())
+                    .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
+
+            if (!tag.getTagName().equalsIgnoreCase("Q&A")) {
+                PostListDto postListDto = new PostListDto(post.getId(),  user.getId(), userDetails.getFullName(), userDetails.getProfileURL(), post.getTitle(), post.getDescription(),
+                        post.getDateOfPost().format(formatter), getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())),
+                        getTagOfPost(tag), post.getCoverURL(), post.isRewarded(), post.getSlug());
+                filterPost.add(postListDto);
+            }
+        }
+        return filterPost;
+    }
+
+
 
     public List<QuestionAnswerDto> filterQA(Integer categoryId, Integer tagId, String title) {
         List<PostEntity> postList;

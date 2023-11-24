@@ -112,4 +112,16 @@ public interface PostRepository extends JpaRepository<PostEntity, Integer> {
             "JOIN post_details pd ON p.id = pd.post_id " +
             "WHERE pd.type = 'Request' ", nativeQuery = true)
     List<PostEntity> getAllPendingPost();
+
+    @Query(value =
+            "SELECT p.id, p.title, p.content, p.date_of_post, p.num_of_upvote, p.num_of_downvote, " +
+                    "p.is_rewarded, p.is_edited, p.allow_comment, p.length, p.account_id, p.category_id, " +
+                    "p.tag_id, p.parent_id, p.description, p.cover_URL, p.slug " +
+                    "FROM post_details pd " +
+                    "JOIN post p join post_skill ps " +
+                    "ON p.id = ps.post_id " +
+                    "ON p.id = pd.post_id " +
+                    "WHERE pd.type = 'Approve' " +
+                    "AND ps.skill_id = :skillId" , nativeQuery = true)
+    List<PostEntity> findPostBySkill(int skillId);
 }
