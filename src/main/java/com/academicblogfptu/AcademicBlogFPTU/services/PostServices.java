@@ -1427,24 +1427,33 @@ public class PostServices {
 
     public SearchMultipleResultDto searchMultiple(SearchMultipleDto searchMultipleDto){
 
-        List<String> listOfTagsAndCategories = searchMultipleDto.getListTagsAndCategories();
+        List<String> listOfTagsAndSkillsAndCategories = searchMultipleDto.getListTagsAndCategories();
         List<Integer> tagList = new ArrayList<>();
         List<Integer> categoryList = new ArrayList<>();
+        List<Integer> skillList = new ArrayList<>();
         List<PostEntity> postsRaw = new ArrayList<>();
         //filter the tag in the list
         List<TagEntity> tags = tagRepository.findAll();
         for (TagEntity tag: tags) {
-            if(listOfTagsAndCategories.contains(tag.getTagName())){
-                listOfTagsAndCategories.remove(tag.getTagName());
+            if(listOfTagsAndSkillsAndCategories.contains(tag.getTagName())){
+                listOfTagsAndSkillsAndCategories.remove(tag.getTagName());
                 tagList.add(tag.getId());
             }
         }
-        for(String categoryName: listOfTagsAndCategories){
-            CategoryEntity category = categoryRepository.findByCategoryName(categoryName).orElseThrow(()-> new AppException("unknown category",HttpStatus.NOT_FOUND));
-            categoryList.add(category.getId());
+        List<CategoryEntity> categoryEntities = categoryRepository.findAll();
+        for(CategoryEntity category: categoryEntities){
+            if(listOfTagsAndSkillsAndCategories.contains(category.getCategoryName())){
+                listOfTagsAndSkillsAndCategories.remove(category.getCategoryName());
+                categoryList.add(category.getId());
+            }
         }
 
-        if(listOfTagsAndCategories.isEmpty()){
+        for (String skillName: listOfTagsAndSkillsAndCategories) {
+            SkillEntity skill = skillRepository.findBySkillName(skillName).orElseThrow(()-> new AppException("unknown skill",HttpStatus.NOT_FOUND));
+            skillList.add(skill.getId());
+        }
+
+        if(listOfTagsAndSkillsAndCategories.isEmpty()){
             postsRaw = postRepository.findByTitle(searchMultipleDto.getTitle());
         }
         else if(categoryList.isEmpty()){
@@ -1456,6 +1465,19 @@ public class PostServices {
         }else{
             postsRaw = postRepository.findByCategoriesAndTagsAndTitle(categoryList,tagList, searchMultipleDto.getTitle());
         }
+
+        if(!skillList.isEmpty()){
+            Iterator<PostEntity> postIterator = postsRaw.iterator();
+            while(postIterator.hasNext()){
+                PostEntity post = postIterator.next();
+                List<PostSkillEntity> postSkillEntities = postSkillRepository.findByPost(post);
+                boolean hasSkill = postSkillEntities.stream().anyMatch(postSkill -> skillList.contains(postSkill.getSkill().getId()));
+                if(!hasSkill){
+                    postIterator.remove();
+                }
+            }
+        }
+
 
         List<PostListDto> postList = new ArrayList<>();
         List<QuestionAnswerDto> qaList = new ArrayList<>();
