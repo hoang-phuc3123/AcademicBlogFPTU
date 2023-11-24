@@ -3,6 +3,7 @@ package com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.PostDtos.PostListDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.PostDtos.QuestionAnswerDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.BadgeEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.SkillEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,6 +28,7 @@ public class ProfileDto {
     private Long numOfPost;
     private Map<String, List<PostListDto>> postList;
     private Map<String, List<QuestionAnswerDto>> qaList;
+    private List<SkillEntity> userSkillsList;
 
 
 }

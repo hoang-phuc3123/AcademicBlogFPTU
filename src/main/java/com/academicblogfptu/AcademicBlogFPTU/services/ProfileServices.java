@@ -57,11 +57,25 @@ public class ProfileServices {
     @Autowired
     private PendingReportReasonRepository pendingReportReasonRepository;
 
+    @Autowired
+    private UserSkillRepository userSkillRepository;
+
+    @Autowired
+    private SkillRepository skillRepository;
+
+    @Autowired
+    private SkillServices skillServices;
+
     public ProfileDto viewProfile(int id,int currentUserId) {
 
         ProfileDto profile = new ProfileDto();
 
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(()-> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+
         UserDetailsEntity userDetails = userDetailsRepository.findByUserId(id);
+
+        List<SkillEntity> userSkillList = skillServices.findSkillByUser(user);
 
         List<BadgeEntity> badges = badgeServices.findBadgesByUserId(id);
         Map<String, List<PostListDto>> postList;
@@ -85,6 +99,7 @@ public class ProfileServices {
         profile.setQaList(QAList);
         profile.setNumOfFollower(numOfFollower);
         profile.setNumOfPost(numOfPost);
+        profile.setUserSkillsList(userSkillList);
 
         return profile;
     }

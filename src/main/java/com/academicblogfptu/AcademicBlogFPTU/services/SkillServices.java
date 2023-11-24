@@ -1,10 +1,7 @@
 package com.academicblogfptu.AcademicBlogFPTU.services;
 
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.UserSkillsDto;
-import com.academicblogfptu.AcademicBlogFPTU.entities.SkillEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.TagEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.UserEntity;
-import com.academicblogfptu.AcademicBlogFPTU.entities.UserSkillEntity;
+import com.academicblogfptu.AcademicBlogFPTU.entities.*;
 import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.SkillRepository;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.UserRepository;
@@ -15,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -73,5 +71,13 @@ public class SkillServices {
         }catch (Exception e){
             throw new AppException(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public List<SkillEntity> findSkillByUser(UserEntity user) {
+        List<UserSkillEntity> userSkill = userSkillRepository.findByUser(user);
+        List<SkillEntity> skills = userSkill.stream()
+                .map(UserSkillEntity::getSkill)
+                .collect(Collectors.toList());
+        return skills;
     }
 }
