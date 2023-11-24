@@ -1001,8 +1001,8 @@ public class PostServices {
 
         List<PostListDto> followedPost = new ArrayList<>();
 
-        for (FollowerEntity following: followedAccount) {
-            for (PostEntity post: posts) {
+        for (PostEntity post: posts) {
+            for (FollowerEntity following: followedAccount) {
                 if (post.getUser().getId() == following.getUser().getId()){
 
                     UserEntity user = userRepository.findById(post.getUser().getId())
@@ -1034,8 +1034,8 @@ public class PostServices {
 
         List<QuestionAnswerDto> followedQA = new ArrayList<>();
 
-        for (FollowerEntity following: followedAccount) {
-            for (PostEntity post: posts) {
+        for (PostEntity post: posts) {
+            for (FollowerEntity following: followedAccount) {
                 if (post.getUser().getId() == following.getUser().getId()){
 
                     UserEntity user = userRepository.findById(post.getUser().getId())
