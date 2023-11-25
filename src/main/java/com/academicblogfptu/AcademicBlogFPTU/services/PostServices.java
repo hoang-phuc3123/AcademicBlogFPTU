@@ -423,7 +423,8 @@ public class PostServices {
                 newPost.setCoverURL(null);
             }
 
-            newPost.setSlug(editPost.getSlug());
+            //newPost.setSlug(editPost.getSlug());
+            newPost.setSlug(null);
 
             postRepository.save(newPost);
 
@@ -499,7 +500,7 @@ public class PostServices {
             editPost.setCoverURL(null);
         }
 
-        editPost.setSlug(editPostDto.getSlug());
+        //editPost.setSlug(editPostDto.getSlug());
 
         postRepository.save(editPost);
 
