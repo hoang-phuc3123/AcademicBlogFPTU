@@ -324,7 +324,7 @@ public class PostServices {
         TagEntity tag = tagRepository.findById(requestPostDto.getTagId())
                 .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
         newPostEntity.setTag(tag);
-        if (!requestPostDto.getCoverURL().isEmpty()){
+        if (requestPostDto.getCoverURL() != null){
             newPostEntity.setCoverURL(requestPostDto.getCoverURL());
         }else {
             newPostEntity.setCoverURL(null);
@@ -417,7 +417,7 @@ public class PostServices {
                     .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
             newPost.setTag(tag);
 
-            if (!editPost.getCoverURL().isEmpty()){
+            if (editPost.getCoverURL() != null){
                 newPost.setCoverURL(editPost.getCoverURL());
             }else {
                 newPost.setCoverURL(null);
@@ -494,7 +494,7 @@ public class PostServices {
                 .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
         editPost.setTag(tag);
 
-        if (!editPostDto.getCoverURL().isEmpty()){
+        if (editPostDto.getCoverURL() != null){
             editPost.setCoverURL(editPostDto.getCoverURL());
         }else {
             editPost.setCoverURL(null);
@@ -947,7 +947,7 @@ public class PostServices {
                 .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
         draft.setTag(tag);
 
-        if (!editPostDto.getCoverURL().isEmpty()){
+        if (editPostDto.getCoverURL() != null){
             draft.setCoverURL(editPostDto.getCoverURL());
         }else {
             draft.setCoverURL(null);
