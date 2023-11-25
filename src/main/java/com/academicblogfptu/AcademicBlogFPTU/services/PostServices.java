@@ -1512,6 +1512,9 @@ public class PostServices {
             }
         }
 
+        postsRaw.sort(Comparator
+                .comparingInt((PostEntity post) -> post.getNumOfUpvote() - post.getNumOfDownvote())
+                .thenComparing(PostEntity::getDateOfPost).reversed());
 
         List<PostListDto> postList = new ArrayList<>();
         List<QuestionAnswerDto> qaList = new ArrayList<>();
@@ -1535,6 +1538,7 @@ public class PostServices {
                 postList.add(postListDto);
             }
         }
+
         return new SearchMultipleResultDto(postList,qaList);
     }
 }
