@@ -52,7 +52,10 @@ public class UserServices {
         UserDetailsEntity userDetails = userDetailsRepository.findByEmail(loginRequestDto.getUsername())
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
         if (passwordEncoder.matches(CharBuffer.wrap(loginRequestDto.getPassword()), userDetails.getUser().getPassword())) {
-            return new UserDto(userDetails.getUser().getId(),userDetails.getUser().getUsername(), userDetails.getFullName(), userDetails.isBanned(), userDetails.isMuted(),userDetails.getMutetime(), userDetails.getUser().getRole().getRoleName(), userDetails.getProfileURL(), userDetails.getCoverURL(),"" , "");
+            if (userDetails.isBanned()) {
+                throw new AppException("The user has been banned", HttpStatus.METHOD_NOT_ALLOWED);
+            }
+            else return new UserDto(userDetails.getUser().getId(),userDetails.getUser().getUsername(), userDetails.getFullName(), userDetails.isBanned(), userDetails.isMuted(),userDetails.getMutetime(), userDetails.getUser().getRole().getRoleName(), userDetails.getProfileURL(), userDetails.getCoverURL(),"" , "");
         }
         throw new AppException("Invalid password", HttpStatus.UNAUTHORIZED);
     }
@@ -63,7 +66,10 @@ public class UserServices {
         UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
         if (passwordEncoder.matches(CharBuffer.wrap(loginDto.getPassword()), user.getPassword())) {
-            return new UserDto(user.getId(),user.getUsername(), userDetails.getFullName(), userDetails.isBanned(), userDetails.isMuted(),userDetails.getMutetime(),user.getRole().getRoleName() , userDetails.getProfileURL(), userDetails.getCoverURL() ,"" , "");
+            if (userDetails.isBanned()) {
+                throw new AppException("The user has been banned", HttpStatus.METHOD_NOT_ALLOWED);
+            }
+            else return new UserDto(user.getId(),user.getUsername(), userDetails.getFullName(), userDetails.isBanned(), userDetails.isMuted(),userDetails.getMutetime(),user.getRole().getRoleName() , userDetails.getProfileURL(), userDetails.getCoverURL() ,"" , "");
         }
         throw new AppException("Invalid password", HttpStatus.UNAUTHORIZED);
     }
@@ -81,7 +87,10 @@ public class UserServices {
             UserEntity user = optionalUser.get();
             UserDetailsEntity userDetails = userDetailsRepository.findByUserAccount(user)
                     .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
-            return new UserDto(user.getId(), user.getUsername(), userDetails.getFullName(),userDetails.isBanned(), userDetails.isMuted(), userDetails.getMutetime(), user.getRole().getRoleName(), userDetails.getProfileURL(),userDetails.getCoverURL(), "" ,"");
+            if (userDetails.isBanned()) {
+                throw new AppException("The user has been banned", HttpStatus.METHOD_NOT_ALLOWED);
+            }
+            else return new UserDto(user.getId(), user.getUsername(), userDetails.getFullName(),userDetails.isBanned(), userDetails.isMuted(), userDetails.getMutetime(), user.getRole().getRoleName(), userDetails.getProfileURL(),userDetails.getCoverURL(), "" ,"");
         } else {
             // Nếu không tìm thấy, tạo một tài khoản mới và trả về thông tin của tài khoản mới
             UserEntity newUser = new UserEntity();
@@ -100,7 +109,9 @@ public class UserServices {
         UserEntity user = optionalUser.get();
         Optional<UserDetailsEntity> optionalUserDetailsEntity = userDetailsRepository.findByUserAccount(user);
         if (optionalUserDetailsEntity.isPresent()) {
-            //optionalUserDetailsEntity.get().setFullName(userDetailsDto.getGivenName());
+            if (optionalUserDetailsEntity.get().isBanned()) {
+                throw new AppException("The user has been banned", HttpStatus.METHOD_NOT_ALLOWED);
+            }
         }
         else {
             UserDetailsEntity newUserDetails = new UserDetailsEntity();
