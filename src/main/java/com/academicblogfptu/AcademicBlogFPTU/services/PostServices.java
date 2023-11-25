@@ -1487,7 +1487,7 @@ public class PostServices {
             skillList.add(skill.getId());
         }
 
-        if(listOfTagsAndSkillsAndCategories.isEmpty()){
+        if(categoryList.isEmpty() && tagList.isEmpty() ){
             postsRaw = postRepository.findByTitle(searchMultipleDto.getTitle());
         }
         else if(categoryList.isEmpty()){
