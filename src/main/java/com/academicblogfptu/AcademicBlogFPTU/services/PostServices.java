@@ -417,7 +417,7 @@ public class PostServices {
                     .orElseThrow(() -> new AppException("Unknown tag", HttpStatus.NOT_FOUND));
             newPost.setTag(tag);
 
-            if (!editPost.getCoverURL().isEmpty()){
+            if (editPost.getCoverURL() != null){
                 newPost.setCoverURL(editPost.getCoverURL());
             }else {
                 newPost.setCoverURL(null);
