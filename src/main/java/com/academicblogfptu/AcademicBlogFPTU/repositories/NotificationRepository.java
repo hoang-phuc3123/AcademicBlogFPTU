@@ -19,5 +19,5 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
             "(p.account_id = :userId) AND " +
             "(p.related_id = :relatedId) AND " +
             "(p.content LIKE CONCAT('%', :content, '%'))", nativeQuery = true)
-    NotificationEntity findByUserIdAndContentAndRelatedIdAndType(int userId,int relatedId,String type,String content);
+    List<NotificationEntity> findByUserIdAndContentAndRelatedIdAndType(int userId,int relatedId,String type,String content);
 }

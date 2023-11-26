@@ -121,9 +121,11 @@ public class NotificationServices {
     }
 
     public void deletePostNotification(NotificationDto notificationDto){
-        NotificationEntity notification = notificationRepository.findByUserIdAndContentAndRelatedIdAndType(notificationDto.getUserId(),notificationDto.getRelatedId(),notificationDto.getType(), notificationDto.getContent());
+        List<NotificationEntity> notification = notificationRepository.findByUserIdAndContentAndRelatedIdAndType(notificationDto.getUserId(),notificationDto.getRelatedId(),notificationDto.getType(), notificationDto.getContent());
         if(notification!=null){
-            notificationRepository.delete(notification);
+            for (NotificationEntity noti: notification) {
+                notificationRepository.delete(noti);
+            }
         }
     }
 
