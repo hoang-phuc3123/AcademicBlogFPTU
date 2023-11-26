@@ -12,7 +12,7 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
 
     List<NotificationEntity> findAllByUserId(Integer userId);
 
-    NotificationEntity findByCommentId(int commentId);
+    List<NotificationEntity> findByCommentId(int commentId);
 
     @Query(value = "SELECT DISTINCT p.* FROM notification p " +
             "WHERE (p.type = :type) AND " +
