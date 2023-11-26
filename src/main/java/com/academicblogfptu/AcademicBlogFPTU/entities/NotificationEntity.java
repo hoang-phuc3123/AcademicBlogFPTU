@@ -40,4 +40,6 @@ public class NotificationEntity {
     @JoinColumn(name = "account_id")
     private UserEntity user;
 
+    private int commentId;
+
 }

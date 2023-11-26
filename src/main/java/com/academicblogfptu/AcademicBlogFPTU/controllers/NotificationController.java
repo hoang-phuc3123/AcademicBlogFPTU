@@ -59,5 +59,26 @@ public class NotificationController {
        return ResponseEntity.ok("Send notification success!");
 
    }
+    @PostMapping("/delete")
+    public ResponseEntity<String> deleteNotification(@RequestBody NotificationDto notificationDto){
+        notificationServices.deleteNotification(notificationDto);
+        return ResponseEntity.ok("Success");
+    }
+
+
+
+   @PostMapping("/delete-post-notify")
+   public ResponseEntity<String> deleteDeclineNotification(@RequestBody NotificationDto notificationDto){
+        notificationServices.deletePostNotification(notificationDto);
+        return ResponseEntity.ok("Success");
+   }
+
+    @PostMapping("/delete-comment-notify")
+    public ResponseEntity<String> deleteDeletedCommentNotification(@RequestBody NotificationDto notificationDto){
+        notificationServices.deleteDeletedCommentNotification(notificationDto);
+        return ResponseEntity.ok("Success");
+    }
+
+
 
 }
