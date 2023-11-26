@@ -142,6 +142,13 @@ public class CommentService {
         for (CommentEntity reply : replyComments) {
             List<PendingReportEntity> pendingReportEntity = pendingReportRepository.findByContentIdAndReportType(reply.getId(),"Comment");
 
+            List<VoteEntity> votes = voteRepository.findByCommentId(reply.getId());
+            if (votes != null){
+                for ( VoteEntity vote : votes) {
+                    voteRepository.delete(vote);
+                }
+            }
+
             if (!pendingReportEntity.isEmpty()){
                 adminServices.deleteReportComment(reply.getId());
             }
