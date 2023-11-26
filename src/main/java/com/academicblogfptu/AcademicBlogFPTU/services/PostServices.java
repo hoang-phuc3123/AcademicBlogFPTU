@@ -953,7 +953,7 @@ public class PostServices {
             draft.setCoverURL(null);
         }
 
-        draft.setSlug(editPostDto.getSlug());
+        //draft.setSlug(editPostDto.getSlug());
 
         postRepository.save(draft);
 
