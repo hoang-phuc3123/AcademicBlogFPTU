@@ -132,9 +132,11 @@ public class NotificationServices {
 
     public void deleteDeletedCommentNotification(Integer commentId){
         try{
-            NotificationEntity notification = notificationRepository.findByCommentId(commentId);
+            List<NotificationEntity> notification = notificationRepository.findByCommentId(commentId);
             if(notification!=null){
-                notificationRepository.delete(notification);
+                for (NotificationEntity noti: notification) {
+                    notificationRepository.delete(noti);
+                }
             }
         }catch (Exception e){
             throw new AppException(e.getMessage(),HttpStatus.UNAUTHORIZED);
