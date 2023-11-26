@@ -55,6 +55,9 @@ public class CommentService {
     @Autowired
     private final BadgeServices badgeServices;
 
+    @Autowired
+    private final NotificationServices notificationServices;
+
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     ZoneId vietnamZone = ZoneId.of("Asia/Ho_Chi_Minh");
@@ -135,6 +138,7 @@ public class CommentService {
             adminServices.deleteReportComment(comment.getId());
         }
         deleteReplyComments(comment);
+        notificationServices.deleteDeletedCommentNotification(commentId);
         commentRepository.delete(comment);
     }
     private void deleteReplyComments(CommentEntity parentComment) {
@@ -153,6 +157,7 @@ public class CommentService {
                 adminServices.deleteReportComment(reply.getId());
             }
             deleteReplyComments(reply);
+            notificationServices.deleteDeletedCommentNotification(reply.getId());
             commentRepository.delete(reply);
         }
     }

@@ -55,6 +55,7 @@ public class NotificationServices {
         notification.setTriggerUser(notificationDto.getTriggerUser());
         notification.setCommentId(notificationDto.getCommentId());
         notification.setUser(userRepository.findById(notificationDto.getUserId()).orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND)));
+        notification.setCommentId(notificationDto.getCommentId());
 
         if(notificationDto.getType().equals("post")) {
             PostEntity post = postRepository.findById(notificationDto.getRelatedId()).orElseThrow(() -> new AppException("Unknown post", HttpStatus.NOT_FOUND));
@@ -62,7 +63,7 @@ public class NotificationServices {
             notification.setRelatedURL(post.getSlug());
         } else if (notificationDto.getType().equals("comment")) {
 
-            CommentEntity comment = commentRepository.findById(notificationDto.getRelatedId()).orElseThrow(() -> new AppException("Unknown comment", HttpStatus.NOT_FOUND));
+            CommentEntity comment = commentRepository.findById(notificationDto.getCommentId()).orElseThrow(() -> new AppException("Unknown comment", HttpStatus.NOT_FOUND));
             notification.setRelatedURL(comment.getPost().getSlug());
 
         }
@@ -129,9 +130,9 @@ public class NotificationServices {
         }
     }
 
-    public void deleteDeletedCommentNotification(NotificationDto notificationDto){
+    public void deleteDeletedCommentNotification(Integer commentId){
         try{
-            NotificationEntity notification = notificationRepository.findByCommentId(notificationDto.getCommentId());
+            NotificationEntity notification = notificationRepository.findByCommentId(commentId);
             if(notification!=null){
                 notificationRepository.delete(notification);
             }
