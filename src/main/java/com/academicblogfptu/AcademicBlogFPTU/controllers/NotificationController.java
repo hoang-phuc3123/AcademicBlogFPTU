@@ -3,6 +3,7 @@ package com.academicblogfptu.AcademicBlogFPTU.controllers;
 
 import com.academicblogfptu.AcademicBlogFPTU.config.MyHandler;
 import com.academicblogfptu.AcademicBlogFPTU.config.UserAuthProvider;
+import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.CommentDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.NotificationDtos.Notification;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.NotificationDtos.NotificationDto;
 import com.academicblogfptu.AcademicBlogFPTU.entities.NotificationEntity;
@@ -74,8 +75,8 @@ public class NotificationController {
    }
 
     @PostMapping("/delete-comment-notify")
-    public ResponseEntity<String> deleteDeletedCommentNotification(@RequestBody NotificationDto notificationDto){
-        notificationServices.deleteDeletedCommentNotification(notificationDto);
+    public ResponseEntity<String> deleteDeletedCommentNotification(@RequestBody CommentDto comment){
+        notificationServices.deleteDeletedCommentNotification(comment.getCommentId());
         return ResponseEntity.ok("Success");
     }
 
