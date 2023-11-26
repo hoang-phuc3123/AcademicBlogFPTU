@@ -53,6 +53,7 @@ public class NotificationServices {
         notification.setNotifyAt(LocalDateTime.now());
         notification.setRelatedId(notificationDto.getRelatedId());
         notification.setTriggerUser(notificationDto.getTriggerUser());
+        notification.setCommentId(notificationDto.getCommentId());
         notification.setUser(userRepository.findById(notificationDto.getUserId()).orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND)));
 
         if(notificationDto.getType().equals("post")) {
@@ -72,7 +73,7 @@ public class NotificationServices {
     }
 
     public NotificationEntity readNotification(int id){
-        NotificationEntity notification = notificationRepository.findById(id).orElseThrow(() -> new AppException("Unknown notification", HttpStatus.UNAUTHORIZED));
+        NotificationEntity notification = notificationRepository.findById(id).orElseThrow(() -> new AppException("Unknown notification", HttpStatus.NOT_FOUND));
         if(!notification.isRead()){
             notification.setRead(true);
             notificationRepository.save(notification);
@@ -90,7 +91,7 @@ public class NotificationServices {
     }
 
     public NotificationEntity getNotification(int id){
-        return notificationRepository.findById(id).orElseThrow(() -> new AppException("Unknown notification",HttpStatus.UNAUTHORIZED));
+        return notificationRepository.findById(id).orElseThrow(() -> new AppException("Unknown notification",HttpStatus.NOT_FOUND));
     }
 
     private NotificationDto mapToDto(NotificationEntity notificationEntity){
@@ -108,16 +109,39 @@ public class NotificationServices {
         notification.setTriggerUser(notificationEntity.getTriggerUser());
         notification.setFullNameOfTriggerUser(userDetailsRepository.findByUserId(notificationEntity.getTriggerUser()).getFullName());
         notification.setAvatarOfTriggerUser(userDetailsRepository.findByUserId(notificationEntity.getTriggerUser()).getProfileURL());
+        notification.setCommentId(notificationEntity.getCommentId());
 
         return notification;
     }
 
 
+    public void deleteNotification(NotificationDto notificationDto){
+        NotificationEntity notification = notificationRepository.findById(notificationDto.getNotificationId()).orElseThrow(() -> new AppException("Unknown notification",HttpStatus.NOT_FOUND));
+        notificationRepository.delete(notification);
+    }
+
+    public void deletePostNotification(NotificationDto notificationDto){
+        NotificationEntity notification = notificationRepository.findByUserIdAndContentAndRelatedIdAndType(notificationDto.getUserId(),notificationDto.getRelatedId(),notificationDto.getType(), notificationDto.getContent());
+        if(notification!=null){
+            notificationRepository.delete(notification);
+        }
+    }
+
+    public void deleteDeletedCommentNotification(NotificationDto notificationDto){
+        try{
+            NotificationEntity notification = notificationRepository.findByCommentId(notificationDto.getCommentId());
+            if(notification!=null){
+                notificationRepository.delete(notification);
+            }
+        }catch (Exception e){
+            throw new AppException(e.getMessage(),HttpStatus.UNAUTHORIZED);
+        }
+
+
+    }
 
     public void sendNotificationRealtime(Integer userId, NotificationDto notificationDto) {
         MyHandler myHandler = (MyHandler) myWebSocketHandler;
         myHandler.sendNotification(userId, notificationDto);
     }
-
-
 }
