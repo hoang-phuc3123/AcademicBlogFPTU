@@ -1222,12 +1222,12 @@ public class PostServices {
         postRepository.save(postEntity);
 
         //sent mail notify
-        MailStructureDto mail = new MailStructureDto();
-        mail.setTriggerId(user.getId());
-        mail.setReceiverId(postEntity.getUser().getId());
-        mail.setMailType("Approve-post");
-        mail.setPostLink("https://fblog.site/view/"+postEntity.getSlug());
-        notifyByMailServices.sendMail(mail);
+//        MailStructureDto mail = new MailStructureDto();
+//        mail.setTriggerId(user.getId());
+//        mail.setReceiverId(postEntity.getUser().getId());
+//        mail.setMailType("Approve-post");
+//        mail.setPostLink("https://fblog.site/view/"+postEntity.getSlug());
+//        notifyByMailServices.sendMail(mail);
 
     }
 
@@ -1245,12 +1245,12 @@ public class PostServices {
         postDetails.setUser(user);
         postDetailsRepository.save(postDetails);
         //send mail
-        MailStructureDto mail = new MailStructureDto();
-        mail.setTriggerId(user.getId());
-        mail.setReceiverId(postDetails.getUser().getId());
-        mail.setMailType("Decline-post");
-        mail.setPostLink(postDetails.getReasonOfDeclination());
-        notifyByMailServices.sendMail(mail);
+//        MailStructureDto mail = new MailStructureDto();
+//        mail.setTriggerId(user.getId());
+//        mail.setReceiverId(postDetails.getUser().getId());
+//        mail.setMailType("Decline-post");
+//        mail.setPostLink(postDetails.getReasonOfDeclination());
+//        notifyByMailServices.sendMail(mail);
     }
 
     //
@@ -1428,12 +1428,12 @@ public class PostServices {
             postRepository.save(post);
 
             //sent mail notify
-            MailStructureDto mail = new MailStructureDto();
-            mail.setTriggerId(user.getId());
-            mail.setReceiverId(postDetails.getUser().getId());
-            mail.setMailType("Approve-Q&A");
-            mail.setPostLink("https://fblog.site/view/"+postDetails.getPost().getSlug());
-            notifyByMailServices.sendMail(mail);
+//            MailStructureDto mail = new MailStructureDto();
+//            mail.setTriggerId(user.getId());
+//            mail.setReceiverId(postDetails.getUser().getId());
+//            mail.setMailType("Approve-Q&A");
+//            mail.setPostLink("https://fblog.site/view/"+postDetails.getPost().getSlug());
+//            notifyByMailServices.sendMail(mail);
 
         }else  {
             throw new AppException("This postId does not belong to Q&A tag", HttpStatus.NOT_FOUND);
@@ -1455,12 +1455,12 @@ public class PostServices {
         postDetails.setUser(user);
         postDetailsRepository.save(postDetails);
             //send mail
-            MailStructureDto mail = new MailStructureDto();
-            mail.setTriggerId(user.getId());
-            mail.setReceiverId(postDetails.getUser().getId());
-            mail.setMailType("Decline-Q&A");
-            mail.setPostLink(postDetails.getReasonOfDeclination());
-            notifyByMailServices.sendMail(mail);
+//            MailStructureDto mail = new MailStructureDto();
+//            mail.setTriggerId(user.getId());
+//            mail.setReceiverId(postDetails.getUser().getId());
+//            mail.setMailType("Decline-Q&A");
+//            mail.setPostLink(postDetails.getReasonOfDeclination());
+//            notifyByMailServices.sendMail(mail);
         }else  {
             throw new AppException("This postId does not belong to Q&A tag", HttpStatus.NOT_FOUND);
         }
