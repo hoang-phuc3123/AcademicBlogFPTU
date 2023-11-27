@@ -9,6 +9,7 @@ import com.academicblogfptu.AcademicBlogFPTU.exceptions.AppException;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.ActivitiesLogRepository;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.PostRepository;
 import com.academicblogfptu.AcademicBlogFPTU.repositories.UserDetailsRepository;
+import com.academicblogfptu.AcademicBlogFPTU.repositories.UserRepository;
 import com.academicblogfptu.AcademicBlogFPTU.services.AdminServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.NotifyByMailServices;
 import com.academicblogfptu.AcademicBlogFPTU.services.UserServices;
@@ -42,6 +43,7 @@ public class UserManageController {
     private final PostRepository postRepository;
     private final NotifyByMailServices notifyByMailServices;
     private final ActivitiesLogRepository activitiesLogRepository;
+    private final UserRepository userRepository;
     public boolean isAdmin(UserDto userDto) {
         return userDto.getRoleName().equals("admin");
     }
@@ -68,7 +70,7 @@ public class UserManageController {
     public ResponseEntity<HashMap<String, Object>> viewDashboard(@RequestHeader("Authorization") String headerValue) {
         if (isAdmin(userService.findByUsername(userAuthProvider.getUser(headerValue.replace("Bearer ", ""))))) {
             try {
-                List<UserDetailsEntity> userInfos = userDetailsRepository.findAll();
+                List<UserEntity> userInfos = userRepository.findAllExceptAdmins();
                 List<PostEntity> totalPost = postRepository.getAllApprovedPost();
                 List<ReportedProfileDto> reportedProfileDto = adminService.viewReportProfile();
                 List<ReportedCommentDto> reportCommentList = adminService.viewPendingReportComment();

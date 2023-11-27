@@ -19,7 +19,6 @@ public interface UserDetailsRepository extends JpaRepository<UserDetailsEntity, 
 
     Optional<UserDetailsEntity> findByPhone(String phone);
 
-
     @Query("SELECT u FROM UserDetailsEntity u WHERE u.user = :user")
     Optional<UserDetailsEntity> findByUserAccount(UserEntity user);
 
