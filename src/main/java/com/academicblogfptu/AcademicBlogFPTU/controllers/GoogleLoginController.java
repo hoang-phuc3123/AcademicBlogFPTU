@@ -94,7 +94,7 @@ public class GoogleLoginController {
                 LoginRequestDto loginDto = new LoginRequestDto(email, generateRandomPassword(10).toCharArray());
                 UserDto userDto = userService.register(loginDto);
                 userService.RegisterUserDetail(userDetailsDto);
-                String accessToken = userAuthProvider.createToken(userDto.getUsername() , 900000);
+                String accessToken = userAuthProvider.createToken(userDto.getUsername() , 900000 * 2);
                 userDto.setToken(accessToken);
                 String refreshToken = UUID.randomUUID().toString();
                 userDto.setRefreshToken(refreshToken);

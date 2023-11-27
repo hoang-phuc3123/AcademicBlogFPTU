@@ -41,7 +41,7 @@ public class LoginController {
             userDto = userService.login(loginRequestDto);
         }
         String refreshToken = UUID.randomUUID().toString();
-        String token = userAuthProvider.createToken(userDto.getUsername(),900000);
+        String token = userAuthProvider.createToken(userDto.getUsername(),900000 * 2);
         userDto.setToken(token);
         userDto.setRefreshToken(refreshToken);
         tokenService.StoreToken(token, refreshToken);
