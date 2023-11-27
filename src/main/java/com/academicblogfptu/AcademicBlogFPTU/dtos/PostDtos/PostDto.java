@@ -4,6 +4,7 @@ import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.CategoryLis
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CategoryAndTagDtos.TagDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.CommentDtos.CommentDto;
 import com.academicblogfptu.AcademicBlogFPTU.dtos.UserDtos.RewarderDto;
+import com.academicblogfptu.AcademicBlogFPTU.entities.BadgeEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.CategoryEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.SkillEntity;
 import com.academicblogfptu.AcademicBlogFPTU.entities.TagEntity;
@@ -64,5 +65,7 @@ public class PostDto {
     private List<SkillEntity> postSkill;
 
     private List<RewarderDto> rewarder;
+
+    private List<BadgeEntity> userBadge;
 }
 
