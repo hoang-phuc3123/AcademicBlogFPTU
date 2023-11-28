@@ -161,6 +161,13 @@ public class PostServices {
         int numOfUpvote = (post.getNumOfUpvote() != null) ? post.getNumOfUpvote() : 0;
         int numOfDownvote = (post.getNumOfDownvote() != null) ? post.getNumOfDownvote() : 0;
 
+        boolean isPending ;
+        if (postDetails.getType().equalsIgnoreCase("Request")){
+            isPending = true;
+        }else {
+            isPending = false;
+        }
+
         List<PostSkillEntity> postSkills = postSkillRepository.findByPost(post);
 
         List<PostRewardEntity> postRewards = postRewardRepository.findByPost(post);
@@ -170,7 +177,7 @@ public class PostServices {
         String reasonOfDecline = (postDetails.getReasonOfDeclination() != null) ? postDetails.getReasonOfDeclination() : null;
              return new PostDto(post.getId(),user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() , post.getTitle(), post.getDescription() , post.getContent(),
                     post.getDateOfPost().format(formatter), numOfUpvote, numOfDownvote, post.isRewarded(), post.isEdited(), post.isAllowComment(),
-                    getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(), post.getSlug(),getCommentsForPost(post.getId()), reasonOfDecline, getSkillOfPost(postSkills), getRewarderForPost(postRewards), badges);
+                    getCategoriesOfPost(getRelatedCategories(post.getCategory().getId())), getTagOfPost(tag), post.getCoverURL(), post.getSlug(),getCommentsForPost(post.getId()), reasonOfDecline, getSkillOfPost(postSkills), getRewarderForPost(postRewards), badges, isPending);
 
     }
     public List<CommentDto> getCommentsForPost(int postId) {
@@ -350,7 +357,7 @@ public class PostServices {
         return new PostDto(newPostEntity.getId(), user.getId() ,userDetails.getFullName() , userDetails.getProfileURL(),newPostEntity.getTitle(), newPostEntity.getDescription(), newPostEntity.getContent(), newPostEntity.getDateOfPost().format(formatter)
         , newPostEntity.getNumOfUpvote(), newPostEntity.getNumOfDownvote(), newPostEntity.isRewarded(), newPostEntity.isEdited()
         , newPostEntity.isAllowComment() ,getCategoriesOfPost(getRelatedCategories(newPostEntity.getCategory().getId())), getTagOfPost(newPostEntity.getTag()),
-                newPostEntity.getCoverURL(), newPostEntity.getSlug(), getCommentsForPost(newPostEntity.getId()), null, getSkillOfPost(postSkills), null, null);
+                newPostEntity.getCoverURL(), newPostEntity.getSlug(), getCommentsForPost(newPostEntity.getId()), null, getSkillOfPost(postSkills), null, null, true);
     }
 
     public void postDetail(int postId, String type){
@@ -534,7 +541,7 @@ public class PostServices {
 
         return new PostDto(editPost.getId(), user.getId(),userDetails.getFullName() , userDetails.getProfileURL(),editPost.getTitle(), editPost.getDescription(),editPost.getContent(), editPost.getDateOfPost().format(formatter)
                 , editPost.getNumOfUpvote(), editPost.getNumOfDownvote(), editPost.isRewarded(), editPost.isEdited()
-                , editPost.isAllowComment() ,getCategoriesOfPost(getRelatedCategories(editPost.getCategory().getId())), getTagOfPost(editPost.getTag()), editPost.getCoverURL(), editPost.getSlug(),getCommentsForPost(editPost.getId()), null, getSkillOfPost(editPostSkills), getRewarderForPost(postRewards), badges);
+                , editPost.isAllowComment() ,getCategoriesOfPost(getRelatedCategories(editPost.getCategory().getId())), getTagOfPost(editPost.getTag()), editPost.getCoverURL(), editPost.getSlug(),getCommentsForPost(editPost.getId()), null, getSkillOfPost(editPostSkills), getRewarderForPost(postRewards), badges, true);
     }
 
     public List<PostListDto> viewRewardedPost() {
@@ -843,7 +850,7 @@ public class PostServices {
 
         postEditHistoryList.add(new PostDto(postEntity.getId(),user.getId() ,userDetails.getFullName(), userDetails.getProfileURL() , postEntity.getTitle(), postEntity.getDescription() , postEntity.getContent(),
                 postEntity.getDateOfPost().format(formatter), postEntity.getNumOfUpvote(), postEntity.getNumOfDownvote(), postEntity.isRewarded(), postEntity.isEdited(), postEntity.isAllowComment(),
-                getCategoriesOfPost(getRelatedCategories(postEntity.getCategory().getId())), getTagOfPost(tag), postEntity.getCoverURL(), postEntity.getSlug(), getCommentsForPost(postEntity.getId()), reasonOfDecline, getSkillOfPost(postSkills), null, null));
+                getCategoriesOfPost(getRelatedCategories(postEntity.getCategory().getId())), getTagOfPost(tag), postEntity.getCoverURL(), postEntity.getSlug(), getCommentsForPost(postEntity.getId()), reasonOfDecline, getSkillOfPost(postSkills), null, null, false));
     }
 
     public void commentToggle(int postId){
@@ -988,7 +995,7 @@ public class PostServices {
 
         return new PostDto(draft.getId(), user.getId(),userDetails.getFullName() , userDetails.getProfileURL(),draft.getTitle(), draft.getDescription(),draft.getContent(), draft.getDateOfPost().format(formatter)
                 , draft.getNumOfUpvote(), draft.getNumOfDownvote(), draft.isRewarded(), draft.isEdited()
-                , draft.isAllowComment() ,getCategoriesOfPost(getRelatedCategories(draft.getCategory().getId())), getTagOfPost(draft.getTag()), draft.getCoverURL(), draft.getSlug(),getCommentsForPost(draft.getId()), null, getSkillOfPost(editDraftSkill), getRewarderForPost(draftReward), badges);
+                , draft.isAllowComment() ,getCategoriesOfPost(getRelatedCategories(draft.getCategory().getId())), getTagOfPost(draft.getTag()), draft.getCoverURL(), draft.getSlug(),getCommentsForPost(draft.getId()), null, getSkillOfPost(editDraftSkill), getRewarderForPost(draftReward), badges, false);
     }
 
     public void sendDraft(int postId){

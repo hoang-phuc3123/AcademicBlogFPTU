@@ -67,5 +67,7 @@ public class PostDto {
     private List<RewarderDto> rewarder;
 
     private List<BadgeEntity> userBadge;
+
+    private boolean isPending;
 }
 
